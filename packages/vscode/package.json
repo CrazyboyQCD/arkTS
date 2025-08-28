@@ -29,12 +29,7 @@
   "engines": {
     "vscode": "^1.22.0"
   },
-  "activationEvents": [
-    "onLanguage:typescript",
-    "onLanguage:typescriptreact",
-    "onStartupFinished",
-    "onFileSystem:file"
-  ],
+  "activationEvents": [],
   "contributes": {
     "jsonValidation": [
       {
