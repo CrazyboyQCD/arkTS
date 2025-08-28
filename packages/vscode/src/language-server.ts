@@ -68,7 +68,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
   async run(): Promise<LabsInfo | undefined> {
     try {
       // First start it will be return LabsInfo object for volar.js labs extension
-      const [labsInfo] = await this.start(undefined, true)
+      const [labsInfo] = await this.start(true)
       return labsInfo!
     }
     catch (error) {
@@ -140,11 +140,11 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
   /**
    * Start the ETS Language Server.
    *
-   * @param overrideClientOptions The override client options.
    * @returns The labs info.
+   * @param force Whether to force the restart.
    * @throws {SdkAnalyzerException} If the SDK path have any no right, it will throw an error.
    */
-  async start(overrideClientOptions: LanguageClientOptions = {}, force: boolean = false): Promise<[LabsInfo | undefined, LanguageClientOptions]> {
+  async start(force: boolean = false, overrideClientOptions: LanguageClientOptions = {}): Promise<[LabsInfo | undefined, LanguageClientOptions]> {
     const [serverOptions, clientOptions] = await Promise.all([
       this.getServerOptions(),
       this.getClientOptions(force),
@@ -207,7 +207,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     this.getConsola().info(`======================= Restarting ETS Language Server =======================`)
     await executeCommand('typescript.restartTsServer')
     await this.stop(true)
-    await this.start(overrideClientOptions, force)
+    await this.start(force, overrideClientOptions)
     const reloadWindow = this.translator.t('ets.language-server.restart.reloadWindow.button')
     const reloadWindowChoice = await vscode.window.showInformationMessage(
       this.translator.t('ets.language-server.restart.reloadWindow'),
