@@ -61,7 +61,7 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { sdkPaths = 
       ))
 
       // ets files
-      if (languageId === 'ets' && filePath.endsWith('.ets'))
+      if (languageId === 'ets')
         return getFullVitrualCode()
       // ETS Server mode
       if (isETSServerMode && !(isDTS || isDETS) && !isInSdkPath)
