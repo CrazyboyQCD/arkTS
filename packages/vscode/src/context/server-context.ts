@@ -9,7 +9,7 @@ import { AbstractWatcher } from '../abstract-watcher'
 
 export abstract class LanguageServerContext extends AbstractWatcher {
   /** Start the language server. */
-  abstract start(overrideClientOptions: LanguageClientOptions): Promise<[LabsInfo | undefined, LanguageClientOptions]>
+  abstract start(force: boolean, overrideClientOptions: LanguageClientOptions): Promise<[LabsInfo | undefined, LanguageClientOptions]>
   /** Stop the language server. */
   abstract stop(): Promise<void>
   /** Restart the language server. */

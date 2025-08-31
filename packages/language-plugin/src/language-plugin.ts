@@ -61,7 +61,7 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { sdkPaths = 
       const isDETS = filePath.endsWith('.d.ets')
 
       // ets files
-      if (languageId === 'ets' && filePath.endsWith('.ets')) {
+      if (languageId === 'ets') {
         return new ETSVirtualCode(
           filePath,
           tsOrEts.createSourceFile(filePath, snapshot.getText(0, snapshot.getLength()), 99 as any) as ts.SourceFile,
