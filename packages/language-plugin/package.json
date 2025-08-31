@@ -1,6 +1,6 @@
 {
   "name": "@arkts/language-plugin",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "ArkTS Volar Language Plugin.",
   "author": "Naily Zero <zero@naily.cc>",
   "license": "MIT",
@@ -54,6 +54,7 @@
   "dependencies": {
     "@volar/language-core": "catalog:prod",
     "@volar/typescript": "catalog:prod",
+    "ts-macro": "^0.3.4",
     "vscode-uri": "catalog:prod"
   }
 }
