@@ -1,5 +1,11 @@
 # vscode-naily-ets
 
+## 1.1.1
+
+### Patch Changes
+
+- 7c47b93: Fixes issue #130 by correcting the argument order in affected functions, ensuring that parameters are passed in the expected sequence. This resolves errors related to incorrect argument handling.
+
 ## 1.1.0
 
 ### Minor Changes
