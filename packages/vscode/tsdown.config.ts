@@ -23,9 +23,19 @@ export default defineConfig({
   platform: 'node',
   clean: false,
   minify: {
-    mangle: false,
-    compress: !isDev,
-    removeWhitespace: !isDev,
+    compress: {
+      keepNames: {
+        function: true,
+        class: true,
+      },
+    },
+    mangle: {
+      keepNames: {
+        function: true,
+        class: true,
+      },
+    },
+    sourcemap: isDev,
   },
   outDir: '.',
   env: {
