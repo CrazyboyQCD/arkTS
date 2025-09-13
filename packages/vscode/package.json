@@ -30,7 +30,7 @@
     "vscode": "^1.22.0"
   },
   "galleryBanner": {
-    "theme": "light",
+    "theme": "dark",
     "color": "#37337a"
   },
   "activationEvents": [],
