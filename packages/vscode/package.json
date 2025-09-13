@@ -29,6 +29,10 @@
   "engines": {
     "vscode": "^1.22.0"
   },
+  "galleryBanner": {
+    "theme": "light",
+    "color": "#37337a"
+  },
   "activationEvents": [],
   "contributes": {
     "jsonValidation": [
