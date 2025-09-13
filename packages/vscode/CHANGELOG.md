@@ -1,5 +1,12 @@
 # vscode-naily-ets
 
+## 1.1.2
+
+### Patch Changes
+
+- b0826c9: feat: add galleryBanner settings
+- a73646f: fix: update tsdown.config.ts (github #134)
+
 ## 1.1.1
 
 ### Patch Changes
