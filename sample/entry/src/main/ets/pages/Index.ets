@@ -27,10 +27,22 @@ struct Index {
   build() {
     Row() {
       Column() {
-        Text(this.message)
+        Text($r('app.string.app_name'))
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)
+          .fontColor($r('app.color.primary_color'))
+
+        Text($r('app.string.welcome_message'))
+          .fontSize(20)
+          .fontColor($r('app.color.secondary_color'))
+          .margin({ top: 10 })
+
+        Text(this.message)
+          .fontSize(30)
+          .fontWeight(FontWeight.Bold)
+          .textAlign(TextAlign.Center)
+          .margin({ top: 20 })
 
         MyCustomComponent()
       }.width('100%')
@@ -42,6 +54,7 @@ struct Index {
         Column() {
           Row() {
             Text(item.toString())
+              .fontColor($r('app.color.primary_color'))
           }.margin(10)
           .height(20)
         }
@@ -51,9 +64,11 @@ struct Index {
         Column() {
           Row() {
             Text(item.toString())
+            Text().backgroundColor($r('app.color.start_window_background'))
           }
         }
       })
     }.height('100%')
+      .backgroundColor($r('app.color.start_window_background'))
   }
 }

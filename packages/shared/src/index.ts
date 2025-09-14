@@ -1,5 +1,6 @@
 export * from './client-options'
 export * from './log/lsp-logger'
 export * from './ts-plugin-options'
+export * from './resource-resolver'
 
 export function typeAssert<T>(_value: unknown): asserts _value is T {}

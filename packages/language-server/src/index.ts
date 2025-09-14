@@ -10,6 +10,8 @@ import { LanguageServerConfigManager } from './config-manager'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
+import { createResourceDetectorPlugin, defaultResourceDetectorConfig } from './services/resource-detector.service'
+import { createResourceDefinitionService } from './services/resource-definition-simple.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -68,6 +70,13 @@ connection.onInitialize(async (params) => {
     isValidationEnabled: () => true,
   })
 
+  // 创建资源检测服务配置
+  const resourceDetectorConfig = {
+    ...defaultResourceDetectorConfig,
+    projectRoot: params.workspaceFolders?.[0]?.uri?.replace('file:///', '') || process.cwd(),
+    enabled: true,
+  }
+
   return server.initialize(
     params,
     createTypeScriptProject(ets as any, tsdk.diagnosticMessages, () => {
@@ -92,6 +101,8 @@ connection.onInitialize(async (params) => {
       createETSLinterDiagnosticService(ets, logger),
       createETSDocumentSymbolService(),
       create$$ThisService(lspConfiguration.getLocale()),
+      createResourceDetectorPlugin(resourceDetectorConfig),
+      createResourceDefinitionService(),
     ],
   )
 })
