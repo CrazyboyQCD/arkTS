@@ -48,20 +48,39 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
 
   @WatchConfiguration()
   async onConfigurationChanged(e: vscode.ConfigurationChangeEvent): Promise<unknown> {
-    if (!e.affectsConfiguration('ets.sdkPath'))
-      return
-    if (!this.getCurrentLanguageClient()?.isRunning()) {
-      this.getConsola().info(`[underwrite] sdk path changed, start language server...`)
-      return this.run()
-    }
+    // 如果 SDK 路径发生变化，重启语言服务器
+    if (e.affectsConfiguration('ets.sdkPath')) {
+      if (!this.getCurrentLanguageClient()?.isRunning()) {
+        this.getConsola().info(`[underwrite] sdk path changed, start language server...`)
+        return this.run()
+      }
 
-    try {
-      // Wait the workspace/configurationChanged event send, then restart the language server
-      await sleep(100)
-      await this.restart(true).catch(e => this.handleLanguageServerError(e))
+      try {
+        // Wait the workspace/configurationChanged event send, then restart the language server
+        await sleep(100)
+        await this.restart(true).catch(e => this.handleLanguageServerError(e))
+      }
+      catch (error) {
+        this.handleLanguageServerError(error)
+      }
     }
-    catch (error) {
-      this.handleLanguageServerError(error)
+    
+    // 如果资源诊断配置发生变化，发送配置更新事件
+    if (e.affectsConfiguration('ets.resourceReferenceDiagnostic')) {
+      const newLevel = vscode.workspace.getConfiguration('ets').get<string>('resourceReferenceDiagnostic', 'error')
+      this.getConsola().info(`Resource diagnostic level changed to: ${newLevel}`)
+      
+      // 通知语言服务器配置变更
+      const client = this.getCurrentLanguageClient()
+      if (client?.isRunning()) {
+        await client.sendNotification('workspace/didChangeConfiguration', {
+          settings: {
+            ets: {
+              resourceReferenceDiagnostic: newLevel
+            }
+          }
+        })
+      }
     }
   }
 
@@ -126,6 +145,9 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
         typescript: { tsdk: tsdk!.tsdk },
         ohos: await sdkAnalyzer.toOhosClientOptions(force, tsdk?.tsdk),
         debug: vscode.workspace.getConfiguration('ets').get<boolean>('lspDebugMode'),
+        ets: {
+          resourceReferenceDiagnostic: vscode.workspace.getConfiguration('ets').get<'error' | 'warning' | 'none'>('resourceReferenceDiagnostic', 'error'),
+        },
       } satisfies EtsServerClientOptions,
     }
   }

@@ -33,4 +33,9 @@ export interface EtsServerClientOptions {
   ohos: OhosClientOptions
   /** Debug mode. */
   debug?: boolean
+  /** ETS specific options. */
+  ets?: {
+    /** Resource reference diagnostic level. */
+    resourceReferenceDiagnostic?: 'error' | 'warning' | 'none'
+  }
 }

@@ -12,6 +12,7 @@ import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
 import { createIntegratedResourceDefinitionService } from './services/integrated-resource-definition.service'
+import { createResourceDiagnosticService, type ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -23,6 +24,18 @@ logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`
 connection.onRequest('ets/waitForEtsConfigurationChangedRequested', (e) => {
   logger.getConsola().info(`waitForEtsConfigurationChangedRequested: ${JSON.stringify(e)}`)
   lspConfiguration.setConfiguration(e)
+})
+
+// 全局配置状态
+let globalResourceDiagnosticLevel: ResourceDiagnosticLevel = 'error'
+
+// 监听配置变更
+connection.onDidChangeConfiguration((params) => {
+  const settings = params.settings
+  if (settings?.ets?.resourceReferenceDiagnostic) {
+    globalResourceDiagnosticLevel = settings.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
+    console.log('Resource diagnostic level changed to:', globalResourceDiagnosticLevel)
+  }
 })
 
 interface ETSFormattingDocumentParams {
@@ -62,6 +75,12 @@ connection.onInitialize(async (params) => {
     lspConfiguration.setLocale(params.locale)
   lspConfiguration.setConfiguration({ typescript: params.initializationOptions?.typescript })
 
+  // 初始化配置
+  if (params.initializationOptions?.ets?.resourceReferenceDiagnostic) {
+    globalResourceDiagnosticLevel = params.initializationOptions.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
+    console.log('Initial resource diagnostic level:', globalResourceDiagnosticLevel)
+  }
+
   const tsdk = lspConfiguration.getTypeScriptTsdk()
   const [tsSemanticService, _tsSyntacticService, ...tsOtherServices] = createTypeScriptServices(ets as any, {
     isFormattingEnabled: () => true,
@@ -97,6 +116,8 @@ connection.onInitialize(async (params) => {
     [
       // 资源定义跳转服务优先
       createIntegratedResourceDefinitionService(projectRoot),
+      // 资源诊断服务
+      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel),
       tsSemanticService,
       ...tsOtherServices,
       createETSLinterDiagnosticService(ets, logger),

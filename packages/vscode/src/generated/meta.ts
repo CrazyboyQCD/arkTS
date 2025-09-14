@@ -4,7 +4,7 @@
 // Meta info
 export const publisher = "NailyZero"
 export const name = "vscode-naily-ets"
-export const version = "1.0.22"
+export const version = "1.1.2"
 export const displayName = "Naily's ArkTS Support"
 export const description = "自用ArkTS扩展,支持代码跳转,欢迎PR! Naily's ArkTS Support."
 export const extensionId = `${publisher}.${name}`
@@ -33,6 +33,21 @@ export const commands = {
 } satisfies Record<string, CommandKey>
 
 /**
+ * Type union of all languages
+ */
+export type LanguageKey = 
+  | "ets"
+  | "hml"
+
+/**
+ * Languages map registed by `NailyZero.vscode-naily-ets`
+ */
+export const languages = {
+  ets: "ets",
+  hml: "hml",
+} satisfies Record<string, LanguageKey>
+
+/**
  * Type union of all configs
  */
 export type ConfigKey = 
@@ -41,6 +56,8 @@ export type ConfigKey =
   | "ets.hmsPath"
   | "ets.lspDebugMode"
   | "ets.hdcPath"
+  | "ets.ignoreWorkspaceLocalPropertiesFile"
+  | "ets.resourceReferenceDiagnostic"
   | "ets.sdkList"
 
 export interface ConfigKeyTypeMap {
@@ -49,6 +66,8 @@ export interface ConfigKeyTypeMap {
   "ets.hmsPath": string,
   "ets.lspDebugMode": boolean,
   "ets.hdcPath": string,
+  "ets.ignoreWorkspaceLocalPropertiesFile": boolean,
+  "ets.resourceReferenceDiagnostic": ("error" | "warning" | "none"),
   "ets.sdkList": { 'API10'?: string; 'API11'?: string; 'API12'?: string; 'API13'?: string; 'API14'?: string; 'API15'?: string; 'API18'?: string; 'API20'?: string },
 }
 
@@ -58,6 +77,8 @@ export interface ConfigShorthandMap {
   etsHmsPath: "ets.hmsPath",
   etsLspDebugMode: "ets.lspDebugMode",
   etsHdcPath: "ets.hdcPath",
+  etsIgnoreWorkspaceLocalPropertiesFile: "ets.ignoreWorkspaceLocalPropertiesFile",
+  etsResourceReferenceDiagnostic: "ets.resourceReferenceDiagnostic",
   etsSdkList: "ets.sdkList",
 }
 
@@ -67,6 +88,8 @@ export interface ConfigShorthandTypeMap {
   etsHmsPath: string,
   etsLspDebugMode: boolean,
   etsHdcPath: string,
+  etsIgnoreWorkspaceLocalPropertiesFile: boolean,
+  etsResourceReferenceDiagnostic: ("error" | "warning" | "none"),
   etsSdkList: { 'API10'?: string; 'API11'?: string; 'API12'?: string; 'API13'?: string; 'API14'?: string; 'API15'?: string; 'API18'?: string; 'API20'?: string },
 }
 
@@ -131,6 +154,26 @@ export const configs = {
     default: "",
   } as ConfigItem<"ets.hdcPath">,
   /**
+   * 
+   * @key `ets.ignoreWorkspaceLocalPropertiesFile`
+   * @default `false`
+   * @type `boolean`
+   */
+  etsIgnoreWorkspaceLocalPropertiesFile: {
+    key: "ets.ignoreWorkspaceLocalPropertiesFile",
+    default: false,
+  } as ConfigItem<"ets.ignoreWorkspaceLocalPropertiesFile">,
+  /**
+   * 未匹配到的 $r() 资源引用的诊断级别
+   * @key `ets.resourceReferenceDiagnostic`
+   * @default `"error"`
+   * @type `string`
+   */
+  etsResourceReferenceDiagnostic: {
+    key: "ets.resourceReferenceDiagnostic",
+    default: "error",
+  } as ConfigItem<"ets.resourceReferenceDiagnostic">,
+  /**
    * A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10).
    * @key `ets.sdkList`
    * @default `{}`
@@ -158,6 +201,8 @@ export interface NestedConfigs {
     "hmsPath": string,
     "lspDebugMode": boolean,
     "hdcPath": string,
+    "ignoreWorkspaceLocalPropertiesFile": boolean,
+    "resourceReferenceDiagnostic": ("error" | "warning" | "none"),
     "sdkList": { 'API10'?: string; 'API11'?: string; 'API12'?: string; 'API13'?: string; 'API14'?: string; 'API15'?: string; 'API18'?: string; 'API20'?: string },
   },
 }
