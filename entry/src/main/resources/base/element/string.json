@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "hello_world",
+      "value": "Hello World"
+    },
+    {
+      "name": "app_name",
+      "value": "ArkTS App"
+    },
+    {
+      "name": "welcome_message",
+      "value": "Welcome to ArkTS"
+    }
+  ]
+}

@@ -6,12 +6,12 @@ import { createConnection, createServer, createTypeScriptProject } from '@volar/
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './config-manager'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
-import { createResourceDetectorPlugin, defaultResourceDetectorConfig } from './services/resource-detector.service'
-import { createResourceDefinitionService } from './services/resource-definition-simple.service'
+import { createIntegratedResourceDefinitionService } from './services/integrated-resource-definition.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -70,14 +70,13 @@ connection.onInitialize(async (params) => {
     isValidationEnabled: () => true,
   })
 
-  // 创建资源检测服务配置
-  const resourceDetectorConfig = {
-    ...defaultResourceDetectorConfig,
-    projectRoot: params.workspaceFolders?.[0]?.uri?.replace('file:///', '') || process.cwd(),
-    enabled: true,
-  }
+  // 获取项目根目录
+  const projectRoot = params.workspaceFolders?.[0]?.uri ? 
+    URI.parse(params.workspaceFolders[0].uri).fsPath : process.cwd()
+  console.log('Server initialization - Project root:', projectRoot)
+  console.log('Server initialization - Workspace folders:', params.workspaceFolders)
 
-  return server.initialize(
+  const initResult = await server.initialize(
     params,
     createTypeScriptProject(ets as any, tsdk.diagnosticMessages, () => {
       return {
@@ -96,17 +95,25 @@ connection.onInitialize(async (params) => {
       }
     }),
     [
+      // 资源定义跳转服务优先
+      createIntegratedResourceDefinitionService(projectRoot),
       tsSemanticService,
       ...tsOtherServices,
       createETSLinterDiagnosticService(ets, logger),
       createETSDocumentSymbolService(),
       create$$ThisService(lspConfiguration.getLocale()),
-      createResourceDetectorPlugin(resourceDetectorConfig),
-      createResourceDefinitionService(),
     ],
   )
+  
+  // 础定 LSP 能力声明包含定义跳转功能
+  console.log('LSP capabilities after initialization:', JSON.stringify(initResult.capabilities, null, 2))
+  
+  return initResult
 })
 
 connection.listen()
 connection.onInitialized(server.initialized)
 connection.onShutdown(server.shutdown)
+
+// 调试日志：LSP 服务已启动
+console.log('ETS Language Server fully initialized with resource definition support')
