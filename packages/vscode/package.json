@@ -177,6 +177,21 @@
           "markdownDescription": "%configuration.ets.ignoreWorkspaceLocalPropertiesFile.description%",
           "default": false
         },
+        "ets.resourceReferenceDiagnostic": {
+          "type": "string",
+          "description": "未匹配到的 $r() 资源引用的诊断级别",
+          "enum": [
+            "error",
+            "warning",
+            "none"
+          ],
+          "enumDescriptions": [
+            "显示为错误",
+            "显示为警告",
+            "不显示任何诊断"
+          ],
+          "default": "error"
+        },
         "ets.sdkList": {
           "type": "object",
           "description": "A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10).",
