@@ -24,8 +24,8 @@ let globalResourceResolver: ResourceResolver | null = null
 /**
  * 初始化全局资源解析器
  */
-export function initializeGlobalResourceResolver(projectRoot: string): void {
-  globalResourceResolver = new ResourceResolver(projectRoot)
+export function initializeGlobalResourceResolver(projectRoot: string, sdkPath?: string): void {
+  globalResourceResolver = new ResourceResolver(projectRoot, sdkPath)
   globalResourceResolver.buildIndex().catch(error => {
     console.error('Failed to build resource index:', error)
   })
@@ -63,7 +63,7 @@ function findResourceCallAtPosition(line: string, character: number): ResourceCa
 /**
  * 创建集成的资源定义跳转服务
  */
-export function createIntegratedResourceDefinitionService(projectRoot: string): LanguageServicePlugin {
+export function createIntegratedResourceDefinitionService(projectRoot: string, sdkPath?: string): LanguageServicePlugin {
   console.log('Creating integrated resource definition service with project root:', projectRoot)
   
   // 清理项目根路径（移除 file:// 前缀）
@@ -74,7 +74,7 @@ export function createIntegratedResourceDefinitionService(projectRoot: string): 
   console.log('Cleaned project root:', cleanProjectRoot)
   
   // 初始化资源解析器
-  initializeGlobalResourceResolver(cleanProjectRoot)
+  initializeGlobalResourceResolver(cleanProjectRoot, sdkPath)
   
   return {
     name: 'arkts-resource-definition-integrated',

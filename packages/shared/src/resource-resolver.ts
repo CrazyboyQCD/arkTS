@@ -13,6 +13,8 @@ export enum ResourceType {
   Integer = 'integer',
   Media = 'media',
   Profile = 'profile',
+  Symbol = 'symbol',
+  Plural = 'plural',
 }
 
 /**
@@ -111,9 +113,11 @@ export function buildResourceFilePath(
 export class ResourceResolver {
   private projectRoot: string
   private resourceIndex: Map<string, ResourceIndexItem> = new Map()
+  private sdkPath?: string
 
-  constructor(projectRoot: string) {
+  constructor(projectRoot: string, sdkPath?: string) {
     this.projectRoot = projectRoot
+    this.sdkPath = sdkPath
   }
 
   /**
@@ -194,6 +198,8 @@ export class ResourceResolver {
   async buildIndex(): Promise<void> {
     this.resourceIndex.clear()
     console.log(`Building resource index for project: ${this.projectRoot}`)
+    
+    // 索引 app 资源（模块资源）
     const modules = await this.findModules()
     console.log(`Found ${modules.length} modules:`, modules)
 
@@ -201,6 +207,9 @@ export class ResourceResolver {
       console.log(`Indexing module: ${moduleName}`)
       await this.indexModule(moduleName)
     }
+    
+    // 索引 sys 资源（系统资源）
+    await this.indexSystemResources()
     
     console.log(`Resource index built with ${this.resourceIndex.size} resources`)
   }
@@ -282,6 +291,89 @@ export class ResourceResolver {
     }
   }
 
+  /**
+   * 索引系统资源（sys 资源）
+   */
+  private async indexSystemResources(): Promise<void> {
+    if (!this.sdkPath) {
+      console.log('SDK path not provided, skipping system resource indexing')
+      return
+    }
+    
+    const sysResourcePath = path.join(this.sdkPath, 'ets', 'build-tools', 'ets-loader', 'sysResource.js')
+    
+    if (!fs.existsSync(sysResourcePath)) {
+      console.log(`System resource file not found: ${sysResourcePath}`)
+      return
+    }
+    
+    try {
+      console.log(`Indexing system resources from: ${sysResourcePath}`)
+      
+      // 读取文件内容
+      const content = await fs.promises.readFile(sysResourcePath, 'utf-8')
+      
+      // 解析 JavaScript 模块内容
+      const sysResources = this.parseSysResourceFile(content)
+      
+      if (sysResources) {
+        this.indexSysResourceObject(sysResources, sysResourcePath)
+        console.log('System resources indexed successfully')
+      }
+    } catch (error) {
+      console.error('Failed to index system resources:', error)
+    }
+  }
+  
+  /**
+   * 解析 sysResource.js 文件内容
+   */
+  private parseSysResourceFile(content: string): any {
+    try {
+      // 移除 module.exports 并解析 JavaScript 对象
+      const moduleMatch = content.match(/module\.exports\.sys\s*=\s*(\{[\s\S]*\})/)
+      if (!moduleMatch) {
+        console.error('Unable to parse sys resource module structure')
+        return null
+      }
+      
+      // 使用 Function 构造函数安全执行 JavaScript
+      const objectStr = moduleMatch[1]
+      const sysResources = new Function(`return ${objectStr}`)();
+      
+      return sysResources
+    } catch (error) {
+      console.error('Failed to parse sysResource.js content:', error)
+      return null
+    }
+  }
+  
+  /**
+   * 索引系统资源对象
+   */
+  private indexSysResourceObject(sysResources: any, filePath: string): void {
+    for (const [resourceType, resources] of Object.entries(sysResources)) {
+      if (typeof resources === 'object' && resources !== null) {
+        for (const [resourceName, resourceId] of Object.entries(resources)) {
+          const reference: ResourceReference = {
+            scope: 'sys',
+            type: resourceType as ResourceType,
+            name: resourceName,
+            raw: `sys.${resourceType}.${resourceName}`,
+          }
+          
+          const location: ResourceLocation = {
+            uri: URI.file(filePath).toString(),
+            value: `System Resource ID: ${resourceId}`,
+          }
+          
+          const key = `${reference.scope}.${reference.type}.${reference.name}`
+          this.resourceIndex.set(key, { reference, location })
+        }
+      }
+    }
+  }
+  
   /**
    * 索引媒体资源
    */

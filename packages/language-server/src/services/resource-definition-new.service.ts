@@ -53,9 +53,9 @@ class ResourceDefinitionService {
   private resolver?: ResourceResolver
   private initialized = false
   
-  constructor(private projectRoot: string) {
+  constructor(private projectRoot: string, private sdkPath?: string) {
     if (projectRoot) {
-      this.resolver = new ResourceResolver(projectRoot)
+      this.resolver = new ResourceResolver(projectRoot, sdkPath)
     }
   }
   
@@ -92,7 +92,7 @@ let globalResourceService: ResourceDefinitionService | null = null
 /**
  * 创建资源定义跳转服务
  */
-export function createResourceDefinitionService(projectRoot?: string): LanguageServicePlugin {
+export function createResourceDefinitionService(projectRoot?: string, sdkPath?: string): LanguageServicePlugin {
   return {
     name: 'arkts-resource-definition',
     capabilities: {
@@ -101,7 +101,7 @@ export function createResourceDefinitionService(projectRoot?: string): LanguageS
     create(context) {
       // 初始化全局服务实例（如果还没有的话）
       if (!globalResourceService && projectRoot) {
-        globalResourceService = new ResourceDefinitionService(projectRoot)
+        globalResourceService = new ResourceDefinitionService(projectRoot, sdkPath)
         // 异步初始化
         globalResourceService.initialize()
       }

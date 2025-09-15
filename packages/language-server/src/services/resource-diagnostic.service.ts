@@ -83,9 +83,9 @@ class ResourceDiagnosticService {
   private resolver?: ResourceResolver
   private initialized = false
   
-  constructor(private projectRoot: string) {
+  constructor(private projectRoot: string, private sdkPath?: string) {
     if (projectRoot) {
-      this.resolver = new ResourceResolver(projectRoot)
+      this.resolver = new ResourceResolver(projectRoot, sdkPath)
     }
   }
   
@@ -169,7 +169,8 @@ let globalResourceDiagnosticService: ResourceDiagnosticService | null = null
  */
 export function createResourceDiagnosticService(
   projectRoot?: string,
-  getDiagnosticLevel?: () => ResourceDiagnosticLevel
+  getDiagnosticLevel?: () => ResourceDiagnosticLevel,
+  sdkPath?: string
 ): LanguageServicePlugin {
   return {
     name: 'arkts-resource-diagnostic',
@@ -182,7 +183,7 @@ export function createResourceDiagnosticService(
     create(context) {
       // 初始化全局服务实例（如果还没有的话）
       if (!globalResourceDiagnosticService && projectRoot) {
-        globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot)
+        globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot, sdkPath)
         // 异步初始化
         globalResourceDiagnosticService.initialize()
       }

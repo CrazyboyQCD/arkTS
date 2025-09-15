@@ -89,10 +89,12 @@ connection.onInitialize(async (params) => {
     isValidationEnabled: () => true,
   })
 
-  // 获取项目根目录
+  // 获取项目根目录和 SDK 路径
   const projectRoot = params.workspaceFolders?.[0]?.uri ? 
     URI.parse(params.workspaceFolders[0].uri).fsPath : process.cwd()
+  const sdkPath = lspConfiguration.getSdkPath()
   console.log('Server initialization - Project root:', projectRoot)
+  console.log('Server initialization - SDK path:', sdkPath)
   console.log('Server initialization - Workspace folders:', params.workspaceFolders)
 
   const initResult = await server.initialize(
@@ -114,10 +116,10 @@ connection.onInitialize(async (params) => {
       }
     }),
     [
-      // 资源定义跳转服务优先
-      createIntegratedResourceDefinitionService(projectRoot),
-      // 资源诊断服务
-      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel),
+      // 资源定义跳转服务优先（支持 sys 资源）
+      createIntegratedResourceDefinitionService(projectRoot, sdkPath),
+      // 资源诊断服务（支持 sys 资源）
+      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel, sdkPath),
       tsSemanticService,
       ...tsOtherServices,
       createETSLinterDiagnosticService(ets, logger),
