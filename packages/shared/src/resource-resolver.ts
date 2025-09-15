@@ -1,3 +1,4 @@
+import type { Range } from 'vscode-languageserver-textdocument'
 import type { LanguageServerLogger } from './log/lsp-logger'
 import * as fs from 'node:fs'
 import { createRequire } from 'node:module'
@@ -40,10 +41,7 @@ export interface ResourceLocation {
   /** 文件URI */
   uri: string
   /** 在文件中的位置（对于JSON资源） */
-  range?: {
-    start: { line: number, character: number }
-    end: { line: number, character: number }
-  }
+  range?: Range
   /** 资源值 */
   value?: string
 }
@@ -375,11 +373,7 @@ export class ResourceResolver {
   /**
    * 在系统资源文件中查找指定资源的位置
    */
-  private findSysResourceItemRange(
-    lines: string[],
-    resourceName: string,
-    resourceType: string,
-  ): { start: { line: number, character: number }, end: { line: number, character: number } } | undefined {
+  private findSysResourceItemRange(lines: string[], resourceName: string, resourceType: string): Range | undefined {
     let inResourceTypeSection = false
 
     for (let i = 0; i < lines.length; i++) {
@@ -465,7 +459,7 @@ export class ResourceResolver {
   /**
    * 在JSON文件中查找指定名称的项的位置
    */
-  private findJsonItemRange(lines: string[], itemName: string): { start: { line: number, character: number }, end: { line: number, character: number } } | undefined {
+  private findJsonItemRange(lines: string[], itemName: string): Range | undefined {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       const nameMatch = line.match(new RegExp(`"name"\\s*:\\s*"${itemName}"`))

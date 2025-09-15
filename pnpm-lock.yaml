@@ -538,6 +538,9 @@ importers:
       kleur:
         specifier: ^4.1.5
         version: 4.1.5
+      vscode-languageserver-textdocument:
+        specifier: ^1.0.12
+        version: 1.0.12
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
