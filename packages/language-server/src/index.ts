@@ -137,7 +137,7 @@ connection.onInitialize(async (params) => {
     ],
   )
 
-  // 础定 LSP 能力声明包含定义跳转功能
+  // 确定 LSP 能力声明包含定义跳转功能
   logger.getConsola().info('LSP capabilities after initialization:', JSON.stringify(initResult.capabilities, null, 2))
 
   return initResult
