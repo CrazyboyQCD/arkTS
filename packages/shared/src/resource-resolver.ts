@@ -505,48 +505,6 @@ export class ResourceResolver {
   }
 
   /**
-   * 根据关键字搜索资源
-   */
-  searchResources(keyword: string, scope?: 'app' | 'sys', type?: ResourceType): ResourceIndexItem[] {
-    const results: ResourceIndexItem[] = []
-    const lowerKeyword = keyword.toLowerCase()
-
-    for (const item of this.resourceIndex.values()) {
-      // 过滤范围
-      if (scope && item.reference.scope !== scope) {
-        continue
-      }
-
-      // 过滤类型
-      if (type && item.reference.type !== type) {
-        continue
-      }
-
-      // 关键字匹配（资源名称或值）
-      const matchesName = item.reference.name.toLowerCase().includes(lowerKeyword)
-      const matchesValue = item.location.value?.toLowerCase().includes(lowerKeyword) || false
-
-      if (matchesName || matchesValue) {
-        results.push(item)
-      }
-    }
-
-    // 按相关性排序（名称匹配的优先级更高）
-    return results.sort((a, b) => {
-      const aNameMatch = a.reference.name.toLowerCase().includes(lowerKeyword)
-      const bNameMatch = b.reference.name.toLowerCase().includes(lowerKeyword)
-
-      if (aNameMatch && !bNameMatch)
-        return -1
-      if (!aNameMatch && bNameMatch)
-        return 1
-
-      // 同样的匹配类型，按字母顺序排序
-      return a.reference.name.localeCompare(b.reference.name)
-    })
-  }
-
-  /**
    * 清除索引
    */
   clearIndex(): void {
