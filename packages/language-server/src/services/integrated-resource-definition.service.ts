@@ -20,15 +20,45 @@ interface ResourceCallInfo {
 
 // 全局资源解析器实例
 let globalResourceResolver: ResourceResolver | null = null
+let globalProjectRoot: string = ''
+let globalSdkPathGetter: (() => string) | null = null
 
 /**
  * 初始化全局资源解析器
  */
-export function initializeGlobalResourceResolver(projectRoot: string, sdkPath?: string): void {
-  globalResourceResolver = new ResourceResolver(projectRoot, sdkPath)
+function initializeGlobalResourceResolver(): void {
+  if (!globalProjectRoot || !globalSdkPathGetter) {
+    console.log('[ARKTS-RESOURCE] Cannot initialize: missing project root or SDK path getter')
+    return
+  }
+  
+  const currentSdkPath = globalSdkPathGetter()
+  console.log('[ARKTS-RESOURCE] Initializing resource resolver with SDK path:', currentSdkPath)
+  
+  globalResourceResolver = new ResourceResolver(globalProjectRoot, currentSdkPath)
   globalResourceResolver.buildIndex().catch(error => {
     console.error('Failed to build resource index:', error)
   })
+}
+
+/**
+ * 确保资源解析器已初始化且SDK路径是最新的
+ */
+function ensureResourceResolverInitialized(): boolean {
+  if (!globalSdkPathGetter) {
+    console.log('[ARKTS-RESOURCE] No SDK path getter available')
+    return false
+  }
+  
+  const currentSdkPath = globalSdkPathGetter()
+  
+  // 如果解析器不存在或SDK路径已更改，重新初始化
+  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver['sdkPath']) {
+    console.log('[ARKTS-RESOURCE] Resource resolver needs (re)initialization')
+    initializeGlobalResourceResolver()
+  }
+  
+  return globalResourceResolver !== null
 }
 
 /**
@@ -63,7 +93,10 @@ function findResourceCallAtPosition(line: string, character: number): ResourceCa
 /**
  * 创建集成的资源定义跳转服务
  */
-export function createIntegratedResourceDefinitionService(projectRoot: string, sdkPath?: string): LanguageServicePlugin {
+export function createIntegratedResourceDefinitionService(
+  projectRoot: string, 
+  sdkPathGetter: () => string
+): LanguageServicePlugin {
   console.log('Creating integrated resource definition service with project root:', projectRoot)
   
   // 清理项目根路径（移除 file:// 前缀）
@@ -73,8 +106,12 @@ export function createIntegratedResourceDefinitionService(projectRoot: string, s
   
   console.log('Cleaned project root:', cleanProjectRoot)
   
-  // 初始化资源解析器
-  initializeGlobalResourceResolver(cleanProjectRoot, sdkPath)
+  // 设置全局变量
+  globalProjectRoot = cleanProjectRoot
+  globalSdkPathGetter = sdkPathGetter
+  
+  // 尝试初始化资源解析器
+  initializeGlobalResourceResolver()
   
   return {
     name: 'arkts-resource-definition-integrated',
@@ -119,14 +156,14 @@ export function createIntegratedResourceDefinitionService(projectRoot: string, s
 
             console.log('[ARKTS-RESOURCE] Parsed resource reference:', resourceRef)
 
-            // 检查全局资源解析器
-            if (!globalResourceResolver) {
-              console.log('[ARKTS-RESOURCE] Global resource resolver not available')
+            // 确保资源解析器已初始化且是最新的
+            if (!ensureResourceResolverInitialized()) {
+              console.log('[ARKTS-RESOURCE] Resource resolver not available')
               return null
             }
 
             // 解析资源位置
-            const resourceLocation = await globalResourceResolver.resolveResourceReference(resourceCall.resourceRef)
+            const resourceLocation = await globalResourceResolver!.resolveResourceReference(resourceCall.resourceRef)
             if (!resourceLocation) {
               console.log('[ARKTS-RESOURCE] Resource not found:', resourceCall.resourceRef)
               return null

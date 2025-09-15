@@ -82,15 +82,32 @@ function getDiagnosticSeverity(level: ResourceDiagnosticLevel): DiagnosticSeveri
 class ResourceDiagnosticService {
   private resolver?: ResourceResolver
   private initialized = false
+  private currentSdkPath?: string
   
-  constructor(private projectRoot: string, private sdkPath?: string) {
-    if (projectRoot) {
-      this.resolver = new ResourceResolver(projectRoot, sdkPath)
-    }
-  }
+  constructor(
+    private projectRoot: string, 
+    private sdkPathGetter?: () => string
+  ) {}
   
   async initialize(): Promise<void> {
-    if (!this.resolver || this.initialized) {
+    if (this.initialized && this.resolver) {
+      // 检查SDK路径是否已更改
+      const currentSdkPath = this.sdkPathGetter?.()
+      if (currentSdkPath === this.currentSdkPath) {
+        return // 没有变化，无需重新初始化
+      }
+    }
+    
+    // 获取当前SDK路径
+    const sdkPath = this.sdkPathGetter?.()
+    console.log('[RESOURCE-DIAGNOSTIC] Initializing with SDK path:', sdkPath)
+    
+    if (this.projectRoot) {
+      this.resolver = new ResourceResolver(this.projectRoot, sdkPath)
+      this.currentSdkPath = sdkPath
+    }
+    
+    if (!this.resolver) {
       return
     }
     
@@ -170,7 +187,7 @@ let globalResourceDiagnosticService: ResourceDiagnosticService | null = null
 export function createResourceDiagnosticService(
   projectRoot?: string,
   getDiagnosticLevel?: () => ResourceDiagnosticLevel,
-  sdkPath?: string
+  sdkPathGetter?: () => string
 ): LanguageServicePlugin {
   return {
     name: 'arkts-resource-diagnostic',
@@ -183,7 +200,7 @@ export function createResourceDiagnosticService(
     create(context) {
       // 初始化全局服务实例（如果还没有的话）
       if (!globalResourceDiagnosticService && projectRoot) {
-        globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot, sdkPath)
+        globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot, sdkPathGetter)
         // 异步初始化
         globalResourceDiagnosticService.initialize()
       }

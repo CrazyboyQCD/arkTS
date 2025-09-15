@@ -24,6 +24,11 @@ logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`
 connection.onRequest('ets/waitForEtsConfigurationChangedRequested', (e) => {
   logger.getConsola().info(`waitForEtsConfigurationChangedRequested: ${JSON.stringify(e)}`)
   lspConfiguration.setConfiguration(e)
+  
+  // 配置更新后，记录SDK路径更新
+  if (e.ohos?.sdkPath) {
+    console.log('SDK path updated to:', e.ohos.sdkPath)
+  }
 })
 
 // 全局配置状态
@@ -117,9 +122,9 @@ connection.onInitialize(async (params) => {
     }),
     [
       // 资源定义跳转服务优先（支持 sys 资源）
-      createIntegratedResourceDefinitionService(projectRoot, sdkPath),
+      createIntegratedResourceDefinitionService(projectRoot, () => lspConfiguration.getSdkPath()),
       // 资源诊断服务（支持 sys 资源）
-      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel, sdkPath),
+      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel, () => lspConfiguration.getSdkPath()),
       tsSemanticService,
       ...tsOtherServices,
       createETSLinterDiagnosticService(ets, logger),
