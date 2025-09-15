@@ -12,6 +12,7 @@
 [![@arkts/language-server NPM version](https://img.shields.io/npm/v/%40arkts%2Flanguage-server?logo=npm&logoColor=red&label=arkts%2Flanguage-server)](https://www.npmjs.com/package/@arkts/language-server)&nbsp;
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/groupguanfang/arkTS)&nbsp;
 ![GitHub repo size](https://img.shields.io/github/repo-size/groupguanfang/arkTS)&nbsp;
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Groupguanfang/arkTS)&nbsp;
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/groupguanfang/arkTS/main?label=Main%20Branch%20Last%20Commit)&nbsp;
 
 </div>
