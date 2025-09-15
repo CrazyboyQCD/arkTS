@@ -54,7 +54,7 @@ struct Index {
         Column() {
           Row() {
             Text(item.toString())
-              .fontColor($r('app.string.EntryAbility_desc'))
+              .fontColor($r('app.color.primary_color'))
           }.margin(10)
           .height(20)
         }
