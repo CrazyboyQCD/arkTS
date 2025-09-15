@@ -352,9 +352,15 @@ export class ResourceResolver {
    * 索引系统资源对象
    */
   private indexSysResourceObject(sysResources: any, filePath: string): void {
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const lines = content.split('\n')
+    
     for (const [resourceType, resources] of Object.entries(sysResources)) {
       if (typeof resources === 'object' && resources !== null) {
         for (const [resourceName, resourceId] of Object.entries(resources)) {
+          // 查找资源在文件中的精确位置
+          const range = this.findSysResourceItemRange(lines, resourceName, resourceType)
+          
           const reference: ResourceReference = {
             scope: 'sys',
             type: resourceType as ResourceType,
@@ -364,6 +370,7 @@ export class ResourceResolver {
           
           const location: ResourceLocation = {
             uri: URI.file(filePath).toString(),
+            range,
             value: `System Resource ID: ${resourceId}`,
           }
           
@@ -372,6 +379,54 @@ export class ResourceResolver {
         }
       }
     }
+  }
+  
+  /**
+   * 在系统资源文件中查找指定资源的位置
+   */
+  private findSysResourceItemRange(
+    lines: string[], 
+    resourceName: string, 
+    resourceType: string
+  ): { start: { line: number, character: number }, end: { line: number, character: number } } | undefined {
+    let inResourceTypeSection = false
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
+      
+      // 检查是否进入了对应的资源类型段落
+      if (line.includes(`${resourceType}:`)) {
+        inResourceTypeSection = true
+        continue
+      }
+      
+      // 如果在资源类型段落中
+      if (inResourceTypeSection) {
+        // 检查是否离开了当前段落（到了下一个类型或结束）
+        if (line.includes('}') && !line.includes(resourceName)) {
+          // 检查是否是结束大括号，且不包含目标资源
+          const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : ''
+          if (nextLine === '' || nextLine.includes(':') || nextLine === '}') {
+            inResourceTypeSection = false
+            continue
+          }
+        }
+        
+        // 在当前段落中查找具体的资源名称
+        if (line.includes(resourceName)) {
+          const originalLine = lines[i] // 保持原始的空格
+          const start = originalLine.indexOf(resourceName)
+          if (start >= 0) {
+            return {
+              start: { line: i, character: start },
+              end: { line: i, character: start + resourceName.length },
+            }
+          }
+        }
+      }
+    }
+    
+    return undefined
   }
   
   /**
@@ -455,6 +510,67 @@ export class ResourceResolver {
    */
   getAllResources(): ResourceIndexItem[] {
     return Array.from(this.resourceIndex.values())
+  }
+  
+  /**
+   * 根据关键字搜索资源
+   */
+  searchResources(keyword: string, scope?: 'app' | 'sys', type?: ResourceType): ResourceIndexItem[] {
+    const results: ResourceIndexItem[] = []
+    const lowerKeyword = keyword.toLowerCase()
+    
+    for (const item of this.resourceIndex.values()) {
+      // 过滤范围
+      if (scope && item.reference.scope !== scope) {
+        continue
+      }
+      
+      // 过滤类型
+      if (type && item.reference.type !== type) {
+        continue
+      }
+      
+      // 关键字匹配（资源名称或值）
+      const matchesName = item.reference.name.toLowerCase().includes(lowerKeyword)
+      const matchesValue = item.location.value?.toLowerCase().includes(lowerKeyword) || false
+      
+      if (matchesName || matchesValue) {
+        results.push(item)
+      }
+    }
+    
+    // 按相关性排序（名称匹配的优先级更高）
+    return results.sort((a, b) => {
+      const aNameMatch = a.reference.name.toLowerCase().includes(lowerKeyword)
+      const bNameMatch = b.reference.name.toLowerCase().includes(lowerKeyword)
+      
+      if (aNameMatch && !bNameMatch) return -1
+      if (!aNameMatch && bNameMatch) return 1
+      
+      // 同样的匹配类型，按字母顺序排序
+      return a.reference.name.localeCompare(b.reference.name)
+    })
+  }
+  
+  /**
+   * 获取指定范围和类型的所有资源
+   */
+  getResourcesByType(scope?: 'app' | 'sys', type?: ResourceType): ResourceIndexItem[] {
+    const results: ResourceIndexItem[] = []
+    
+    for (const item of this.resourceIndex.values()) {
+      if (scope && item.reference.scope !== scope) {
+        continue
+      }
+      
+      if (type && item.reference.type !== type) {
+        continue
+      }
+      
+      results.push(item)
+    }
+    
+    return results.sort((a, b) => a.reference.name.localeCompare(b.reference.name))
   }
 
   /**

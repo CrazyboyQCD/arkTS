@@ -13,6 +13,7 @@ import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
 import { createIntegratedResourceDefinitionService } from './services/integrated-resource-definition.service'
 import { createResourceDiagnosticService, type ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
+import { createResourceCompletionService } from './services/resource-completion.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -123,6 +124,8 @@ connection.onInitialize(async (params) => {
     [
       // 资源定义跳转服务优先（支持 sys 资源）
       createIntegratedResourceDefinitionService(projectRoot, () => lspConfiguration.getSdkPath()),
+      // 资源智能补全服务（支持前缀匹配）
+      createResourceCompletionService(projectRoot, () => lspConfiguration.getSdkPath()),
       // 资源诊断服务（支持 sys 资源）
       createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel, () => lspConfiguration.getSdkPath()),
       tsSemanticService,
