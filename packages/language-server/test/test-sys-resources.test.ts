@@ -1,6 +1,6 @@
 import path from 'node:path'
-import { LanguageServerLogger, ResourceResolver } from '@arkts/shared'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { LanguageServerLogger, ResourceResolver } from '../../shared/src/index'
 
 const root = path.resolve(__dirname, '..')
 const projectRoot = path.join(root, 'sample')

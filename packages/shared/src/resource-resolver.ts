@@ -574,27 +574,6 @@ export class ResourceResolver {
   }
 
   /**
-   * 获取指定范围和类型的所有资源
-   */
-  getResourcesByType(scope?: 'app' | 'sys', type?: ResourceType): ResourceIndexItem[] {
-    const results: ResourceIndexItem[] = []
-
-    for (const item of this.resourceIndex.values()) {
-      if (scope && item.reference.scope !== scope) {
-        continue
-      }
-
-      if (type && item.reference.type !== type) {
-        continue
-      }
-
-      results.push(item)
-    }
-
-    return results.sort((a, b) => a.reference.name.localeCompare(b.reference.name))
-  }
-
-  /**
    * 清除索引
    */
   clearIndex(): void {

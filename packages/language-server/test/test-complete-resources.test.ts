@@ -1,10 +1,9 @@
 import path from 'node:path'
-import { LanguageServerLogger, ResourceResolver, ResourceType } from '@arkts/shared'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { LanguageServerLogger, ResourceResolver } from '../../shared/src/index'
 
-const root = path.resolve(__dirname, '..')
-const projectRoot = path.join(root, 'sample')
-const sdkPath = path.join(root, 'test', 'mock-sdk')
+const projectRoot = __dirname
+const sdkPath = path.join(__dirname, 'mock-sdk')
 
 describe('完整资源解析能力', () => {
   const logger = new LanguageServerLogger('test')
@@ -23,7 +22,7 @@ describe('完整资源解析能力', () => {
     for (const ref of tests) {
       const loc = await resolver.resolveResourceReference(ref)
       expect(loc, ref).not.toBeNull()
-      expect(loc!.uri).toBeTruthy()
+      expect(loc?.uri).toBeTruthy()
     }
   })
 
@@ -32,16 +31,8 @@ describe('完整资源解析能力', () => {
     for (const ref of appRefs) {
       const loc = await resolver.resolveResourceReference(ref)
       expect(loc, ref).not.toBeNull()
-      expect(loc!.uri).toBeTruthy()
-      expect(loc!.value).toBeTruthy()
+      expect(loc?.uri).toBeTruthy()
+      expect(loc?.value).toBeTruthy()
     }
-  })
-
-  it('资源搜索/筛选工作正常', () => {
-    const colorResults = resolver.searchResources('color')
-    expect(colorResults.length).toBeGreaterThan(0)
-
-    const strings = resolver.getResourcesByType(undefined, ResourceType.String)
-    expect(strings.length).toBeGreaterThan(0)
   })
 })

@@ -1,10 +1,10 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { LanguageServerLogger } from '@arkts/shared'
 import { beforeAll, describe, expect, it } from 'vitest'
+import { LanguageServerLogger } from '../src/log/lsp-logger'
 // 集成测试：测试与实际项目结构的集成（Vitest 版本）
-import { parseResourceReference, ResourceResolver, ResourceType } from '../out/index.mjs'
+import { parseResourceReference, ResourceResolver, ResourceType } from '../src/resource-resolver'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -40,7 +40,8 @@ maybeDescribe('实际项目结构集成测试', () => {
     ]
 
     for (const ref of testCases) {
-      await expect(resolver.resolveResourceReference(ref)).resolves.toSatisfy(result => result === null || typeof result.uri === 'string')
+      const result = await resolver.resolveResourceReference(ref)
+      expect(result === null || typeof result?.uri === 'string').toBe(true)
     }
   })
 })

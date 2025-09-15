@@ -97,7 +97,7 @@ function analyzeResourceCompletionContext(
 /**
  * 生成改进的资源补全项
  */
-function generateResourceCompletionItems(
+export function generateResourceCompletionItems(
   context: ResourceCompletionContext,
   resources: ResourceIndexItem[],
 ): CompletionItem[] {

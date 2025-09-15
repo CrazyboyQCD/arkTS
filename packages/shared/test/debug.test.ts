@@ -1,9 +1,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { LanguageServerLogger } from '@arkts/shared'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { ResourceResolver } from '../out/index.mjs'
+import { LanguageServerLogger } from '../src/log/lsp-logger'
+import { ResourceResolver } from '../src/resource-resolver'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -39,12 +39,14 @@ maybeDescribe('以 sample 作为根目录的资源解析', () => {
   let resolver
 
   beforeAll(async () => {
-    resolver = new ResourceResolver(new LanguageServerLogger(), sampleRoot)
+    const logger = new LanguageServerLogger('TEST LOGGER')
+    resolver = new ResourceResolver(logger, sampleRoot)
     await resolver.buildIndex()
   })
 
   it('能够索引到资源并返回列表', () => {
     const resources = resolver.getAllResources()
+    console.warn(resources)
     expect(Array.isArray(resources)).toBe(true)
   })
 })

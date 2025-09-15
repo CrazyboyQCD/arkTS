@@ -1,10 +1,10 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { LanguageServerLogger } from '@arkts/shared'
 import { describe, expect, it } from 'vitest'
+import { LanguageServerLogger } from '../src/log/lsp-logger'
 // 简单的手动测试脚本 -> 结构化为 Vitest 套件
-import { parseResourceReference, ResourceResolver, ResourceType } from '../out/index.mjs'
+import { parseResourceReference, ResourceResolver, ResourceType } from '../src/resource-resolver'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -78,8 +78,11 @@ describe('resourceResolver - 基本功能', () => {
       const elementDir = path.join(resourcesDir, 'element')
       const mediaDir = path.join(resourcesDir, 'media')
 
-      await fs.promises.mkdir(elementDir, { recursive: true })
-      await fs.promises.mkdir(mediaDir, { recursive: true })
+      fs.mkdirSync(elementDir, { recursive: true })
+      fs.mkdirSync(mediaDir, { recursive: true })
+
+      // 确保被识别为模块
+      fs.writeFileSync(path.join(entryModule, 'src', 'main', 'module.json5'), '{ "foo": "bar" }')
 
       const colorJson = {
         color: [
@@ -87,29 +90,25 @@ describe('resourceResolver - 基本功能', () => {
           { name: 'secondary', value: '#424242' },
         ],
       }
-      await fs.promises.writeFile(
-        path.join(elementDir, 'color.json'),
-        JSON.stringify(colorJson, null, 2),
-      )
-
-      await fs.promises.writeFile(path.join(mediaDir, 'logo.png'), 'fake-image-data')
+      fs.writeFileSync(path.join(elementDir, 'color.json'), JSON.stringify(colorJson, null, 2))
+      fs.writeFileSync(path.join(mediaDir, 'logo.png'), 'fake-image-data')
 
       const resolver = new ResourceResolver(new LanguageServerLogger(), tempDir)
       await resolver.buildIndex()
 
       const colorResult = await resolver.resolveResourceReference('app.color.primary')
       expect(colorResult).not.toBeNull()
-      expect(colorResult.value).toBe('#1976D2')
-      expect(colorResult.uri.includes('color.json')).toBe(true)
+      expect(colorResult?.value).toBe('#1976D2')
+      expect(colorResult?.uri.includes('color.json')).toBe(true)
 
       const mediaResult = await resolver.resolveResourceReference('app.media.logo')
       expect(mediaResult).not.toBeNull()
-      expect(mediaResult.value).toBe('logo.png')
-      expect(mediaResult.uri.includes('logo.png')).toBe(true)
+      expect(mediaResult?.value).toBe('logo.png')
+      expect(mediaResult?.uri.includes('logo.png')).toBe(true)
     }
     finally {
       if (fs.existsSync(tempDir)) {
-        await fs.promises.rm(tempDir, { recursive: true, force: true })
+        fs.rmSync(tempDir, { recursive: true, force: true })
       }
     }
   })

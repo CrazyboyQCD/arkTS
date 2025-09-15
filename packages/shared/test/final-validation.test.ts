@@ -1,10 +1,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { LanguageServerLogger } from '@arkts/shared'
 import { beforeAll, describe, expect, it } from 'vitest'
-// 最终验收测试：Vitest 版本，验证完整的 $r() 资源引用跳转功能
-import { parseResourceReference, ResourceResolver } from '../out/index.mjs'
+import { LanguageServerLogger } from '../src/log/lsp-logger'
+import { parseResourceReference, ResourceResolver } from '../src/resource-resolver'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -14,9 +13,16 @@ const projectRoot = path.resolve(__dirname, '../../..')
 const sampleIndex = path.join(projectRoot, 'sample/entry/src/main/ets/pages/Index.ets')
 const hasSample = fs.existsSync(sampleIndex)
 
-function extractResourceReferences(code) {
+interface ResourceReference {
+  fullMatch: string
+  resourceRef: string
+  start: number
+  end: number
+}
+
+function extractResourceReferences(code: string) {
   const regex = /\$r\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g
-  const matches = []
+  const matches: ResourceReference[] = []
 
   for (let m = regex.exec(code); m !== null; m = regex.exec(code)) {
     matches.push({
@@ -41,16 +47,16 @@ maybeDescribe('最终验收：$r() 资源引用跳转', () => {
   })
 
   it('能够从示例页面提取 $r() 引用并解析', async () => {
-    const content = await fs.promises.readFile(sampleIndex, 'utf-8')
+    const content = fs.readFileSync(sampleIndex, 'utf-8')
     const refs = extractResourceReferences(content)
-    expect(refs.length).toBeGreaterThan(0)
+    expect(refs.length, '没有找到 $r() 引用').toBeGreaterThan(0)
 
     // 仅校验解析与可解析性，不强制存在性
     const parsed = parseResourceReference(refs[0].resourceRef)
     expect(parsed).not.toBeNull()
 
     const result = await resolver.resolveResourceReference(refs[0].resourceRef)
-    expect(result === null || typeof result.uri === 'string').toBe(true)
+    expect(result === null || typeof result?.uri === 'string').toBe(true)
   })
 
   it('关键项目文件存在性检查', () => {
@@ -65,7 +71,7 @@ maybeDescribe('最终验收：$r() 资源引用跳转', () => {
 
     for (const file of keyFiles) {
       const p = path.join(projectRoot, file)
-      expect(fs.existsSync(p)).toBe(true)
+      expect(fs.existsSync(p), `文件 ${p} 不存在`).toBe(true)
     }
   })
 })
