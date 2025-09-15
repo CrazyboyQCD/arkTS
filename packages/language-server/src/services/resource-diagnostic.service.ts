@@ -1,7 +1,8 @@
 import type { Diagnostic, LanguageServicePlugin } from '@volar/language-server'
 import type { DiagnosticSeverity } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { LanguageServerLogger, parseResourceReference, ResourceResolver } from '@arkts/shared'
+import { parseResourceReference, ResourceResolver } from '@arkts/shared'
+import { logger } from '../logger'
 
 /**
  * 资源引用诊断级别
@@ -24,8 +25,6 @@ interface ResourceCallInfo {
   line: number
 }
 
-const logger = new LanguageServerLogger('RESOURCE-DIAGNOSTIC').getConsola()
-
 /**
  * 查找文档中所有的 $r() 调用
  */
@@ -44,6 +43,7 @@ function findAllResourceCalls(document: TextDocument): ResourceCallInfo[] {
     // 重置正则表达式的lastIndex
     resourceCallRegex.lastIndex = 0
 
+    // eslint-disable-next-line no-cond-assign
     while ((match = resourceCallRegex.exec(line)) !== null) {
       const fullCall = match[0]
       const resourceRef = match[1]
@@ -101,10 +101,10 @@ class ResourceDiagnosticService {
 
     // 获取当前SDK路径
     const sdkPath = this.sdkPathGetter?.()
-    logger.info('Initializing with SDK path:', sdkPath)
+    logger.getConsola().info('Initializing with SDK path:', sdkPath)
 
     if (this.projectRoot) {
-      this.resolver = new ResourceResolver(this.projectRoot, sdkPath)
+      this.resolver = new ResourceResolver(logger, this.projectRoot, sdkPath)
       this.currentSdkPath = sdkPath
     }
 
@@ -115,10 +115,10 @@ class ResourceDiagnosticService {
     try {
       await this.resolver.buildIndex()
       this.initialized = true
-      logger.info('Resource diagnostic service initialized successfully')
+      logger.getConsola().info('Resource diagnostic service initialized successfully')
     }
     catch (error) {
-      console.error('Failed to initialize resource diagnostic service:', error)
+      logger.getConsola().error('Failed to initialize resource diagnostic service:', error)
     }
   }
 
@@ -225,7 +225,7 @@ export function createResourceDiagnosticService(
             return await globalResourceDiagnosticService.provideDiagnostics(document, diagnosticLevel)
           }
           catch (error) {
-            console.error('Error in resource diagnostics:', error)
+            logger.getConsola().error('Error in resource diagnostics:', error)
             return []
           }
         },

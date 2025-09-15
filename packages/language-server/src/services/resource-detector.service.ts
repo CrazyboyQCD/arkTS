@@ -1,7 +1,8 @@
-import type { ResourceLocation } from '@arkts/shared'
+import type { ResourceIndexItem, ResourceLocation } from '@arkts/shared'
 import type { Connection, DidChangeConfigurationParams, DidChangeWatchedFilesParams, LanguageServicePlugin } from '@volar/language-server'
 import { ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
+import { logger } from '../logger'
 
 /**
  * 资源检测服务配置
@@ -26,7 +27,7 @@ export class ResourceDetectorService {
 
   constructor(config: ResourceDetectorConfig) {
     this.config = config
-    this.resolver = new ResourceResolver(config.projectRoot)
+    this.resolver = new ResourceResolver(logger, config.projectRoot)
   }
 
   /**
@@ -121,7 +122,7 @@ export class ResourceDetectorService {
   /**
    * 获取所有资源
    */
-  getAllResources() {
+  getAllResources(): ResourceIndexItem[] {
     return this.resolver.getAllResources()
   }
 
@@ -131,8 +132,8 @@ export class ResourceDetectorService {
   updateConfig(newConfig: Partial<ResourceDetectorConfig>): void {
     this.config = { ...this.config, ...newConfig }
 
-    if (newConfig.projectRoot && newConfig.projectRoot !== this.resolver['projectRoot']) {
-      this.resolver = new ResourceResolver(newConfig.projectRoot)
+    if (newConfig.projectRoot && newConfig.projectRoot !== this.resolver.getProjectRoot()) {
+      this.resolver = new ResourceResolver(logger, newConfig.projectRoot)
       this.isIndexBuilt = false
 
       if (this.config.enabled) {
@@ -161,6 +162,7 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
     capabilities: {
       // 不需要特殊能力，主要是后台服务
     },
+    // eslint-disable-next-line ts/ban-ts-comment
     // @ts-expect-error
     create(context) {
       // 设置连接

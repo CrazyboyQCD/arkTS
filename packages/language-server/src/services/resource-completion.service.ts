@@ -2,8 +2,9 @@ import type { ResourceIndexItem } from '@arkts/shared'
 import type { LanguageServicePlugin } from '@volar/language-service'
 import type { CompletionItem, CompletionList } from 'vscode-languageserver-protocol'
 import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
-import { LanguageServerLogger, ResourceResolver } from '@arkts/shared'
+import { ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
+import { logger } from '../logger'
 
 /**
  * 资源补全上下文
@@ -23,23 +24,22 @@ interface ResourceCompletionContext {
 let globalResourceResolver: ResourceResolver | null = null
 let globalProjectRoot: string = ''
 let globalSdkPathGetter: (() => string) | null = null
-const logger = new LanguageServerLogger('ARKTS-COMPLETION').getConsola()
 
 /**
  * 初始化全局资源解析器
  */
 function initializeGlobalResourceResolver(): void {
   if (!globalProjectRoot || !globalSdkPathGetter) {
-    logger.info('Cannot initialize: missing project root or SDK path getter')
+    logger.getConsola().info('Cannot initialize: missing project root or SDK path getter')
     return
   }
 
   const currentSdkPath = globalSdkPathGetter()
-  logger.info('Initializing resource resolver with SDK path:', currentSdkPath)
+  logger.getConsola().info('Initializing resource resolver with SDK path:', currentSdkPath)
 
-  globalResourceResolver = new ResourceResolver(globalProjectRoot, currentSdkPath)
+  globalResourceResolver = new ResourceResolver(logger, globalProjectRoot, currentSdkPath)
   globalResourceResolver.buildIndex().catch((error) => {
-    console.error('Failed to build resource index:', error)
+    logger.getConsola().error('Failed to build resource index:', error)
   })
 }
 
@@ -48,15 +48,15 @@ function initializeGlobalResourceResolver(): void {
  */
 function ensureResourceResolverInitialized(): boolean {
   if (!globalSdkPathGetter) {
-    logger.info('No SDK path getter available')
+    logger.getConsola().info('No SDK path getter available')
     return false
   }
 
   const currentSdkPath = globalSdkPathGetter()
 
   // 如果解析器不存在或SDK路径已更改，重新初始化
-  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver['sdkPath']) {
-    logger.info('Resource resolver needs (re)initialization')
+  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver.getSdkPath()) {
+    logger.getConsola().info('Resource resolver needs (re)initialization')
     initializeGlobalResourceResolver()
   }
 
@@ -76,7 +76,7 @@ function analyzeResourceCompletionContext(
   })
 
   // 查找 $r() 调用的正则表达式（修复转义问题）
-  const resourceCallPattern = /\$r\s*\(\s*['"]?([^'")]*)$/
+  const resourceCallPattern = /\$r\s*\(\s*['"]?([^'")\s]*)$/
   const resourceCallMatch = line.match(resourceCallPattern)
 
   if (!resourceCallMatch) {
@@ -104,7 +104,7 @@ function generateResourceCompletionItems(
   const items: CompletionItem[] = []
   const { prefix } = context
 
-  logger.info('Generating items for prefix:', prefix)
+  logger.getConsola().info('Generating items for prefix:', prefix)
 
   // 如果前缀为空，提供范围选项
   if (!prefix) {
@@ -245,7 +245,7 @@ function generateResourceCompletionItems(
     return items
   }
 
-  logger.info(`Generated ${items.length} completion items for prefix '${prefix}'`)
+  logger.getConsola().info(`Generated ${items.length} completion items for prefix '${prefix}'`)
   return items
 }
 
@@ -256,14 +256,14 @@ export function createResourceCompletionService(
   projectRoot: string,
   sdkPathGetter: () => string,
 ): LanguageServicePlugin {
-  logger.info('Creating resource completion service with project root:', projectRoot)
+  logger.getConsola().info('Creating resource completion service with project root:', projectRoot)
 
   // 清理项目根路径（移除 file:// 前缀）
   const cleanProjectRoot = projectRoot.startsWith('file://')
     ? URI.parse(projectRoot).fsPath
     : projectRoot
 
-  logger.info('Cleaned project root:', cleanProjectRoot)
+  logger.getConsola().info('Cleaned project root:', cleanProjectRoot)
 
   // 设置全局变量
   globalProjectRoot = cleanProjectRoot
@@ -282,31 +282,28 @@ export function createResourceCompletionService(
     },
     create(_context) {
       return {
-        async provideCompletionItems(
-          document: TextDocument,
-          position: Position,
-        ): Promise<CompletionList | null> {
+        async provideCompletionItems(document: TextDocument, position: Position): Promise<CompletionList | null> {
           try {
-            logger.info('provideCompletionItems called for:', document.uri, 'at position:', position)
+            logger.getConsola().info('provideCompletionItems called for:', document.uri, 'at position:', position)
 
             // 只处理 .ets 文件
             if (!document.uri.endsWith('.ets')) {
-              logger.info('Not an .ets file, skipping')
+              logger.getConsola().info('Not an .ets file, skipping')
               return null
             }
 
             // 分析补全上下文
             const completionContext = analyzeResourceCompletionContext(document, position)
             if (!completionContext) {
-              logger.info('No resource completion context found')
+              logger.getConsola().info('No resource completion context found')
               return null
             }
 
-            logger.info('Completion context:', completionContext)
+            logger.getConsola().info('Completion context:', completionContext)
 
             // 确保资源解析器已初始化且是最新的
             if (!ensureResourceResolverInitialized()) {
-              logger.info('Resource resolver not available')
+              logger.getConsola().info('Resource resolver not available')
               return null
             }
 
@@ -316,7 +313,7 @@ export function createResourceCompletionService(
             // 生成补全项
             const completionItems = generateResourceCompletionItems(completionContext, allResources)
 
-            logger.info(`Generated ${completionItems.length} completion items`)
+            logger.getConsola().info(`Generated ${completionItems.length} completion items`)
 
             return {
               isIncomplete: false,
@@ -324,7 +321,7 @@ export function createResourceCompletionService(
             }
           }
           catch (error) {
-            console.error('Error in provideCompletionItems:', error)
+            logger.getConsola().error('Error in provideCompletionItems:', error)
             return null
           }
         },

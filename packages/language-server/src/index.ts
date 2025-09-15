@@ -2,13 +2,13 @@ import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.ser
 import fs from 'node:fs'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
-import { LanguageServerLogger } from '@arkts/shared'
 import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './config-manager'
+import { logger } from './logger'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createResourceCompletionService } from './services/resource-completion.service'
@@ -18,7 +18,6 @@ import { createETSDocumentSymbolService } from './services/symbol.service'
 
 const connection = createConnection()
 const server = createServer(connection)
-const logger = new LanguageServerLogger('ETS Language Server')
 const lspConfiguration = new LanguageServerConfigManager(logger)
 
 logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`)

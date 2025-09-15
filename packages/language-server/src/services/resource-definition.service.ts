@@ -1,8 +1,9 @@
 import type { LanguageServicePlugin, LocationLink } from '@volar/language-server'
 import type { Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { LanguageServerLogger, parseResourceReference, ResourceResolver } from '@arkts/shared'
+import { parseResourceReference, ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
+import { logger } from '../logger'
 
 /**
  * 资源调用信息
@@ -22,23 +23,22 @@ interface ResourceCallInfo {
 let globalResourceResolver: ResourceResolver | null = null
 let globalProjectRoot: string = ''
 let globalSdkPathGetter: (() => string) | null = null
-const logger = new LanguageServerLogger('ARKTS-RESOURCE').getConsola()
 
 /**
  * 初始化全局资源解析器
  */
 function initializeGlobalResourceResolver(): void {
   if (!globalProjectRoot || !globalSdkPathGetter) {
-    logger.info('Cannot initialize: missing project root or SDK path getter')
+    logger.getConsola().info('Cannot initialize: missing project root or SDK path getter')
     return
   }
 
   const currentSdkPath = globalSdkPathGetter()
-  logger.info('Initializing resource resolver with SDK path:', currentSdkPath)
+  logger.getConsola().info('Initializing resource resolver with SDK path:', currentSdkPath)
 
-  globalResourceResolver = new ResourceResolver(globalProjectRoot, currentSdkPath)
+  globalResourceResolver = new ResourceResolver(logger, globalProjectRoot, currentSdkPath)
   globalResourceResolver.buildIndex().catch((error) => {
-    console.error('Failed to build resource index:', error)
+    logger.getConsola().error('Failed to build resource index:', error)
   })
 }
 
@@ -47,15 +47,15 @@ function initializeGlobalResourceResolver(): void {
  */
 function ensureResourceResolverInitialized(): boolean {
   if (!globalSdkPathGetter) {
-    logger.info('No SDK path getter available')
+    logger.getConsola().info('No SDK path getter available')
     return false
   }
 
   const currentSdkPath = globalSdkPathGetter()
 
   // 如果解析器不存在或SDK路径已更改，重新初始化
-  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver['sdkPath']) {
-    logger.info('Resource resolver needs (re)initialization')
+  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver.getSdkPath()) {
+    logger.getConsola().info('Resource resolver needs (re)initialization')
     initializeGlobalResourceResolver()
   }
 
@@ -72,6 +72,7 @@ function findResourceCallAtPosition(line: string, character: number): ResourceCa
   let match: RegExpExecArray | null
 
   // 循环匹配
+  // eslint-disable-next-line no-cond-assign
   while ((match = resourceCallRegex.exec(line)) !== null) {
     const fullCall = match[0]
     const resourceRef = match[2] // 使用第二个捕获组，因为第一个是引号
@@ -99,14 +100,14 @@ export function createIntegratedResourceDefinitionService(
   projectRoot: string,
   sdkPathGetter: () => string,
 ): LanguageServicePlugin {
-  logger.info('Creating integrated resource definition service with project root:', projectRoot)
+  logger.getConsola().info('Creating integrated resource definition service with project root:', projectRoot)
 
   // 清理项目根路径（移除 file:// 前缀）
   const cleanProjectRoot = projectRoot.startsWith('file://')
     ? URI.parse(projectRoot).fsPath
     : projectRoot
 
-  logger.info('Cleaned project root:', cleanProjectRoot)
+  logger.getConsola().info('Cleaned project root:', cleanProjectRoot)
 
   // 设置全局变量
   globalProjectRoot = cleanProjectRoot
@@ -124,11 +125,11 @@ export function createIntegratedResourceDefinitionService(
       return {
         async provideDefinition(document: TextDocument, position: Position): Promise<LocationLink[] | null> {
           try {
-            logger.info('provideDefinition called for:', document.uri, 'at position:', position)
+            logger.getConsola().info('provideDefinition called for:', document.uri, 'at position:', position)
 
             // 只处理 .ets 文件
             if (!document.uri.endsWith('.ets')) {
-              logger.info('Not an .ets file, skipping')
+              logger.getConsola().info('Not an .ets file, skipping')
               return null
             }
 
@@ -138,40 +139,40 @@ export function createIntegratedResourceDefinitionService(
               end: { line: position.line + 1, character: 0 },
             })
 
-            logger.info('Current line:', line.trim())
+            logger.getConsola().info('Current line:', line.trim())
 
             // 查找 $r() 调用
             const resourceCall = findResourceCallAtPosition(line, position.character)
             if (!resourceCall) {
-              logger.info('No $r() call found at position, letting other services handle')
+              logger.getConsola().info('No $r() call found at position, letting other services handle')
               return null
             }
 
-            logger.info('Found $r() call:', resourceCall)
+            logger.getConsola().info('Found $r() call:', resourceCall)
 
             // 解析资源引用
             const resourceRef = parseResourceReference(resourceCall.resourceRef)
             if (!resourceRef) {
-              logger.info('Failed to parse resource reference:', resourceCall.resourceRef)
+              logger.getConsola().info('Failed to parse resource reference:', resourceCall.resourceRef)
               return null
             }
 
-            logger.info('Parsed resource reference:', resourceRef)
+            logger.getConsola().info('Parsed resource reference:', resourceRef)
 
             // 确保资源解析器已初始化且是最新的
             if (!ensureResourceResolverInitialized()) {
-              logger.info('Resource resolver not available')
+              logger.getConsola().info('Resource resolver not available')
               return null
             }
 
             // 解析资源位置
             const resourceLocation = await globalResourceResolver!.resolveResourceReference(resourceCall.resourceRef)
             if (!resourceLocation) {
-              logger.info('Resource not found:', resourceCall.resourceRef)
+              logger.getConsola().info('Resource not found:', resourceCall.resourceRef)
               return null
             }
 
-            logger.info('Found resource location:', resourceLocation)
+            logger.getConsola().info('Found resource location:', resourceLocation)
 
             // 构建跳转位置
             const targetRange = resourceLocation.range || {
@@ -191,11 +192,11 @@ export function createIntegratedResourceDefinitionService(
               originSelectionRange,
             }]
 
-            logger.info('Returning location link:', result)
+            logger.getConsola().info('Returning location link:', result)
             return result
           }
           catch (error) {
-            console.error('Error in provideDefinition:', error)
+            logger.getConsola().error('Error in provideDefinition:', error)
             return null
           }
         },

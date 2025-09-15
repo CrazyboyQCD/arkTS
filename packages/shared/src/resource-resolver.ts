@@ -1,3 +1,4 @@
+import type { LanguageServerLogger } from './log/lsp-logger'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { URI } from 'vscode-uri'
@@ -116,7 +117,15 @@ export class ResourceResolver {
   private resourceIndex: Map<string, ResourceIndexItem> = new Map()
   private sdkPath?: string
 
-  constructor(projectRoot: string, sdkPath?: string) {
+  getSdkPath(): string | undefined {
+    return this.sdkPath
+  }
+
+  getProjectRoot(): string {
+    return this.projectRoot
+  }
+
+  constructor(private readonly logger: LanguageServerLogger, projectRoot: string, sdkPath?: string) {
     this.projectRoot = projectRoot
     this.sdkPath = sdkPath
   }
@@ -157,7 +166,7 @@ export class ResourceResolver {
           const moduleJsonPath = path.join(fullPath, 'src', 'main', 'module.json5')
 
           if (fs.existsSync(moduleJsonPath)) {
-            console.log(`Found module: ${moduleRelativePath} at ${fullPath}`)
+            this.logger.getConsola().log(`Found module: ${moduleRelativePath} at ${fullPath}`)
             modules.push(moduleRelativePath)
           }
           else {
@@ -169,7 +178,7 @@ export class ResourceResolver {
     }
     catch (error) {
       // 忽略无法访问的目录
-      console.debug(`Cannot access directory ${currentPath}:`, error)
+      this.logger.getConsola().error(`Cannot access directory ${currentPath}:`, error)
     }
   }
 
@@ -201,21 +210,21 @@ export class ResourceResolver {
    */
   async buildIndex(): Promise<void> {
     this.resourceIndex.clear()
-    console.log(`Building resource index for project: ${this.projectRoot}`)
+    this.logger.getConsola().log(`Building resource index for project: ${this.projectRoot}`)
 
     // 索引 app 资源（模块资源）
     const modules = await this.findModules()
-    console.log(`Found ${modules.length} modules:`, modules)
+    this.logger.getConsola().log(`Found ${modules.length} modules:`, modules)
 
     for (const moduleName of modules) {
-      console.log(`Indexing module: ${moduleName}`)
+      this.logger.getConsola().log(`Indexing module: ${moduleName}`)
       await this.indexModule(moduleName)
     }
 
     // 索引 sys 资源（系统资源）
     await this.indexSystemResources()
 
-    console.log(`Resource index built with ${this.resourceIndex.size} resources`)
+    this.logger.getConsola().log(`Resource index built with ${this.resourceIndex.size} resources`)
   }
 
   /**
@@ -248,20 +257,20 @@ export class ResourceResolver {
         if (file.endsWith('.json')) {
           const resourceType = path.basename(file, '.json') as ResourceType
           if (Object.values(ResourceType).includes(resourceType)) {
-            await this.indexJsonResource(path.join(elementPath, file), resourceType, moduleName)
+            await this.indexJsonResource(path.join(elementPath, file), resourceType)
           }
         }
       }
     }
     catch (error) {
-      console.error(`Failed to index element resources for ${moduleName}:`, error)
+      this.logger.getConsola().error(`Failed to index element resources for ${moduleName}:`, error)
     }
   }
 
   /**
    * 索引JSON资源文件
    */
-  private async indexJsonResource(filePath: string, resourceType: ResourceType, moduleName: string): Promise<void> {
+  private async indexJsonResource(filePath: string, resourceType: ResourceType): Promise<void> {
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8')
       const json = JSON.parse(content)
@@ -293,7 +302,7 @@ export class ResourceResolver {
       }
     }
     catch (error) {
-      console.error(`Failed to index JSON resource ${filePath}:`, error)
+      this.logger.getConsola().error(`Failed to index JSON resource ${filePath}:`, error)
     }
   }
 
@@ -302,19 +311,19 @@ export class ResourceResolver {
    */
   private async indexSystemResources(): Promise<void> {
     if (!this.sdkPath) {
-      console.log('SDK path not provided, skipping system resource indexing')
+      this.logger.getConsola().log('SDK path not provided, skipping system resource indexing')
       return
     }
 
     const sysResourcePath = path.join(this.sdkPath, 'ets', 'build-tools', 'ets-loader', 'sysResource.js')
 
     if (!fs.existsSync(sysResourcePath)) {
-      console.log(`System resource file not found: ${sysResourcePath}`)
+      this.logger.getConsola().log(`System resource file not found: ${sysResourcePath}`)
       return
     }
 
     try {
-      console.log(`Indexing system resources from: ${sysResourcePath}`)
+      this.logger.getConsola().log(`Indexing system resources from: ${sysResourcePath}`)
 
       // 读取文件内容
       const content = await fs.promises.readFile(sysResourcePath, 'utf-8')
@@ -324,11 +333,11 @@ export class ResourceResolver {
 
       if (sysResources) {
         this.indexSysResourceObject(sysResources, sysResourcePath)
-        console.log('System resources indexed successfully')
+        this.logger.getConsola().log('System resources indexed successfully')
       }
     }
     catch (error) {
-      console.error('Failed to index system resources:', error)
+      this.logger.getConsola().error('Failed to index system resources:', error)
     }
   }
 
@@ -340,18 +349,19 @@ export class ResourceResolver {
       // 移除 module.exports 并解析 JavaScript 对象
       const moduleMatch = content.match(/module\.exports\.sys\s*=\s*(\{[\s\S]*\})/)
       if (!moduleMatch) {
-        console.error('Unable to parse sys resource module structure')
+        this.logger.getConsola().error('Unable to parse sys resource module structure')
         return null
       }
 
       // 使用 Function 构造函数安全执行 JavaScript
       const objectStr = moduleMatch[1]
+      // eslint-disable-next-line no-new-func
       const sysResources = new Function(`return ${objectStr}`)()
 
       return sysResources
     }
     catch (error) {
-      console.error('Failed to parse sysResource.js content:', error)
+      this.logger.getConsola().error('Failed to parse sysResource.js content:', error)
       return null
     }
   }
