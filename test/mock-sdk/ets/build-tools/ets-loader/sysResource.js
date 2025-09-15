@@ -1,39 +1,39 @@
 module.exports.sys = {
 
-    color: {
+  color: {
 
-        ohos_id_color_foreground: 125829120,
+    ohos_id_color_foreground: 125829120,
 
-        },
+  },
 
-    float: {
+  float: {
 
-        ohos_id_alpha_content_primary: 125829369,
+    ohos_id_alpha_content_primary: 125829369,
 
-        },
+  },
 
-    string: {
+  string: {
 
-        ohos_id_text_font_family_regular: 125829694,
+    ohos_id_text_font_family_regular: 125829694,
 
-        },
+  },
 
-    media: {
+  media: {
 
-        ohos_app_icon: 125829858,
+    ohos_app_icon: 125829858,
 
-        },
+  },
 
-    symbol: {
+  symbol: {
 
-        ohos_wifi: 125830644,
+    ohos_wifi: 125830644,
 
-        },
+  },
 
-    plural: {
+  plural: {
 
-        selecttitlebar_accessibility_message_desc_new: 125834861
+    selecttitlebar_accessibility_message_desc_new: 125834861,
 
-    }
+  },
 
 }

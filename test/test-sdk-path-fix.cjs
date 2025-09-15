@@ -15,7 +15,7 @@ console.log('初始SDK路径:', configManager.getSdkPath())
 const projectRoot = process.cwd()
 const resourceService = createIntegratedResourceDefinitionService(
   projectRoot,
-  () => configManager.getSdkPath()
+  () => configManager.getSdkPath(),
 )
 
 console.log('✅ 资源服务创建成功，使用动态SDK路径获取函数')
@@ -23,8 +23,8 @@ console.log('✅ 资源服务创建成功，使用动态SDK路径获取函数')
 // 模拟配置更新（类似 ets/waitForEtsConfigurationChangedRequested）
 const mockConfig = {
   ohos: {
-    sdkPath: 'd:\\Develop\\ENV_SDK\\OpenHarmony\\20'
-  }
+    sdkPath: 'd:\\Develop\\ENV_SDK\\OpenHarmony\\20',
+  },
 }
 
 configManager.setConfiguration(mockConfig)

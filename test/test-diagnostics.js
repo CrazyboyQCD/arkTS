@@ -4,14 +4,14 @@
  * 测试资源诊断功能
  */
 
-const { ResourceResolver } = require('@arkts/shared');
-const { createResourceDiagnosticService } = require('@arkts/language-server');
+const { createResourceDiagnosticService } = require('@arkts/language-server')
+const { ResourceResolver } = require('@arkts/shared')
 
 async function testResourceDiagnostics() {
-  console.log('=== 测试资源诊断功能 ===');
-  
-  const projectRoot = 'C:\\Users\\Administrator\\Desktop\\arkTS';
-  
+  console.log('=== 测试资源诊断功能 ===')
+
+  const projectRoot = 'C:\\Users\\Administrator\\Desktop\\arkTS'
+
   // 创建模拟文档
   const testDocument = {
     uri: 'file:///test.ets',
@@ -32,41 +32,41 @@ struct TestPage {
     }
   }
 }
-    `.trim()
-  };
+    `.trim(),
+  }
 
   try {
     // 测试不同诊断级别
-    const diagnosticLevels = ['error', 'warning', 'none'];
-    
+    const diagnosticLevels = ['error', 'warning', 'none']
+
     for (const level of diagnosticLevels) {
-      console.log(`\n--- 测试诊断级别: ${level} ---`);
-      
+      console.log(`\n--- 测试诊断级别: ${level} ---`)
+
       const service = createResourceDiagnosticService(
         projectRoot,
-        () => level
-      );
-      
-      const plugin = service.create({});
-      
+        () => level,
+      )
+
+      const plugin = service.create({})
+
       if (plugin.provideDiagnostics) {
-        const diagnostics = await plugin.provideDiagnostics(testDocument);
-        
-        console.log(`找到 ${diagnostics.length} 个诊断:`);
+        const diagnostics = await plugin.provideDiagnostics(testDocument)
+
+        console.log(`找到 ${diagnostics.length} 个诊断:`)
         diagnostics.forEach((diag, index) => {
-          console.log(`  ${index + 1}. [${diag.severity === 1 ? 'ERROR' : 'WARNING'}] ${diag.message}`);
-          console.log(`     位置: 行${diag.range.start.line + 1}, 列${diag.range.start.character + 1}-${diag.range.end.character + 1}`);
-          console.log(`     代码: ${diag.code}`);
-        });
+          console.log(`  ${index + 1}. [${diag.severity === 1 ? 'ERROR' : 'WARNING'}] ${diag.message}`)
+          console.log(`     位置: 行${diag.range.start.line + 1}, 列${diag.range.start.character + 1}-${diag.range.end.character + 1}`)
+          console.log(`     代码: ${diag.code}`)
+        })
       }
     }
-    
-  } catch (error) {
-    console.error('测试失败:', error);
+  }
+  catch (error) {
+    console.error('测试失败:', error)
   }
 }
 
 // 运行测试
 if (require.main === module) {
-  testResourceDiagnostics();
+  testResourceDiagnostics()
 }

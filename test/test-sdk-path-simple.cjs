@@ -4,14 +4,14 @@ console.log('=== 测试SDK路径动态获取修复 ===')
 class MockConfigManager {
   constructor() {
     this.config = {
-      ohos: { sdkPath: '' }
+      ohos: { sdkPath: '' },
     }
   }
-  
+
   getSdkPath() {
     return this.config.ohos.sdkPath
   }
-  
+
   setConfiguration(config) {
     if (config.ohos?.sdkPath) {
       this.config.ohos.sdkPath = config.ohos.sdkPath
@@ -33,8 +33,8 @@ console.log('通过动态函数获取初始SDK路径:', sdkPathGetter())
 console.log('\n--- 模拟配置更新 ---')
 const mockConfig = {
   ohos: {
-    sdkPath: 'd:\\Develop\\ENV_SDK\\OpenHarmony\\20'
-  }
+    sdkPath: 'd:\\Develop\\ENV_SDK\\OpenHarmony\\20',
+  },
 }
 
 configManager.setConfiguration(mockConfig)
