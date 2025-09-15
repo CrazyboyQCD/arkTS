@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "antfu.pnpm-catalog-lens",
+    "vitest.explorer",
+    "dbaeumer.vscode-eslint"
+  ]
+}
