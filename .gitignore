@@ -12,3 +12,4 @@ oh_modules
 .test
 .hvigor
 .idea
+coverage

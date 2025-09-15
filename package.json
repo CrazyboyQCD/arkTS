@@ -12,8 +12,8 @@
     "pack": "cd ./packages/vscode && npm run pack",
     "generate": "cd ./packages/vscode && npm run update",
     "release": "pnpm -F \"{packages/*}\" build && tsx ./scripts/publish.ts",
-    "test": "vitest",
-    "lint": "eslint && oxlint && tsc --build --noEmit",
+    "test": "vitest --coverage --ui",
+    "lint": "eslint && oxlint && tsc --build --noEmit && vitest --coverage --ui",
     "prepare": "pnpm -F \"{packages/*}\" build"
   },
   "dependencies": {
@@ -39,6 +39,8 @@
     "@types/lodash": "catalog:prod",
     "@types/node": "catalog:dev",
     "@types/unzipper": "catalog:prod",
+    "@vitest/coverage-v8": "catalog:test",
+    "@vitest/ui": "catalog:test",
     "consola": "catalog:prod",
     "cross-env": "catalog:scripts",
     "defu": "catalog:prod",
@@ -58,6 +60,7 @@
     "type-fest": "catalog:dev",
     "typescript": "catalog:prod",
     "unzipper": "catalog:prod",
+    "vitest": "catalog:test",
     "vscode-ext-gen": "catalog:dev",
     "vscode-languageserver-textdocument": "catalog:prod",
     "vscode-nls": "catalog:prod"

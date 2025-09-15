@@ -11,6 +11,14 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "app_name",
+      "value": "ArkTS Sample App"
+    },
+    {
+      "name": "welcome_message",
+      "value": "Welcome to ArkTS!"
     }
   ]
 }

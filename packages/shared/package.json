@@ -47,13 +47,16 @@
   "scripts": {
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
-    "release": "pnpm publish"
+    "release": "pnpm publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "consola": "^3.4.2",
     "kleur": "^4.1.5"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@types/vscode": "^1.102.0"
   }
 }

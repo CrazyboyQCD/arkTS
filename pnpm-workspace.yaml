@@ -71,6 +71,10 @@ catalogs:
     pnpm: ^10.14.0
     simple-git-hooks: ^2.13.1
     tsx: ^4.20.4
+  test:
+    '@vitest/coverage-v8': 2.1.9
+    '@vitest/ui': 2.1.9
+    vitest: ^3.2.4
 onlyBuiltDependencies:
   - '@swc/core'
   - '@vscode/vsce-sign'
