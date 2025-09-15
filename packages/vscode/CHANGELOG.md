@@ -1,5 +1,12 @@
 # vscode-naily-ets
 
+## 1.1.3
+
+### Patch Changes
+
+- d8eaa76: fix: update galleryBanner theme color
+- be25ace: feat: 支持$r()资源引用补全 (#6) 感谢 github @frezs 的贡献 🎉!
+
 ## 1.1.2
 
 ### Patch Changes
