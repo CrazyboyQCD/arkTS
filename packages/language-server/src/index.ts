@@ -11,7 +11,7 @@ import { LanguageServerConfigManager } from './config-manager'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
-import { createIntegratedResourceDefinitionService } from './services/integrated-resource-definition.service'
+import { createIntegratedResourceDefinitionService } from './services/resource-definition.service'
 import { createResourceDiagnosticService, type ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import { createResourceCompletionService } from './services/resource-completion.service'
 
