@@ -1,5 +1,11 @@
 # @arkts/shared
 
+## 1.0.6
+
+### Patch Changes
+
+- be25ace: feat: 支持$r()资源引用补全 (#6) 感谢 github @frezs 的贡献 🎉!
+
 ## 1.0.5
 
 ### Patch Changes

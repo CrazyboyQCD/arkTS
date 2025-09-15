@@ -1,5 +1,11 @@
 # @arkts/typescript-plugin
 
+## 1.1.1
+
+### Patch Changes
+
+- be25ace: feat: 支持$r()资源引用补全 (#6) 感谢 github @frezs 的贡献 🎉!
+
 ## 1.1.0
 
 ### Minor Changes
