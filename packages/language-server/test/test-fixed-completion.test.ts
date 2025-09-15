@@ -1,7 +1,7 @@
 import type { ResourceIndexItem } from '@arkts/shared'
 import { describe, expect, it } from 'vitest'
-import { generateResourceCompletionItems } from '../src/services/resource-completion.service'
 import { ResourceType } from '../../shared/src/resource-resolver'
+import { generateResourceCompletionItems } from '../src/services/resource-completion.service'
 
 // 扩展数据集，覆盖更多 case
 const mockResources: ResourceIndexItem[] = [
