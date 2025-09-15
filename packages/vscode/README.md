@@ -102,14 +102,16 @@ PR地址: [https://github.com/material-extensions/vscode-material-icon-theme/pul
 
 <!-- configs -->
 
-| Key                | Description                                                                                                | Type      | Default                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- |
-| `ets.sdkPath`      | %configuration.ets.sdkPath.description%                                                                    | `string`  | `""`                          |
-| `ets.baseSdkPath`  | %configuration.ets.baseSdkPath.description%                                                                | `string`  | `"${os.homedir}/OpenHarmony"` |
-| `ets.hmsPath`      | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          |
-| `ets.lspDebugMode` | %configuration.ets.lspDebugMode.description%                                                               | `boolean` | `false`                       |
-| `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          |
-| `ets.sdkList`      | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          |
+| Key                                      | Description                                                                                                | Type      | Default                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- |
+| `ets.sdkPath`                            | %configuration.ets.sdkPath.description%                                                                    | `string`  | `""`                          |
+| `ets.baseSdkPath`                        | %configuration.ets.baseSdkPath.description%                                                                | `string`  | `"${os.homedir}/OpenHarmony"` |
+| `ets.hmsPath`                            | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          |
+| `ets.lspDebugMode`                       | %configuration.ets.lspDebugMode.description%                                                               | `boolean` | `false`                       |
+| `ets.hdcPath`                            | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          |
+| `ets.ignoreWorkspaceLocalPropertiesFile` | %configuration.ets.ignoreWorkspaceLocalPropertiesFile.description%                                         | `boolean` | `false`                       |
+| `ets.resourceReferenceDiagnostic`        | 未匹配到的 $r() 资源引用的诊断级别                                                                                       | `string`  | `"error"`                     |
+| `ets.sdkList`                            | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          |
 
 <!-- configs -->
 
