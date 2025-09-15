@@ -1,8 +1,7 @@
-import type { LanguageServicePlugin, Diagnostic } from '@volar/language-server'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
+import type { Diagnostic, LanguageServicePlugin } from '@volar/language-server'
 import type { DiagnosticSeverity } from 'vscode-languageserver-protocol'
-import { parseResourceReference, ResourceResolver } from '@arkts/shared'
-import { URI } from 'vscode-uri'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { LanguageServerLogger, parseResourceReference, ResourceResolver } from '@arkts/shared'
 
 /**
  * 资源引用诊断级别
@@ -25,6 +24,8 @@ interface ResourceCallInfo {
   line: number
 }
 
+const logger = new LanguageServerLogger('RESOURCE-DIAGNOSTIC').getConsola()
+
 /**
  * 查找文档中所有的 $r() 调用
  */
@@ -32,23 +33,23 @@ function findAllResourceCalls(document: TextDocument): ResourceCallInfo[] {
   const text = document.getText()
   const lines = text.split('\n')
   const resourceCalls: ResourceCallInfo[] = []
-  
+
   // 匹配 $r() 调用的正则表达式
   const resourceCallRegex = /\$r\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g
-  
+
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
     const line = lines[lineIndex]
     let match: RegExpExecArray | null
-    
+
     // 重置正则表达式的lastIndex
     resourceCallRegex.lastIndex = 0
-    
+
     while ((match = resourceCallRegex.exec(line)) !== null) {
       const fullCall = match[0]
       const resourceRef = match[1]
       const start = match.index
       const end = match.index + fullCall.length
-      
+
       resourceCalls.push({
         resourceRef,
         start,
@@ -58,7 +59,7 @@ function findAllResourceCalls(document: TextDocument): ResourceCallInfo[] {
       })
     }
   }
-  
+
   return resourceCalls
 }
 
@@ -83,12 +84,12 @@ class ResourceDiagnosticService {
   private resolver?: ResourceResolver
   private initialized = false
   private currentSdkPath?: string
-  
+
   constructor(
-    private projectRoot: string, 
-    private sdkPathGetter?: () => string
+    private projectRoot: string,
+    private sdkPathGetter?: () => string,
   ) {}
-  
+
   async initialize(): Promise<void> {
     if (this.initialized && this.resolver) {
       // 检查SDK路径是否已更改
@@ -97,49 +98,50 @@ class ResourceDiagnosticService {
         return // 没有变化，无需重新初始化
       }
     }
-    
+
     // 获取当前SDK路径
     const sdkPath = this.sdkPathGetter?.()
-    console.log('[RESOURCE-DIAGNOSTIC] Initializing with SDK path:', sdkPath)
-    
+    logger.info('Initializing with SDK path:', sdkPath)
+
     if (this.projectRoot) {
       this.resolver = new ResourceResolver(this.projectRoot, sdkPath)
       this.currentSdkPath = sdkPath
     }
-    
+
     if (!this.resolver) {
       return
     }
-    
+
     try {
       await this.resolver.buildIndex()
       this.initialized = true
-      console.log('Resource diagnostic service initialized successfully')
-    } catch (error) {
+      logger.info('Resource diagnostic service initialized successfully')
+    }
+    catch (error) {
       console.error('Failed to initialize resource diagnostic service:', error)
     }
   }
-  
+
   async provideDiagnostics(
-    document: TextDocument, 
-    diagnosticLevel: ResourceDiagnosticLevel
+    document: TextDocument,
+    diagnosticLevel: ResourceDiagnosticLevel,
   ): Promise<Diagnostic[]> {
     // 如果设置为none，不提供任何诊断
     if (diagnosticLevel === 'none') {
       return []
     }
-    
+
     if (!this.resolver) {
       return []
     }
-    
+
     if (!this.initialized) {
       await this.initialize()
     }
-    
+
     const diagnostics: Diagnostic[] = []
     const resourceCalls = findAllResourceCalls(document)
-    
+
     for (const call of resourceCalls) {
       // 解析资源引用
       const resourceRef = parseResourceReference(call.resourceRef)
@@ -157,7 +159,7 @@ class ResourceDiagnosticService {
         })
         continue
       }
-      
+
       // 检查资源是否存在
       const resourceLocation = await this.resolver.resolveResourceReference(call.resourceRef)
       if (!resourceLocation) {
@@ -173,7 +175,7 @@ class ResourceDiagnosticService {
         })
       }
     }
-    
+
     return diagnostics
   }
 }
@@ -187,7 +189,7 @@ let globalResourceDiagnosticService: ResourceDiagnosticService | null = null
 export function createResourceDiagnosticService(
   projectRoot?: string,
   getDiagnosticLevel?: () => ResourceDiagnosticLevel,
-  sdkPathGetter?: () => string
+  sdkPathGetter?: () => string,
 ): LanguageServicePlugin {
   return {
     name: 'arkts-resource-diagnostic',
@@ -197,14 +199,14 @@ export function createResourceDiagnosticService(
         workspaceDiagnostics: false,
       },
     },
-    create(context) {
+    create() {
       // 初始化全局服务实例（如果还没有的话）
       if (!globalResourceDiagnosticService && projectRoot) {
         globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot, sdkPathGetter)
         // 异步初始化
         globalResourceDiagnosticService.initialize()
       }
-      
+
       return {
         async provideDiagnostics(document: TextDocument): Promise<Diagnostic[]> {
           try {
@@ -212,17 +214,17 @@ export function createResourceDiagnosticService(
             if (!document.uri.endsWith('.ets')) {
               return []
             }
-            
+
             // 获取诊断级别
             const diagnosticLevel = getDiagnosticLevel?.() || 'error'
-            
+
             if (!globalResourceDiagnosticService) {
               return []
             }
-            
+
             return await globalResourceDiagnosticService.provideDiagnostics(document, diagnosticLevel)
-            
-          } catch (error) {
+          }
+          catch (error) {
             console.error('Error in resource diagnostics:', error)
             return []
           }

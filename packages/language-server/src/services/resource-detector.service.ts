@@ -1,7 +1,6 @@
-import type { Connection, DidChangeConfigurationParams, DidChangeWatchedFilesParams, FileChangeType, LanguageServicePlugin } from '@volar/language-server'
-import { ResourceResolver, ResourceReference, ResourceLocation, parseResourceReference } from '@arkts/shared'
-import * as fs from 'node:fs'
-import * as path from 'node:path'
+import type { ResourceLocation } from '@arkts/shared'
+import type { Connection, DidChangeConfigurationParams, DidChangeWatchedFilesParams, LanguageServicePlugin } from '@volar/language-server'
+import { ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
 
 /**
@@ -56,11 +55,12 @@ export class ResourceDetectorService {
     try {
       await this.resolver.buildIndex()
       this.isIndexBuilt = true
-      
+
       if (this.connection) {
         this.connection.console.info('Resource index built successfully')
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (this.connection) {
         this.connection.console.error(`Failed to build resource index: ${error}`)
       }
@@ -130,11 +130,11 @@ export class ResourceDetectorService {
    */
   updateConfig(newConfig: Partial<ResourceDetectorConfig>): void {
     this.config = { ...this.config, ...newConfig }
-    
+
     if (newConfig.projectRoot && newConfig.projectRoot !== this.resolver['projectRoot']) {
       this.resolver = new ResourceResolver(newConfig.projectRoot)
       this.isIndexBuilt = false
-      
+
       if (this.config.enabled) {
         this.buildResourceIndex()
       }
@@ -161,6 +161,7 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
     capabilities: {
       // 不需要特殊能力，主要是后台服务
     },
+    // @ts-expect-error
     create(context) {
       // 设置连接
       if ('connection' in context && context.connection) {
@@ -168,7 +169,7 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
       }
 
       // 初始化服务
-      service.initialize().catch(error => {
+      service.initialize().catch((error) => {
         console.error('Failed to initialize resource detector:', error)
       })
 
@@ -186,7 +187,7 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
         getAllResources: () => service.getAllResources(),
       }
     },
-    
+
     // 插件销毁时清理资源
     dispose() {
       service.dispose()

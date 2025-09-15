@@ -10,14 +10,14 @@ console.log(`Timestamp: ${timestamp}`)
 try {
   const { createIntegratedResourceDefinitionService } = require('../src/services/integrated-resource-definition.service')
   console.log('✅ Service imported successfully')
-  
+
   // 测试创建服务
   const testService = createIntegratedResourceDefinitionService('C:\\Users\\Administrator\\Desktop\\arkTS\\test')
   console.log('✅ Service created successfully')
   console.log('Service name:', testService.name)
   console.log('Service capabilities:', testService.capabilities)
-  
-} catch (error) {
+}
+catch (error) {
   console.error('❌ Failed to import/create service:', error.message)
 }
 

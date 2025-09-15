@@ -1,8 +1,8 @@
-// 简单的手动测试脚本，验证资源解析器功能
-import { parseResourceReference, ResourceType, ResourceResolver } from '../out/index.mjs'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
+// 简单的手动测试脚本，验证资源解析器功能
+import { parseResourceReference, ResourceResolver, ResourceType } from '../out/index.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -15,13 +15,15 @@ function test(name, fn) {
     if (result instanceof Promise) {
       result.then(() => {
         console.log(`✅ ${name} passed`)
-      }).catch(error => {
+      }).catch((error) => {
         console.error(`❌ ${name} failed:`, error)
       })
-    } else {
+    }
+    else {
       console.log(`✅ ${name} passed`)
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error(`❌ ${name} failed:`, error)
   }
 }
@@ -47,7 +49,7 @@ function expect(actual) {
       if (actual <= expected) {
         throw new Error(`Expected ${actual} to be greater than ${expected}`)
       }
-    }
+    },
   }
 }
 
@@ -86,10 +88,10 @@ test('parseResourceReference - media resource', () => {
 })
 
 test('parseResourceReference - with quotes', () => {
-  const result1 = parseResourceReference("'app.color.bg_color'")
+  const result1 = parseResourceReference('\'app.color.bg_color\'')
   const result2 = parseResourceReference('"app.color.bg_color"')
   const result3 = parseResourceReference('`app.color.bg_color`')
-  
+
   expect(result1?.name).toBe('bg_color')
   expect(result2?.name).toBe('bg_color')
   expect(result3?.name).toBe('bg_color')
@@ -115,7 +117,7 @@ test('parseResourceReference - float type', () => {
 // 测试 ResourceResolver
 test('ResourceResolver - basic functionality', async () => {
   const tempDir = path.join(__dirname, 'temp-test-project')
-  
+
   try {
     // 创建测试目录结构
     const entryModule = path.join(tempDir, 'entry')
@@ -135,12 +137,12 @@ test('ResourceResolver - basic functionality', async () => {
     }
     await fs.promises.writeFile(
       path.join(elementDir, 'color.json'),
-      JSON.stringify(colorJson, null, 2)
+      JSON.stringify(colorJson, null, 2),
     )
 
     // 创建媒体文件
     await fs.promises.writeFile(path.join(mediaDir, 'logo.png'), 'fake-image-data')
-    
+
     const resolver = new ResourceResolver(tempDir)
     await resolver.buildIndex()
 
@@ -150,7 +152,7 @@ test('ResourceResolver - basic functionality', async () => {
       throw new Error('Expected color result to not be null')
     }
     expect(colorResult.value).toBe('#1976D2')
-    
+
     if (!colorResult.uri.includes('color.json')) {
       throw new Error('Expected URI to contain color.json')
     }
@@ -161,7 +163,7 @@ test('ResourceResolver - basic functionality', async () => {
       throw new Error('Expected media result to not be null')
     }
     expect(mediaResult.value).toBe('logo.png')
-    
+
     if (!mediaResult.uri.includes('logo.png')) {
       throw new Error('Expected URI to contain logo.png')
     }
@@ -170,8 +172,8 @@ test('ResourceResolver - basic functionality', async () => {
     if (fs.existsSync(tempDir)) {
       await fs.promises.rm(tempDir, { recursive: true, force: true })
     }
-    
-  } catch (error) {
+  }
+  catch (error) {
     // 确保清理测试文件
     if (fs.existsSync(tempDir)) {
       await fs.promises.rm(tempDir, { recursive: true, force: true })

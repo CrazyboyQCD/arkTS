@@ -187,7 +187,7 @@
           ],
           "enumDescriptions": [
             "显示为错误",
-            "显示为警告", 
+            "显示为警告",
             "不显示任何诊断"
           ],
           "default": "error"

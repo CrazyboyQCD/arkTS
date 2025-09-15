@@ -1,7 +1,7 @@
 import type { LanguageServicePlugin, LocationLink } from '@volar/language-server'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { Position } from 'vscode-languageserver-protocol'
-import { parseResourceReference, ResourceResolver, type ResourceLocation } from '@arkts/shared'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { LanguageServerLogger, parseResourceReference, ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
 
 /**
@@ -22,21 +22,22 @@ interface ResourceCallInfo {
 let globalResourceResolver: ResourceResolver | null = null
 let globalProjectRoot: string = ''
 let globalSdkPathGetter: (() => string) | null = null
+const logger = new LanguageServerLogger('ARKTS-RESOURCE').getConsola()
 
 /**
  * 初始化全局资源解析器
  */
 function initializeGlobalResourceResolver(): void {
   if (!globalProjectRoot || !globalSdkPathGetter) {
-    console.log('[ARKTS-RESOURCE] Cannot initialize: missing project root or SDK path getter')
+    logger.info('Cannot initialize: missing project root or SDK path getter')
     return
   }
-  
+
   const currentSdkPath = globalSdkPathGetter()
-  console.log('[ARKTS-RESOURCE] Initializing resource resolver with SDK path:', currentSdkPath)
-  
+  logger.info('Initializing resource resolver with SDK path:', currentSdkPath)
+
   globalResourceResolver = new ResourceResolver(globalProjectRoot, currentSdkPath)
-  globalResourceResolver.buildIndex().catch(error => {
+  globalResourceResolver.buildIndex().catch((error) => {
     console.error('Failed to build resource index:', error)
   })
 }
@@ -46,18 +47,18 @@ function initializeGlobalResourceResolver(): void {
  */
 function ensureResourceResolverInitialized(): boolean {
   if (!globalSdkPathGetter) {
-    console.log('[ARKTS-RESOURCE] No SDK path getter available')
+    logger.info('No SDK path getter available')
     return false
   }
-  
+
   const currentSdkPath = globalSdkPathGetter()
-  
+
   // 如果解析器不存在或SDK路径已更改，重新初始化
   if (!globalResourceResolver || currentSdkPath !== globalResourceResolver['sdkPath']) {
-    console.log('[ARKTS-RESOURCE] Resource resolver needs (re)initialization')
+    logger.info('Resource resolver needs (re)initialization')
     initializeGlobalResourceResolver()
   }
-  
+
   return globalResourceResolver !== null
 }
 
@@ -66,16 +67,17 @@ function ensureResourceResolverInitialized(): boolean {
  */
 function findResourceCallAtPosition(line: string, character: number): ResourceCallInfo | null {
   // 匹配 $r() 调用的正则表达式，支持各种引号和空格
-  const resourceCallRegex = /\$r\s*\(\s*(['"`])([^'"\`]+)\1\s*\)/g
-  
+  const resourceCallRegex = /\$r\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g
+
   let match: RegExpExecArray | null
-  
+
+  // 循环匹配
   while ((match = resourceCallRegex.exec(line)) !== null) {
     const fullCall = match[0]
     const resourceRef = match[2] // 使用第二个捕获组，因为第一个是引号
     const start = match.index
     const end = match.index + fullCall.length
-    
+
     // 检查光标是否在这个 $r() 调用范围内
     if (character >= start && character <= end) {
       return {
@@ -86,7 +88,7 @@ function findResourceCallAtPosition(line: string, character: number): ResourceCa
       }
     }
   }
-  
+
   return null
 }
 
@@ -94,82 +96,82 @@ function findResourceCallAtPosition(line: string, character: number): ResourceCa
  * 创建集成的资源定义跳转服务
  */
 export function createIntegratedResourceDefinitionService(
-  projectRoot: string, 
-  sdkPathGetter: () => string
+  projectRoot: string,
+  sdkPathGetter: () => string,
 ): LanguageServicePlugin {
-  console.log('Creating integrated resource definition service with project root:', projectRoot)
-  
+  logger.info('Creating integrated resource definition service with project root:', projectRoot)
+
   // 清理项目根路径（移除 file:// 前缀）
-  const cleanProjectRoot = projectRoot.startsWith('file://') 
-    ? URI.parse(projectRoot).fsPath 
+  const cleanProjectRoot = projectRoot.startsWith('file://')
+    ? URI.parse(projectRoot).fsPath
     : projectRoot
-  
-  console.log('Cleaned project root:', cleanProjectRoot)
-  
+
+  logger.info('Cleaned project root:', cleanProjectRoot)
+
   // 设置全局变量
   globalProjectRoot = cleanProjectRoot
   globalSdkPathGetter = sdkPathGetter
-  
+
   // 尝试初始化资源解析器
   initializeGlobalResourceResolver()
-  
+
   return {
     name: 'arkts-resource-definition-integrated',
     capabilities: {
       definitionProvider: true,
     },
-    create(context) {
+    create() {
       return {
         async provideDefinition(document: TextDocument, position: Position): Promise<LocationLink[] | null> {
           try {
-            console.log('[ARKTS-RESOURCE] provideDefinition called for:', document.uri, 'at position:', position)
-            
+            logger.info('provideDefinition called for:', document.uri, 'at position:', position)
+
             // 只处理 .ets 文件
             if (!document.uri.endsWith('.ets')) {
-              console.log('[ARKTS-RESOURCE] Not an .ets file, skipping')
+              logger.info('Not an .ets file, skipping')
               return null
             }
-            
+
             // 获取当前位置的文本
             const line = document.getText({
               start: { line: position.line, character: 0 },
               end: { line: position.line + 1, character: 0 },
             })
 
-            console.log('[ARKTS-RESOURCE] Current line:', line.trim())
+            logger.info('Current line:', line.trim())
 
             // 查找 $r() 调用
             const resourceCall = findResourceCallAtPosition(line, position.character)
             if (!resourceCall) {
-              console.log('[ARKTS-RESOURCE] No $r() call found at position, letting other services handle')
+              logger.info('No $r() call found at position, letting other services handle')
               return null
             }
 
-            console.log('[ARKTS-RESOURCE] Found $r() call:', resourceCall)
+            logger.info('Found $r() call:', resourceCall)
 
             // 解析资源引用
             const resourceRef = parseResourceReference(resourceCall.resourceRef)
             if (!resourceRef) {
-              console.log('[ARKTS-RESOURCE] Failed to parse resource reference:', resourceCall.resourceRef)
+              logger.info('Failed to parse resource reference:', resourceCall.resourceRef)
               return null
             }
 
-            console.log('[ARKTS-RESOURCE] Parsed resource reference:', resourceRef)
+            logger.info('Parsed resource reference:', resourceRef)
 
             // 确保资源解析器已初始化且是最新的
             if (!ensureResourceResolverInitialized()) {
-              console.log('[ARKTS-RESOURCE] Resource resolver not available')
+              logger.info('Resource resolver not available')
               return null
             }
 
             // 解析资源位置
             const resourceLocation = await globalResourceResolver!.resolveResourceReference(resourceCall.resourceRef)
             if (!resourceLocation) {
-              console.log('[ARKTS-RESOURCE] Resource not found:', resourceCall.resourceRef)
+              logger.info('Resource not found:', resourceCall.resourceRef)
               return null
             }
 
-            console.log('[ARKTS-RESOURCE] Found resource location:', resourceLocation)
+            logger.info('Found resource location:', resourceLocation)
 
             // 构建跳转位置
             const targetRange = resourceLocation.range || {
@@ -189,11 +191,11 @@ export function createIntegratedResourceDefinitionService(
               originSelectionRange,
             }]
 
-            console.log('[ARKTS-RESOURCE] Returning location link:', result)
+            logger.info('Returning location link:', result)
             return result
-
-          } catch (error) {
-            console.error('[ARKTS-RESOURCE] Error in provideDefinition:', error)
+          }
+          catch (error) {
+            console.error('Error in provideDefinition:', error)
             return null
           }
         },

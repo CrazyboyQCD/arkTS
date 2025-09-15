@@ -64,21 +64,21 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
         this.handleLanguageServerError(error)
       }
     }
-    
+
     // 如果资源诊断配置发生变化，发送配置更新事件
     if (e.affectsConfiguration('ets.resourceReferenceDiagnostic')) {
       const newLevel = vscode.workspace.getConfiguration('ets').get<string>('resourceReferenceDiagnostic', 'error')
       this.getConsola().info(`Resource diagnostic level changed to: ${newLevel}`)
-      
+
       // 通知语言服务器配置变更
       const client = this.getCurrentLanguageClient()
       if (client?.isRunning()) {
         await client.sendNotification('workspace/didChangeConfiguration', {
           settings: {
             ets: {
-              resourceReferenceDiagnostic: newLevel
-            }
-          }
+              resourceReferenceDiagnostic: newLevel,
+            },
+          },
         })
       }
     }

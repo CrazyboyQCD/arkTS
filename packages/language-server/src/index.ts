@@ -1,3 +1,4 @@
+import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import fs from 'node:fs'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
@@ -10,10 +11,10 @@ import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './config-manager'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
-import { createETSDocumentSymbolService } from './services/symbol.service'
-import { createIntegratedResourceDefinitionService } from './services/resource-definition.service'
-import { createResourceDiagnosticService, type ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import { createResourceCompletionService } from './services/resource-completion.service'
+import { createIntegratedResourceDefinitionService } from './services/resource-definition.service'
+import { createResourceDiagnosticService } from './services/resource-diagnostic.service'
+import { createETSDocumentSymbolService } from './services/symbol.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -25,10 +26,10 @@ logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`
 connection.onRequest('ets/waitForEtsConfigurationChangedRequested', (e) => {
   logger.getConsola().info(`waitForEtsConfigurationChangedRequested: ${JSON.stringify(e)}`)
   lspConfiguration.setConfiguration(e)
-  
+
   // 配置更新后，记录SDK路径更新
   if (e.ohos?.sdkPath) {
-    console.log('SDK path updated to:', e.ohos.sdkPath)
+    logger.getConsola().info('SDK path updated to:', e.ohos.sdkPath)
   }
 })
 
@@ -40,7 +41,7 @@ connection.onDidChangeConfiguration((params) => {
   const settings = params.settings
   if (settings?.ets?.resourceReferenceDiagnostic) {
     globalResourceDiagnosticLevel = settings.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
-    console.log('Resource diagnostic level changed to:', globalResourceDiagnosticLevel)
+    logger.getConsola().info('Resource diagnostic level changed to:', globalResourceDiagnosticLevel)
   }
 })
 
@@ -84,7 +85,7 @@ connection.onInitialize(async (params) => {
   // 初始化配置
   if (params.initializationOptions?.ets?.resourceReferenceDiagnostic) {
     globalResourceDiagnosticLevel = params.initializationOptions.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
-    console.log('Initial resource diagnostic level:', globalResourceDiagnosticLevel)
+    logger.getConsola().info('Initial resource diagnostic level:', globalResourceDiagnosticLevel)
   }
 
   const tsdk = lspConfiguration.getTypeScriptTsdk()
@@ -96,12 +97,13 @@ connection.onInitialize(async (params) => {
   })
 
   // 获取项目根目录和 SDK 路径
-  const projectRoot = params.workspaceFolders?.[0]?.uri ? 
-    URI.parse(params.workspaceFolders[0].uri).fsPath : process.cwd()
+  const projectRoot = params.workspaceFolders?.[0]?.uri
+    ? URI.parse(params.workspaceFolders[0].uri).fsPath
+    : process.cwd()
   const sdkPath = lspConfiguration.getSdkPath()
-  console.log('Server initialization - Project root:', projectRoot)
-  console.log('Server initialization - SDK path:', sdkPath)
-  console.log('Server initialization - Workspace folders:', params.workspaceFolders)
+  logger.getConsola().info('Server initialization - Project root:', projectRoot)
+  logger.getConsola().info('Server initialization - SDK path:', sdkPath)
+  logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
 
   const initResult = await server.initialize(
     params,
@@ -135,10 +137,10 @@ connection.onInitialize(async (params) => {
       create$$ThisService(lspConfiguration.getLocale()),
     ],
   )
-  
+
   // 础定 LSP 能力声明包含定义跳转功能
-  console.log('LSP capabilities after initialization:', JSON.stringify(initResult.capabilities, null, 2))
-  
+  logger.getConsola().info('LSP capabilities after initialization:', JSON.stringify(initResult.capabilities, null, 2))
+
   return initResult
 })
 
@@ -147,4 +149,4 @@ connection.onInitialized(server.initialized)
 connection.onShutdown(server.shutdown)
 
 // 调试日志：LSP 服务已启动
-console.log('ETS Language Server fully initialized with resource definition support')
+logger.getConsola().info('ETS Language Server fully initialized with resource definition support')
