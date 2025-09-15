@@ -1,5 +1,6 @@
 import type { LanguageServerLogger } from './log/lsp-logger'
 import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import { URI } from 'vscode-uri'
 
@@ -324,45 +325,17 @@ export class ResourceResolver {
 
     try {
       this.logger.getConsola().log(`Indexing system resources from: ${sysResourcePath}`)
-
-      // 读取文件内容
-      const content = await fs.promises.readFile(sysResourcePath, 'utf-8')
-
-      // 解析 JavaScript 模块内容
-      const sysResources = this.parseSysResourceFile(content)
-
-      if (sysResources) {
-        this.indexSysResourceObject(sysResources, sysResourcePath)
-        this.logger.getConsola().log('System resources indexed successfully')
+      const require = createRequire('/')
+      const sysResources: unknown = require(sysResourcePath)
+      if (typeof sysResources !== 'object' || !sysResources || !('sys' in sysResources) || typeof sysResources.sys !== 'object' || !sysResources.sys) {
+        this.logger.getConsola().log(`System resource file only support export an 'sys' object. The file must start with 'module.exports.sys = {}'.`)
+        return
       }
+      this.indexSysResourceObject(sysResources.sys, sysResourcePath)
+      this.logger.getConsola().log('System resources indexed successfully')
     }
     catch (error) {
       this.logger.getConsola().error('Failed to index system resources:', error)
-    }
-  }
-
-  /**
-   * 解析 sysResource.js 文件内容
-   */
-  private parseSysResourceFile(content: string): any {
-    try {
-      // 移除 module.exports 并解析 JavaScript 对象
-      const moduleMatch = content.match(/module\.exports\.sys\s*=\s*(\{[\s\S]*\})/)
-      if (!moduleMatch) {
-        this.logger.getConsola().error('Unable to parse sys resource module structure')
-        return null
-      }
-
-      // 使用 Function 构造函数安全执行 JavaScript
-      const objectStr = moduleMatch[1]
-      // eslint-disable-next-line no-new-func
-      const sysResources = new Function(`return ${objectStr}`)()
-
-      return sysResources
-    }
-    catch (error) {
-      this.logger.getConsola().error('Failed to parse sysResource.js content:', error)
-      return null
     }
   }
 
