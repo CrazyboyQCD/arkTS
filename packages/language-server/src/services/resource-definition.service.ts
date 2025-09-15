@@ -65,7 +65,7 @@ function ensureResourceResolverInitialized(): boolean {
 /**
  * 在指定位置查找 $r() 调用
  */
-function findResourceCallAtPosition(line: string, character: number): ResourceCallInfo | null {
+export function findResourceCallAtPosition(line: string, character: number): ResourceCallInfo | null {
   // 匹配 $r() 调用的正则表达式，支持各种引号和空格
   const resourceCallRegex = /\$r\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g
 

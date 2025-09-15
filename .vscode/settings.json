@@ -54,5 +54,6 @@
     "other": "on",
     "comments": "off",
     "strings": "on"
-  }
+  },
+  "oxc.enable": true
 }

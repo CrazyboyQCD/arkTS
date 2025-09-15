@@ -81,7 +81,7 @@ describe('resourceResolver 精确导航（包含 range）', () => {
   })
 })
 
-describe('sDK 路径动态获取（概念验证）', () => {
+describe('sdk 路径动态获取（概念验证）', () => {
   class MockConfigManager {
     private config = { ohos: { sdkPath: '' } }
     getSdkPath() { return this.config.ohos.sdkPath }
