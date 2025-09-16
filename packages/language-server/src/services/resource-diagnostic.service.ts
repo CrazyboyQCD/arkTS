@@ -1,10 +1,12 @@
 import type { Diagnostic, LanguageServicePlugin } from '@volar/language-server'
+import type * as ets from 'ohos-typescript'
 import type { DiagnosticSeverity } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { LanguageServerConfigManager } from '../classes/config-manager'
 import { parseResourceReference, ResourceResolver } from '@arkts/shared'
 import { BaseResourceService } from '../classes/base-resource-service'
 import { logger } from '../logger'
+import { ContextUtil } from '../utils/finder'
 
 /**
  * 资源引用诊断级别
@@ -75,6 +77,7 @@ class ResourceDiagnosticService extends BaseResourceService {
   async provideDiagnostics(
     document: TextDocument,
     diagnosticLevel: ResourceDiagnosticLevel,
+    sourceFile: ets.SourceFile,
   ): Promise<Diagnostic[]> {
     // 如果设置为none，不提供任何诊断
     if (diagnosticLevel === 'none') {
@@ -90,7 +93,7 @@ class ResourceDiagnosticService extends BaseResourceService {
     }
 
     const diagnostics: Diagnostic[] = []
-    const resourceCalls = await this.findAllResourceCalls(document)
+    const resourceCalls = await this.findAllResourceCalls(sourceFile)
 
     for (const call of resourceCalls) {
       // 解析资源引用
@@ -145,7 +148,7 @@ export function createResourceDiagnosticService(lspConfiguration: LanguageServer
         workspaceDiagnostics: false,
       },
     },
-    create() {
+    create(context) {
       // 初始化全局服务实例（如果还没有的话）
       if (!globalResourceDiagnosticService && projectRoot) {
         globalResourceDiagnosticService = new ResourceDiagnosticService(projectRoot, lspConfiguration)
@@ -155,12 +158,11 @@ export function createResourceDiagnosticService(lspConfiguration: LanguageServer
 
       return {
         async provideDiagnostics(document: TextDocument): Promise<Diagnostic[]> {
-          try {
-            // 检查是否是.ets文件
-            if (!document.uri.endsWith('.ets')) {
-              return []
-            }
+          const sourceFile = new ContextUtil(context).decodeSourceFile(document)
+          if (!sourceFile)
+            return []
 
+          try {
             // 获取诊断级别
             const diagnosticLevel = getDiagnosticLevel?.() || 'error'
             logger.getConsola().info(`Current diagnostic level for resource: ${diagnosticLevel}`)
@@ -169,7 +171,7 @@ export function createResourceDiagnosticService(lspConfiguration: LanguageServer
               return []
             }
 
-            return await globalResourceDiagnosticService.provideDiagnostics(document, diagnosticLevel)
+            return await globalResourceDiagnosticService.provideDiagnostics(document, diagnosticLevel, sourceFile)
           }
           catch (error) {
             logger.getConsola().error('Error in resource diagnostics:', error)

@@ -1,4 +1,5 @@
 import type { LanguageServicePlugin, LocationLink } from '@volar/language-server'
+import type * as ets from 'ohos-typescript'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { LanguageServerConfigManager } from '../classes/config-manager'
 import { parseResourceReference } from '@arkts/shared'
@@ -7,6 +8,7 @@ import { URI } from 'vscode-uri'
 import { BaseResourceService } from '../classes/base-resource-service'
 import { ResourceResolverManager } from '../classes/resource-resolver'
 import { logger } from '../logger'
+import { ContextUtil } from '../utils/finder'
 
 /**
  * 资源定义服务
@@ -21,7 +23,7 @@ class ResourceDefinitionService extends BaseResourceService {
   /**
    * 提供资源定义跳转
    */
-  async provideDefinition(document: TextDocument, position: Position): Promise<LocationLink[] | null> {
+  async provideDefinition(document: TextDocument, position: Position, sourceFile: ets.SourceFile): Promise<LocationLink[] | null> {
     try {
       if (!this.isEtsFile(document))
         return null
@@ -29,7 +31,7 @@ class ResourceDefinitionService extends BaseResourceService {
       this.logOperation('provideDefinition', { uri: document.uri, position })
 
       // 查找当前位置的 $r() 调用
-      const resourceCall = await this.findResourceCallAtPosition(document, position)
+      const resourceCall = await this.findResourceCallAtPosition(document, position, sourceFile)
       if (!resourceCall) {
         this.logOperation('No $r() call found at position')
         return null
@@ -120,10 +122,13 @@ export function createIntegratedResourceDefinitionService(projectRoot: string, l
     capabilities: {
       definitionProvider: true,
     },
-    create() {
+    create(context) {
       return {
         async provideDefinition(document: TextDocument, position: Position): Promise<LocationLink[] | null> {
-          return service.provideDefinition(document, position)
+          const sourceFile = new ContextUtil(context).decodeSourceFile(document)
+          if (!sourceFile)
+            return null
+          return service.provideDefinition(document, position, sourceFile)
         },
       }
     },

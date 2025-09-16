@@ -1,3 +1,5 @@
+import type { Position } from '@volar/language-server/node'
+import type * as ets from 'ohos-typescript'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { GlobalRCallInfo } from './global-call-expression-finder'
 import { logger } from '../logger'
@@ -38,20 +40,13 @@ export abstract class BaseResourceService {
   /**
    * 查找文档中所有的 $r() 调用
    */
-  protected async findAllResourceCalls(document: TextDocument): Promise<GlobalRCallInfo[]> {
+  protected async findAllResourceCalls(sourceFile: ets.SourceFile): Promise<GlobalRCallInfo[]> {
     if (!(await this.ensureInitialized())) {
       logger.getConsola().warn('Failed to initialize ETS for resource call finding')
       return []
     }
 
     try {
-      const sourceFile = this.ets!.createSourceFile(
-        document.uri,
-        document.getText(),
-        this.ets!.ScriptTarget.ES2015,
-        true,
-      )
-
       return this.finder!.findGlobalRCallsSimple(sourceFile)
     }
     catch (error) {
@@ -63,16 +58,10 @@ export abstract class BaseResourceService {
   /**
    * 查找指定位置的 $r() 调用
    */
-  protected async findResourceCallAtPosition(
-    document: TextDocument,
-    position: { line: number, character: number },
-  ): Promise<GlobalRCallInfo | null> {
-    const calls = await this.findAllResourceCalls(document)
+  protected async findResourceCallAtPosition(document: TextDocument, position: Position, sourceFile: ets.SourceFile): Promise<GlobalRCallInfo | null> {
+    const calls = await this.findAllResourceCalls(sourceFile)
     const offset = document.offsetAt(position)
-
-    return calls.find(call =>
-      offset >= call.resourceStart && offset <= call.resourceEnd,
-    ) || null
+    return calls.find(call => offset >= call.resourceStart && offset <= call.resourceEnd) || null
   }
 
   /**

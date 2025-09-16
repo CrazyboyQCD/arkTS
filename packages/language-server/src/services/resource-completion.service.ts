@@ -5,11 +5,11 @@ import type { CompletionItem, CompletionList } from 'vscode-languageserver-proto
 import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import type { LanguageServerConfigManager } from '../classes/config-manager'
 import type { GlobalRCallInfo } from '../classes/global-call-expression-finder'
-import type { TSProvider } from './symbol.service'
 import { URI } from 'vscode-uri'
 import { GlobalRCallFinder } from '../classes/global-call-expression-finder'
 import { ResourceResolverManager } from '../classes/resource-resolver'
 import { logger } from '../logger'
+import { ContextUtil } from '../utils/finder'
 
 /**
  * 资源补全上下文
@@ -338,29 +338,12 @@ export function createResourceCompletionService(projectRoot: string, lspConfigur
     create(context) {
       return {
         async provideCompletionItems(document: TextDocument, position: Position): Promise<CompletionList | null> {
-          const decoded = context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
-          if (!decoded)
-            return null
-          const [decodedUri] = decoded
-          const languageService = context.inject<TSProvider>(`typescript/languageService`)
-          if (!languageService)
-            return null
-          const program = languageService.getProgram()
-          if (!program)
-            return null
-          const sourceFile = program.getSourceFile(decodedUri.fsPath)
+          const sourceFile = new ContextUtil(context).decodeSourceFile(document)
           if (!sourceFile)
             return null
 
           try {
             logger.getConsola().info('[resource-completion] provideCompletionItems called for:', document.uri, 'at position:', position)
-
-            // 只处理 .ets 文件
-            if (!document.uri.endsWith('.ets')) {
-              logger.getConsola().info('[resource-completion] Not an .ets file, skipping')
-              return null
-            }
-
             // 导入 ohos-typescript
             const ets = await import('ohos-typescript')
 
