@@ -1,6 +1,6 @@
 import * as ets from 'ohos-typescript'
 import { describe, expect } from 'vitest'
-import { GlobalRCallFinder } from '../src/global-call-expression-finder'
+import { GlobalRCallFinder } from '../src/classes/global-call-expression-finder'
 
 // 创建全局共享的TypeScript程序，避免每个测试重复创建
 const sharedProgram = ets.createProgram(['test.ets'], {

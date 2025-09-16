@@ -13,7 +13,7 @@ import { ContextUtil } from '../utils/finder'
 /**
  * 资源定义服务
  */
-class ResourceDefinitionService extends BaseResourceService {
+export class ResourceDefinitionService extends BaseResourceService {
   constructor(private lspConfiguration: LanguageServerConfigManager) {
     super()
   }
