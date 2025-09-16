@@ -1,19 +1,19 @@
 import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
-import fs from 'node:fs'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
 import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './classes/config-manager'
+import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
-import { create$$ThisService } from './services/$$this.service'
+import { createETS$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
-import { createResourceCompletionService } from './services/resource-completion.service'
-import { createIntegratedResourceDefinitionService } from './services/resource-definition.service'
-import { createResourceDiagnosticService } from './services/resource-diagnostic.service'
+import { createETSFormattingService } from './services/formatting.service'
+import { createETSResourceCompletionService } from './services/resource-completion.service'
+import { createETSIntegratedResourceDefinitionService } from './services/resource-definition.service'
+import { createETSResourceDiagnosticService } from './services/resource-diagnostic.service'
 import { createETSDocumentSymbolService } from './services/symbol.service'
 
 const connection = createConnection()
@@ -39,38 +39,12 @@ connection.onDidChangeConfiguration((params) => {
   }
 })
 
-interface ETSFormattingDocumentParams {
-  options: import('vscode').FormattingOptions
-  textDocument: import('vscode').TextDocument
-}
+// TODO: 监听文件变更
+// connection.onDidChangeWatchedFiles((params) => {
+//   logger.getConsola().info('Watched files changed:', JSON.stringify(params))
+// })
 
-let etsLanguageService: ets.LanguageService | undefined
-
-connection.onRequest('ets/formatDocument', async (params: ETSFormattingDocumentParams): Promise<any[]> => {
-  if (!etsLanguageService)
-    return []
-
-  const doc = TextDocument.create(
-    params.textDocument.uri.fsPath,
-    params.textDocument.languageId,
-    params.textDocument.version,
-    fs.existsSync(params.textDocument.uri.fsPath) ? fs.readFileSync(params.textDocument.uri.fsPath, 'utf-8') : '',
-  )
-  const formatSettings = ets?.getDefaultFormatCodeSettings()
-  if (params.options.tabSize !== undefined) {
-    formatSettings.tabSize = params.options.tabSize
-    formatSettings.indentSize = params.options.tabSize
-  }
-
-  const textChanges = etsLanguageService.getFormattingEditsForDocument(params.textDocument.uri.fsPath, formatSettings)
-  return textChanges.map(change => ({
-    newText: change.newText,
-    range: {
-      start: doc.positionAt(change.span.start),
-      end: doc.positionAt(change.span.start + change.span.length),
-    },
-  }))
-})
+ResourceWatcher.from(connection)
 
 connection.onInitialize(async (params) => {
   if (params.locale)
@@ -84,12 +58,6 @@ connection.onInitialize(async (params) => {
   }
 
   const tsdk = lspConfiguration.getTypeScriptTsdk()
-  const [tsSemanticService, _tsSyntacticService, ...tsOtherServices] = createTypeScriptServices(ets as any, {
-    isFormattingEnabled: () => true,
-    isSuggestionsEnabled: () => true,
-    isAutoClosingTagsEnabled: () => true,
-    isValidationEnabled: () => true,
-  })
 
   // 获取项目根目录和 SDK 路径
   const projectRoot = params.workspaceFolders?.[0]?.uri
@@ -100,7 +68,7 @@ connection.onInitialize(async (params) => {
   logger.getConsola().info('Server initialization - SDK path:', sdkPath)
   logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
 
-  const initResult = await server.initialize(
+  return server.initialize(
     params,
     createTypeScriptProject(ets as any, tsdk.diagnosticMessages, () => {
       return {
@@ -114,29 +82,20 @@ connection.onInitialize(async (params) => {
           options.project.typescript.languageServiceHost.getCompilationSettings = () => {
             return lspConfiguration.getTsConfig(originalSettings as ets.CompilerOptions) as any
           }
-          etsLanguageService = ets.createLanguageService(options.project.typescript.languageServiceHost as ets.LanguageServiceHost)
         },
       }
     }),
     [
-      // 资源定义跳转服务优先（支持 sys 资源）
-      createIntegratedResourceDefinitionService(projectRoot, lspConfiguration),
-      // 资源智能补全服务（支持前缀匹配）
-      createResourceCompletionService(projectRoot, lspConfiguration),
-      // 资源诊断服务（支持 sys 资源）
-      createResourceDiagnosticService(lspConfiguration, projectRoot, () => globalResourceDiagnosticLevel),
-      tsSemanticService,
-      ...tsOtherServices,
+      ...createTypeScriptServices(ets as any),
+      createETSIntegratedResourceDefinitionService(projectRoot, lspConfiguration),
+      createETSResourceCompletionService(projectRoot, lspConfiguration),
+      createETSResourceDiagnosticService(lspConfiguration, projectRoot, () => globalResourceDiagnosticLevel),
       createETSLinterDiagnosticService(ets, logger),
       createETSDocumentSymbolService(),
-      create$$ThisService(lspConfiguration.getLocale()),
+      createETS$$ThisService(lspConfiguration.getLocale()),
+      createETSFormattingService(),
     ],
   )
-
-  // 确定 LSP 能力声明包含定义跳转功能
-  logger.getConsola().info('LSP capabilities after initialization:', JSON.stringify(initResult.capabilities, null, 2))
-
-  return initResult
 })
 
 connection.listen()

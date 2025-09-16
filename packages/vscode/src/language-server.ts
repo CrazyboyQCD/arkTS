@@ -7,7 +7,7 @@ import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import defu from 'defu'
 import { executeCommand } from 'reactive-vscode'
 import { Autowired } from 'unioc'
-import { Command, Disposable, ExtensionContext, IOnActivate, WatchConfiguration } from 'unioc/vscode'
+import { Command, Disposable, ExtensionContext, WatchConfiguration } from 'unioc/vscode'
 import * as vscode from 'vscode'
 import { LanguageServerContext } from './context/server-context'
 import { SdkManager } from './sdk/sdk-manager'
@@ -16,7 +16,7 @@ import { sleep } from './utils'
 
 @Disposable
 @Command('ets.restartServer')
-export class EtsLanguageServer extends LanguageServerContext implements Command, Disposable, vscode.DocumentFormattingEditProvider, IOnActivate {
+export class EtsLanguageServer extends LanguageServerContext implements Command, Disposable {
   @Autowired
   protected readonly translator: Translator
 
@@ -28,22 +28,6 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
 
   onExecuteCommand(): void {
     this.restart().catch(e => this.handleLanguageServerError(e))
-  }
-
-  async onActivate(context: vscode.ExtensionContext): Promise<void> {
-    context.subscriptions.push(
-      vscode.languages.registerDocumentFormattingEditProvider(
-        { scheme: 'file', language: 'ets' },
-        this,
-      ),
-    )
-  }
-
-  async provideDocumentFormattingEdits(textDocument: vscode.TextDocument, options: vscode.FormattingOptions): Promise<vscode.TextEdit[]> {
-    return await this.getCurrentLanguageClient()?.sendRequest('ets/formatDocument', {
-      textDocument,
-      options,
-    }) || []
   }
 
   @WatchConfiguration()
@@ -149,6 +133,13 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
           resourceReferenceDiagnostic: vscode.workspace.getConfiguration('ets').get<'error' | 'warning' | 'none'>('resourceReferenceDiagnostic', 'error'),
         },
       } satisfies EtsServerClientOptions,
+      synchronize: {
+        fileEvents: [
+          vscode.workspace.createFileSystemWatcher('**/*.ets'),
+          vscode.workspace.createFileSystemWatcher('**/*.json'),
+          vscode.workspace.createFileSystemWatcher('**/*.json5'),
+        ],
+      },
     }
   }
 
