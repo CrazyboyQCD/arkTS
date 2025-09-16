@@ -31,11 +31,11 @@ struct Index {
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)
-          .fontColor($r('app.color.primary_color'))
+          .fontColor($r('app.color.start_window_background'))
 
         Text($r('app.string.welcome_message'))
           .fontSize(20)
-          .fontColor($r('app.color.secondary_color'))
+          .fontColor($r('sys.symbol.a_3fingers_slash'))
           .margin({ top: 10 })
 
         Text(this.message)

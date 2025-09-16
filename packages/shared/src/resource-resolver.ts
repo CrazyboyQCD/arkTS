@@ -1,5 +1,7 @@
+import type { Range } from 'vscode-languageserver-textdocument'
 import type { LanguageServerLogger } from './log/lsp-logger'
 import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
 import * as path from 'node:path'
 import { URI } from 'vscode-uri'
 
@@ -39,10 +41,7 @@ export interface ResourceLocation {
   /** 文件URI */
   uri: string
   /** 在文件中的位置（对于JSON资源） */
-  range?: {
-    start: { line: number, character: number }
-    end: { line: number, character: number }
-  }
+  range?: Range
   /** 资源值 */
   value?: string
 }
@@ -150,12 +149,11 @@ export class ResourceResolver {
    * 递归查找模块
    */
   private async findModulesRecursive(currentPath: string, relativePath: string, modules: string[], maxDepth: number): Promise<void> {
-    if (maxDepth <= 0) {
+    if (maxDepth <= 0)
       return
-    }
 
     try {
-      const entries = await fs.promises.readdir(currentPath, { withFileTypes: true })
+      const entries = fs.readdirSync(currentPath, { withFileTypes: true })
 
       for (const entry of entries) {
         if (entry.isDirectory() && !this.shouldSkipDirectory(entry.name)) {
@@ -324,45 +322,17 @@ export class ResourceResolver {
 
     try {
       this.logger.getConsola().log(`Indexing system resources from: ${sysResourcePath}`)
-
-      // 读取文件内容
-      const content = await fs.promises.readFile(sysResourcePath, 'utf-8')
-
-      // 解析 JavaScript 模块内容
-      const sysResources = this.parseSysResourceFile(content)
-
-      if (sysResources) {
-        this.indexSysResourceObject(sysResources, sysResourcePath)
-        this.logger.getConsola().log('System resources indexed successfully')
+      const require = createRequire('/')
+      const sysResources: unknown = require(sysResourcePath)
+      if (typeof sysResources !== 'object' || !sysResources || !('sys' in sysResources) || typeof sysResources.sys !== 'object' || !sysResources.sys) {
+        this.logger.getConsola().log(`System resource file only support export an 'sys' object. The file must start with 'module.exports.sys = {}'.`)
+        return
       }
+      this.indexSysResourceObject(sysResources.sys, sysResourcePath)
+      this.logger.getConsola().log('System resources indexed successfully')
     }
     catch (error) {
       this.logger.getConsola().error('Failed to index system resources:', error)
-    }
-  }
-
-  /**
-   * 解析 sysResource.js 文件内容
-   */
-  private parseSysResourceFile(content: string): any {
-    try {
-      // 移除 module.exports 并解析 JavaScript 对象
-      const moduleMatch = content.match(/module\.exports\.sys\s*=\s*(\{[\s\S]*\})/)
-      if (!moduleMatch) {
-        this.logger.getConsola().error('Unable to parse sys resource module structure')
-        return null
-      }
-
-      // 使用 Function 构造函数安全执行 JavaScript
-      const objectStr = moduleMatch[1]
-      // eslint-disable-next-line no-new-func
-      const sysResources = new Function(`return ${objectStr}`)()
-
-      return sysResources
-    }
-    catch (error) {
-      this.logger.getConsola().error('Failed to parse sysResource.js content:', error)
-      return null
     }
   }
 
@@ -402,11 +372,7 @@ export class ResourceResolver {
   /**
    * 在系统资源文件中查找指定资源的位置
    */
-  private findSysResourceItemRange(
-    lines: string[],
-    resourceName: string,
-    resourceType: string,
-  ): { start: { line: number, character: number }, end: { line: number, character: number } } | undefined {
+  private findSysResourceItemRange(lines: string[], resourceName: string, resourceType: string): Range | undefined {
     let inResourceTypeSection = false
 
     for (let i = 0; i < lines.length; i++) {
@@ -492,7 +458,7 @@ export class ResourceResolver {
   /**
    * 在JSON文件中查找指定名称的项的位置
    */
-  private findJsonItemRange(lines: string[], itemName: string): { start: { line: number, character: number }, end: { line: number, character: number } } | undefined {
+  private findJsonItemRange(lines: string[], itemName: string): Range | undefined {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       const nameMatch = line.match(new RegExp(`"name"\\s*:\\s*"${itemName}"`))
@@ -529,48 +495,6 @@ export class ResourceResolver {
    */
   getAllResources(): ResourceIndexItem[] {
     return Array.from(this.resourceIndex.values())
-  }
-
-  /**
-   * 根据关键字搜索资源
-   */
-  searchResources(keyword: string, scope?: 'app' | 'sys', type?: ResourceType): ResourceIndexItem[] {
-    const results: ResourceIndexItem[] = []
-    const lowerKeyword = keyword.toLowerCase()
-
-    for (const item of this.resourceIndex.values()) {
-      // 过滤范围
-      if (scope && item.reference.scope !== scope) {
-        continue
-      }
-
-      // 过滤类型
-      if (type && item.reference.type !== type) {
-        continue
-      }
-
-      // 关键字匹配（资源名称或值）
-      const matchesName = item.reference.name.toLowerCase().includes(lowerKeyword)
-      const matchesValue = item.location.value?.toLowerCase().includes(lowerKeyword) || false
-
-      if (matchesName || matchesValue) {
-        results.push(item)
-      }
-    }
-
-    // 按相关性排序（名称匹配的优先级更高）
-    return results.sort((a, b) => {
-      const aNameMatch = a.reference.name.toLowerCase().includes(lowerKeyword)
-      const bNameMatch = b.reference.name.toLowerCase().includes(lowerKeyword)
-
-      if (aNameMatch && !bNameMatch)
-        return -1
-      if (!aNameMatch && bNameMatch)
-        return 1
-
-      // 同样的匹配类型，按字母顺序排序
-      return a.reference.name.localeCompare(b.reference.name)
-    })
   }
 
   /**

@@ -7,7 +7,7 @@ import { LanguageClient, TransportKind } from '@volar/vscode/node'
 import defu from 'defu'
 import { executeCommand } from 'reactive-vscode'
 import { Autowired } from 'unioc'
-import { Command, Disposable, ExtensionContext, IOnActivate, WatchConfiguration } from 'unioc/vscode'
+import { Command, Disposable, ExtensionContext, WatchConfiguration } from 'unioc/vscode'
 import * as vscode from 'vscode'
 import { LanguageServerContext } from './context/server-context'
 import { SdkManager } from './sdk/sdk-manager'
@@ -16,7 +16,7 @@ import { sleep } from './utils'
 
 @Disposable
 @Command('ets.restartServer')
-export class EtsLanguageServer extends LanguageServerContext implements Command, Disposable, vscode.DocumentFormattingEditProvider, IOnActivate {
+export class EtsLanguageServer extends LanguageServerContext implements Command, Disposable {
   @Autowired
   protected readonly translator: Translator
 
@@ -28,22 +28,6 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
 
   onExecuteCommand(): void {
     this.restart().catch(e => this.handleLanguageServerError(e))
-  }
-
-  async onActivate(context: vscode.ExtensionContext): Promise<void> {
-    context.subscriptions.push(
-      vscode.languages.registerDocumentFormattingEditProvider(
-        { scheme: 'file', language: 'ets' },
-        this,
-      ),
-    )
-  }
-
-  async provideDocumentFormattingEdits(textDocument: vscode.TextDocument, options: vscode.FormattingOptions): Promise<vscode.TextEdit[]> {
-    return await this.getCurrentLanguageClient()?.sendRequest('ets/formatDocument', {
-      textDocument,
-      options,
-    }) || []
   }
 
   @WatchConfiguration()
@@ -149,6 +133,13 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
           resourceReferenceDiagnostic: vscode.workspace.getConfiguration('ets').get<'error' | 'warning' | 'none'>('resourceReferenceDiagnostic', 'error'),
         },
       } satisfies EtsServerClientOptions,
+      synchronize: {
+        fileEvents: [
+          vscode.workspace.createFileSystemWatcher('**/*.ets'),
+          vscode.workspace.createFileSystemWatcher('**/*.json'),
+          vscode.workspace.createFileSystemWatcher('**/*.json5'),
+        ],
+      },
     }
   }
 
@@ -173,14 +164,20 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     ])
     this.configureTypeScriptPlugin(clientOptions)
 
-    // If the lsp is already created, just restart the lsp
-    if (this._client) {
-      this._client.start()
-      this._client.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
+    const start = (type: 'restarted' | 'started'): [undefined, LanguageClientOptions] => {
+      this._client?.start()
+      this._client?.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
+      // support for auto close tag
+      if (this._client)
+        activateAutoInsertion('ets', this._client)
       this.getConsola().info('ETS Language Server restarted!')
-      vscode.window.setStatusBarMessage('ETS Language Server restarted!', 1000)
+      vscode.window.setStatusBarMessage(`ETS Language Server ${type}!`, 1000)
       return [undefined, clientOptions]
     }
+
+    // If the lsp is already created, just restart the lsp
+    if (this._client)
+      return start('restarted')
 
     // If the lsp is not created, create a new one
     this._client = new LanguageClient(
@@ -189,12 +186,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       serverOptions,
       defu(overrideClientOptions, clientOptions),
     )
-    this._client.start()
-    this._client.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
-    // support for auto close tag
-    activateAutoInsertion('ets', this._client)
-    this.getConsola().info('ETS Language Server started!')
-    vscode.window.setStatusBarMessage('ETS Language Server started!', 1000)
+    start('started')
 
     // support for https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volarjs-labs
     // ref: https://twitter.com/johnsoncodehk/status/1656126976774791168

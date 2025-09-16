@@ -8,7 +8,7 @@ interface TSProvider {
 
 export function createETSLinterDiagnosticService(ets: typeof import('ohos-typescript'), logger: LanguageServerLogger): LanguageServicePlugin {
   return {
-    name: 'ets-diagnostic',
+    name: 'arkts-diagnostic',
     capabilities: {
       diagnosticProvider: {
         interFileDependencies: true,
