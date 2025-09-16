@@ -1,5 +1,11 @@
 # @arkts/shared
 
+## 1.0.7
+
+### Patch Changes
+
+- 9737adc: fix: 替换不安全的`new Function()`, 改为 createRequire 加载 SDK 中的`sysResource.js`
+
 ## 1.0.6
 
 ### Patch Changes

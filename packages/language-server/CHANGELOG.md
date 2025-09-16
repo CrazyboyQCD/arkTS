@@ -1,5 +1,14 @@
 # @arkts/language-server
 
+## 1.1.2
+
+### Patch Changes
+
+- d5f73b0: fix: rename the current services
+- 6f22ab2: refactor: 删除旧版格式化逻辑，使用`language-service`替代并删除用于格式化的 languageService，大幅提高性能
+- 387cf2e: fix: prepare add new resource watcher
+- 9737adc: fix: 替换不安全的`new Function()`, 改为 createRequire 加载 SDK 中的`sysResource.js`
+
 ## 1.1.1
 
 ### Patch Changes
