@@ -65,23 +65,16 @@ export abstract class BaseResourceService {
   }
 
   /**
-   * 检查文档是否为 .ets 文件
-   */
-  protected isEtsFile(document: TextDocument): boolean {
-    return document.uri.endsWith('.ets')
-  }
-
-  /**
    * 记录服务操作日志
    */
-  protected logOperation(operation: string, details?: any): void {
-    logger.getConsola().info(`[${this.constructor.name}] ${operation}`, details)
+  protected info(operation: string, details?: any): void {
+    logger.getConsola().info(`[${this.constructor.name}] ${operation}`, JSON.stringify(details))
   }
 
   /**
    * 记录错误日志
    */
-  protected logError(operation: string, error: any): void {
+  protected error(operation: string, error: any): void {
     logger.getConsola().error(`[${this.constructor.name}] ${operation}:`, error)
   }
 }

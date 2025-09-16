@@ -314,7 +314,7 @@ export function generateResourceCompletionItems(context: ResourceCompletionConte
 /**
  * 创建资源补全服务
  */
-export function createResourceCompletionService(projectRoot: string, lspConfiguration: LanguageServerConfigManager): LanguageServicePlugin {
+export function createETSResourceCompletionService(projectRoot: string, lspConfiguration: LanguageServerConfigManager): LanguageServicePlugin {
   logger.getConsola().info('Creating resource completion service with project root:', projectRoot)
 
   // 清理项目根路径（移除 file:// 前缀）

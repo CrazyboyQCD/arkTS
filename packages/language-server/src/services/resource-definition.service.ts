@@ -25,43 +25,38 @@ class ResourceDefinitionService extends BaseResourceService {
    */
   async provideDefinition(document: TextDocument, position: Position, sourceFile: ets.SourceFile): Promise<LocationLink[] | null> {
     try {
-      if (!this.isEtsFile(document))
-        return null
-
-      this.logOperation('provideDefinition', { uri: document.uri, position })
+      this.info('provideDefinition', { uri: document.uri, position })
 
       // 查找当前位置的 $r() 调用
       const resourceCall = await this.findResourceCallAtPosition(document, position, sourceFile)
-      if (!resourceCall) {
-        this.logOperation('No $r() call found at position')
+      if (!resourceCall)
         return null
-      }
 
-      this.logOperation('Found $r() call', resourceCall)
+      this.info('Found $r() call', resourceCall)
 
       // 解析资源引用
       const resourceRef = parseResourceReference(resourceCall.resourceValue)
       if (!resourceRef) {
-        this.logError('Failed to parse resource reference', resourceCall.resourceValue)
+        this.error('Failed to parse resource reference', resourceCall.resourceValue)
         return null
       }
 
-      this.logOperation('Parsed resource reference', resourceRef)
+      this.info('Parsed resource reference', resourceRef)
 
       // 确保资源解析器已初始化
       if (!this.resourceResolverManager.ensureInitialized(this.lspConfiguration)) {
-        this.logError('Resource resolver not available', null)
+        this.error('Resource resolver not available', null)
         return null
       }
 
       // 解析资源位置
       const resourceLocation = await this.resourceResolverManager.getResolver()!.resolveResourceReference(resourceCall.resourceValue)
       if (!resourceLocation) {
-        this.logOperation('Resource not found', resourceCall.resourceValue)
+        this.info('Resource not found', resourceCall.resourceValue)
         return null
       }
 
-      this.logOperation('Found resource location', resourceLocation)
+      this.info('Found resource location', resourceLocation)
 
       // 构建跳转位置
       const targetRange = resourceLocation.range || {
@@ -87,11 +82,11 @@ class ResourceDefinitionService extends BaseResourceService {
         originSelectionRange,
       }]
 
-      this.logOperation('Returning location link', result)
+      this.info('Returning location link', result)
       return result
     }
     catch (error) {
-      this.logError('Error in provideDefinition', error)
+      this.error('Error in provideDefinition', error)
       return null
     }
   }
@@ -100,7 +95,7 @@ class ResourceDefinitionService extends BaseResourceService {
 /**
  * 创建集成的资源定义跳转服务
  */
-export function createIntegratedResourceDefinitionService(projectRoot: string, lspConfiguration: LanguageServerConfigManager): LanguageServicePlugin {
+export function createETSIntegratedResourceDefinitionService(projectRoot: string, lspConfiguration: LanguageServerConfigManager): LanguageServicePlugin {
   logger.getConsola().info('Creating integrated resource definition service with project root:', projectRoot)
 
   // 清理项目根路径（移除 file:// 前缀）

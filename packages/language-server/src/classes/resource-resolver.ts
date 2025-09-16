@@ -20,9 +20,9 @@ export class ResourceResolverManager {
 
   /** 初始化解析器（若前置条件缺失则忽略） */
   public initialize(lspConfiguration: LanguageServerConfigManager): void {
-    const sdkPath = this.getCurrentSdkPath(lspConfiguration)
+    const sdkPath = lspConfiguration.getSdkPath()
     if (!this.projectRoot || !sdkPath) {
-      logger.getConsola().info('[resource-resolver] skip initialize: missing project root or sdkPath')
+      logger.getConsola().info('[resource-resolver] skip initialize: missing project root or sdkPath.', JSON.stringify({ projectRoot: this.projectRoot, sdkPath }))
       return
     }
 
@@ -35,18 +35,12 @@ export class ResourceResolverManager {
 
   /** 确保解析器存在且 SDK 路径最新 */
   public ensureInitialized(lspConfiguration: LanguageServerConfigManager): boolean {
-    const sdkPath = this.getCurrentSdkPath(lspConfiguration)
-    if (!sdkPath) {
-      logger.getConsola().info('[resource-resolver] no sdkPath available')
-      return false
-    }
-
     if (!this.projectRoot) {
       logger.getConsola().info('[resource-resolver] project root not set')
       return false
     }
 
-    if (!this.currentResolver || sdkPath !== this.currentResolver.getSdkPath()) {
+    if (!this.currentResolver) {
       logger.getConsola().info('[resource-resolver] (re)initialize required')
       this.initialize(lspConfiguration)
     }
@@ -62,16 +56,6 @@ export class ResourceResolverManager {
   /** 获取所有索引资源（若未初始化则返回空数组） */
   public getAllResources(): ResourceIndexItem[] {
     return this.currentResolver ? this.currentResolver.getAllResources() : []
-  }
-
-  private getCurrentSdkPath(lspConfiguration: LanguageServerConfigManager): string | undefined {
-    try {
-      return lspConfiguration.getSdkPath()
-    }
-    catch (error) {
-      logger.getConsola().error('[resource-resolver] getSdkPath error:', error)
-      return undefined
-    }
   }
 
   private static instance: ResourceResolverManager | null = null

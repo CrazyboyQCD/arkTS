@@ -53,7 +53,7 @@ class ResourceDiagnosticService extends BaseResourceService {
 
     // 获取当前SDK路径
     const sdkPath = this.lspConfiguration.getSdkPath()
-    this.logOperation('Initializing with SDK path', sdkPath)
+    this.info('Initializing with SDK path', sdkPath)
 
     if (this.projectRoot) {
       this.resolver = new ResourceResolver(logger, this.projectRoot, sdkPath)
@@ -67,10 +67,10 @@ class ResourceDiagnosticService extends BaseResourceService {
     try {
       await this.resolver.buildIndex()
       this.initialized = true
-      this.logOperation('Resource diagnostic service initialized successfully')
+      this.info('Resource diagnostic service initialized successfully')
     }
     catch (error) {
-      this.logError('Failed to initialize resource diagnostic service', error)
+      this.error('Failed to initialize resource diagnostic service', error)
     }
   }
 
@@ -139,7 +139,7 @@ let globalResourceDiagnosticService: ResourceDiagnosticService | null = null
 /**
  * 创建资源诊断服务
  */
-export function createResourceDiagnosticService(lspConfiguration: LanguageServerConfigManager, projectRoot?: string, getDiagnosticLevel?: () => ResourceDiagnosticLevel): LanguageServicePlugin {
+export function createETSResourceDiagnosticService(lspConfiguration: LanguageServerConfigManager, projectRoot?: string, getDiagnosticLevel?: () => ResourceDiagnosticLevel): LanguageServicePlugin {
   return {
     name: 'arkts-resource-diagnostic',
     capabilities: {

@@ -17,7 +17,7 @@ function matchLocaleText<TStorage extends Record<'default' | (string & {}), stri
 }
 
 /** 给 $$this 提供注释，说明$$this语法是用来干啥的，提供markdown文档悬浮到hover处 */
-export function create$$ThisService(locale: string): LanguageServicePlugin {
+export function createETS$$ThisService(locale: string): LanguageServicePlugin {
   const $$thisRegex = /\$\$this/g
 
   return {
