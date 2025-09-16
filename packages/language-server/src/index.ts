@@ -7,7 +7,7 @@ import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
-import { LanguageServerConfigManager } from './config-manager'
+import { LanguageServerConfigManager } from './classes/config-manager'
 import { logger } from './logger'
 import { create$$ThisService } from './services/$$this.service'
 import { createETSLinterDiagnosticService } from './services/diagnostic.service'
@@ -25,11 +25,6 @@ logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`
 connection.onRequest('ets/waitForEtsConfigurationChangedRequested', (e) => {
   logger.getConsola().info(`waitForEtsConfigurationChangedRequested: ${JSON.stringify(e)}`)
   lspConfiguration.setConfiguration(e)
-
-  // 配置更新后，记录SDK路径更新
-  if (e.ohos?.sdkPath) {
-    logger.getConsola().info('SDK path updated to:', e.ohos.sdkPath)
-  }
 })
 
 // 全局配置状态
@@ -50,6 +45,7 @@ interface ETSFormattingDocumentParams {
 }
 
 let etsLanguageService: ets.LanguageService | undefined
+
 connection.onRequest('ets/formatDocument', async (params: ETSFormattingDocumentParams): Promise<any[]> => {
   if (!etsLanguageService)
     return []
@@ -124,11 +120,11 @@ connection.onInitialize(async (params) => {
     }),
     [
       // 资源定义跳转服务优先（支持 sys 资源）
-      createIntegratedResourceDefinitionService(projectRoot, () => lspConfiguration.getSdkPath()),
+      createIntegratedResourceDefinitionService(projectRoot, lspConfiguration),
       // 资源智能补全服务（支持前缀匹配）
-      createResourceCompletionService(projectRoot, () => lspConfiguration.getSdkPath()),
+      createResourceCompletionService(projectRoot, lspConfiguration),
       // 资源诊断服务（支持 sys 资源）
-      createResourceDiagnosticService(projectRoot, () => globalResourceDiagnosticLevel, () => lspConfiguration.getSdkPath()),
+      createResourceDiagnosticService(lspConfiguration, projectRoot, () => globalResourceDiagnosticLevel),
       tsSemanticService,
       ...tsOtherServices,
       createETSLinterDiagnosticService(ets, logger),

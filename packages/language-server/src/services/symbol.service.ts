@@ -88,20 +88,16 @@ function getSymbolTree(item: ets.NavigationTree, document: TextDocument): Docume
 
 export function createETSDocumentSymbolService(): LanguageServicePlugin {
   return {
-    name: 'ets-navigation-tree',
+    name: 'arkts-navigation-tree',
     capabilities: {
       documentSymbolProvider: true,
     },
     create(context) {
-      if (!context.project.typescript?.languageServiceHost)
-        return {}
-
-      const languageService = context.inject<TSProvider>('typescript/languageService')
-      if (!languageService)
-        return {}
-
       return {
         provideDocumentSymbols(document) {
+          const languageService = context.inject<TSProvider>('typescript/languageService')
+          if (!languageService)
+            return []
           const decodeDocumentUri = context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
           if (!decodeDocumentUri)
             return []

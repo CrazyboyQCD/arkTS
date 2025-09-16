@@ -173,14 +173,20 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     ])
     this.configureTypeScriptPlugin(clientOptions)
 
-    // If the lsp is already created, just restart the lsp
-    if (this._client) {
-      this._client.start()
-      this._client.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
+    const start = (type: 'restarted' | 'started'): [undefined, LanguageClientOptions] => {
+      this._client?.start()
+      this._client?.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
+      // support for auto close tag
+      if (this._client)
+        activateAutoInsertion('ets', this._client)
       this.getConsola().info('ETS Language Server restarted!')
-      vscode.window.setStatusBarMessage('ETS Language Server restarted!', 1000)
+      vscode.window.setStatusBarMessage(`ETS Language Server ${type}!`, 1000)
       return [undefined, clientOptions]
     }
+
+    // If the lsp is already created, just restart the lsp
+    if (this._client)
+      return start('restarted')
 
     // If the lsp is not created, create a new one
     this._client = new LanguageClient(
@@ -189,12 +195,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       serverOptions,
       defu(overrideClientOptions, clientOptions),
     )
-    this._client.start()
-    this._client.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
-    // support for auto close tag
-    activateAutoInsertion('ets', this._client)
-    this.getConsola().info('ETS Language Server started!')
-    vscode.window.setStatusBarMessage('ETS Language Server started!', 1000)
+    start('started')
 
     // support for https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volarjs-labs
     // ref: https://twitter.com/johnsoncodehk/status/1656126976774791168

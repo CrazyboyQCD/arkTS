@@ -1,7 +1,9 @@
 import type { ResourceIndexItem, ResourceLocation } from '@arkts/shared'
 import type { Connection, DidChangeConfigurationParams, DidChangeWatchedFilesParams, LanguageServicePlugin } from '@volar/language-server'
+import type { Disposable } from 'vscode'
 import { ResourceResolver } from '@arkts/shared'
 import { URI } from 'vscode-uri'
+import { BaseResourceService } from '../classes/base-resource-service'
 import { logger } from '../logger'
 
 /**
@@ -19,13 +21,14 @@ export interface ResourceDetectorConfig {
 /**
  * 资源检测服务
  */
-export class ResourceDetectorService {
+export class ResourceDetectorService extends BaseResourceService implements Disposable {
   private resolver: ResourceResolver
   private config: ResourceDetectorConfig
   private isIndexBuilt = false
   private connection?: Connection
 
   constructor(config: ResourceDetectorConfig) {
+    super()
     this.config = config
     this.resolver = new ResourceResolver(logger, config.projectRoot)
   }
@@ -56,15 +59,10 @@ export class ResourceDetectorService {
     try {
       await this.resolver.buildIndex()
       this.isIndexBuilt = true
-
-      if (this.connection) {
-        this.connection.console.info('Resource index built successfully')
-      }
+      this.logOperation('Resource index built successfully')
     }
     catch (error) {
-      if (this.connection) {
-        this.connection.console.error(`Failed to build resource index: ${error}`)
-      }
+      this.logError('Failed to build resource index', error)
     }
   }
 
@@ -178,6 +176,9 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
       return {
         // 监听配置变化
         onDidChangeConfiguration(params: DidChangeConfigurationParams) {
+          logger.getConsola().info(`Resource detector config changed!`)
+          logger.getConsola().info(JSON.stringify(params))
+          logger.getConsola().info(`END!`)
           const settings = params.settings
           if (settings && settings.arkts && settings.arkts.resources) {
             service.updateConfig(settings.arkts.resources)
@@ -195,16 +196,4 @@ export function createResourceDetectorPlugin(config: ResourceDetectorConfig): La
       service.dispose()
     },
   }
-}
-
-/**
- * 默认配置
- */
-export const defaultResourceDetectorConfig: ResourceDetectorConfig = {
-  projectRoot: '',
-  enabled: true,
-  watchPatterns: [
-    '**/src/main/resources/base/element/*.json',
-    '**/src/main/resources/base/media/*',
-  ],
 }

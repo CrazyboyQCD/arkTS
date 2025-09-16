@@ -21,7 +21,7 @@ export function create$$ThisService(locale: string): LanguageServicePlugin {
   const $$thisRegex = /\$\$this/g
 
   return {
-    name: 'ets:$$this',
+    name: 'arkts-$$this',
     capabilities: {
       hoverProvider: true,
     },

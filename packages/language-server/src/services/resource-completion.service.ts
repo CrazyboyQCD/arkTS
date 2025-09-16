@@ -1,9 +1,14 @@
 import type { ResourceIndexItem } from '@arkts/shared'
 import type { LanguageServicePlugin } from '@volar/language-service'
+import type * as ets from 'ohos-typescript'
 import type { CompletionItem, CompletionList } from 'vscode-languageserver-protocol'
 import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
-import { ResourceResolver } from '@arkts/shared'
+import type { LanguageServerConfigManager } from '../classes/config-manager'
+import type { GlobalRCallInfo } from '../classes/global-call-expression-finder'
+import type { TSProvider } from './symbol.service'
 import { URI } from 'vscode-uri'
+import { GlobalRCallFinder } from '../classes/global-call-expression-finder'
+import { ResourceResolverManager } from '../classes/resource-resolver'
 import { logger } from '../logger'
 
 /**
@@ -18,97 +23,144 @@ interface ResourceCompletionContext {
   isInResourceCall: boolean
   /** 已输入的部分（如 'app.color.' 或 'sys.'） */
   prefix: string
-}
-
-// 全局资源解析器实例
-let globalResourceResolver: ResourceResolver | null = null
-let globalProjectRoot: string = ''
-let globalSdkPathGetter: (() => string) | null = null
-
-/**
- * 初始化全局资源解析器
- */
-function initializeGlobalResourceResolver(): void {
-  if (!globalProjectRoot || !globalSdkPathGetter) {
-    logger.getConsola().info('Cannot initialize: missing project root or SDK path getter')
-    return
-  }
-
-  const currentSdkPath = globalSdkPathGetter()
-  logger.getConsola().info('Initializing resource resolver with SDK path:', currentSdkPath)
-
-  globalResourceResolver = new ResourceResolver(logger, globalProjectRoot, currentSdkPath)
-  globalResourceResolver.buildIndex().catch((error) => {
-    logger.getConsola().error('Failed to build resource index:', error)
-  })
+  /** 全局 $r 调用信息（如果可用） */
+  globalRCallInfo?: GlobalRCallInfo
+  /** 光标在资源字符串中的位置 */
+  cursorPositionInResource?: number
 }
 
 /**
- * 确保资源解析器已初始化且SDK路径是最新的
+ * 资源补全上下文分析器
  */
-function ensureResourceResolverInitialized(): boolean {
-  if (!globalSdkPathGetter) {
-    logger.getConsola().info('No SDK path getter available')
-    return false
+class ResourceCompletionAnalyzer {
+  constructor(private readonly ets: typeof import('ohos-typescript')) {}
+
+  /**
+   * 分析当前位置的资源补全上下文（使用 AST 分析）
+   */
+  analyzeContext(document: TextDocument, position: Position, sourceFile: ets.SourceFile): ResourceCompletionContext | null {
+    try {
+      // 验证输入参数
+      if (!document || !position) {
+        logger.getConsola().warn(`Invalid document or position provided to analyzeContext in ${document.uri}`)
+        return null
+      }
+      // 使用 GlobalRCallFinder 查找所有 $r 调用
+      const finder = new GlobalRCallFinder(this.ets)
+      const globalRCalls = finder.findGlobalRCallsSimple(sourceFile)
+      // 将位置转换为字符偏移量
+      const offset = document.offsetAt(position)
+
+      // 查找包含当前光标位置的 $r 调用
+      const currentCall = globalRCalls.find(call => offset >= call.resourceStart && offset <= call.resourceEnd)
+      if (!currentCall)
+        return null
+
+      // 计算光标在资源字符串中的相对位置
+      const cursorPositionInResource = offset - currentCall.resourceStart
+      const currentInput = currentCall.resourceValue.substring(0, cursorPositionInResource)
+
+      return {
+        currentInput,
+        startPosition: document.positionAt(currentCall.resourceStart),
+        isInResourceCall: true,
+        prefix: currentInput,
+        globalRCallInfo: currentCall,
+        cursorPositionInResource,
+      }
+    }
+    catch (error) {
+      logger.getConsola().warn('Failed to analyze resource completion context with AST:', error)
+
+      // 回退到正则表达式方法
+      return this.analyzeContextFallback(document, position)
+    }
   }
 
-  const currentSdkPath = globalSdkPathGetter()
+  /**
+   * 回退的资源补全上下文分析（使用正则表达式）
+   */
+  private analyzeContextFallback(document: TextDocument, position: Position): ResourceCompletionContext | null {
+    const line = document.getText({
+      start: { line: position.line, character: 0 },
+      end: { line: position.line, character: position.character },
+    })
 
-  // 如果解析器不存在或SDK路径已更改，重新初始化
-  if (!globalResourceResolver || currentSdkPath !== globalResourceResolver.getSdkPath()) {
-    logger.getConsola().info('Resource resolver needs (re)initialization')
-    initializeGlobalResourceResolver()
+    // 查找 $r() 调用的正则表达式（修复转义问题）
+    const resourceCallPattern = /\$r\s*\(\s*['"]?([^'")\s]*)$/
+    const resourceCallMatch = line.match(resourceCallPattern)
+
+    if (!resourceCallMatch) {
+      return null
+    }
+
+    const currentInput = resourceCallMatch[1]
+    const startCharacter = line.lastIndexOf('$r(') + 3
+
+    return {
+      currentInput,
+      startPosition: { line: position.line, character: startCharacter },
+      isInResourceCall: true,
+      prefix: currentInput,
+    }
   }
-
-  return globalResourceResolver !== null
 }
 
 /**
- * 分析当前位置的资源补全上下文
+ * 资源补全项生成器
  */
-function analyzeResourceCompletionContext(
-  document: TextDocument,
-  position: Position,
-): ResourceCompletionContext | null {
-  const line = document.getText({
-    start: { line: position.line, character: 0 },
-    end: { line: position.line, character: position.character },
-  })
+class ResourceCompletionGenerator {
+  /**
+   * 生成改进的资源补全项
+   */
+  generateItems(context: ResourceCompletionContext, resources: ResourceIndexItem[]): CompletionItem[] {
+    try {
+      // 验证输入参数
+      if (!context || !resources) {
+        logger.getConsola().warn('Invalid context or resources provided to generateItems')
+        return []
+      }
 
-  // 查找 $r() 调用的正则表达式（修复转义问题）
-  const resourceCallPattern = /\$r\s*\(\s*['"]?([^'")\s]*)$/
-  const resourceCallMatch = line.match(resourceCallPattern)
+      const { prefix, globalRCallInfo } = context
 
-  if (!resourceCallMatch) {
-    return null
+      logger.getConsola().info('Generating items for prefix:', prefix, 'with global call info:', globalRCallInfo)
+
+      // 如果前缀为空，提供范围选项
+      if (!prefix) {
+        return this.generateScopeOptions()
+      }
+
+      const parts = prefix.split('.')
+
+      // 处理第一段：范围前缀匹配（如 'a', 's', 'app', 'sy'）
+      if (parts.length === 1) {
+        return this.generateScopeAndTypeOptions(parts[0], resources)
+      }
+
+      // 处理第二段：类型匹配（如 'app.c', 'sys.str'）
+      if (parts.length === 2) {
+        return this.generateTypeAndResourceOptions(parts[0], parts[1], resources)
+      }
+
+      // 处理第三段：资源名称匹配（如 'app.color.p', 'sys.string.ohos'）
+      if (parts.length === 3) {
+        return this.generateResourceNameOptions(parts[0], parts[1], parts[2], resources)
+      }
+
+      logger.getConsola().info(`Generated 0 completion items for prefix '${prefix}' (unsupported length: ${parts.length})`)
+      return []
+    }
+    catch (error) {
+      logger.getConsola().error('Error in generateItems:', error)
+      return []
+    }
   }
 
-  const currentInput = resourceCallMatch[1]
-  const startCharacter = line.lastIndexOf('$r(') + 3
-
-  return {
-    currentInput,
-    startPosition: { line: position.line, character: startCharacter },
-    isInResourceCall: true,
-    prefix: currentInput,
-  }
-}
-
-/**
- * 生成改进的资源补全项
- */
-export function generateResourceCompletionItems(
-  context: ResourceCompletionContext,
-  resources: ResourceIndexItem[],
-): CompletionItem[] {
-  const items: CompletionItem[] = []
-  const { prefix } = context
-
-  logger.getConsola().info('Generating items for prefix:', prefix)
-
-  // 如果前缀为空，提供范围选项
-  if (!prefix) {
-    items.push(
+  /**
+   * 生成范围选项（app, sys）
+   */
+  private generateScopeOptions(): CompletionItem[] {
+    return [
       {
         label: 'app',
         kind: 14, // CompletionItemKind.Keyword
@@ -123,41 +175,41 @@ export function generateResourceCompletionItems(
         documentation: '引用系统预定义资源',
         insertText: 'sys.',
       },
-    )
-    return items
+    ]
   }
 
-  const parts = prefix.split('.')
-
-  // 处理第一段：范围前缀匹配（如 'a', 's', 'app', 'sy'）
-  if (parts.length === 1) {
-    const scopePrefix = parts[0].toLowerCase()
+  /**
+   * 生成范围和类型选项
+   */
+  private generateScopeAndTypeOptions(scopePrefix: string, resources: ResourceIndexItem[]): CompletionItem[] {
+    const items: CompletionItem[] = []
+    const scopePrefixLower = scopePrefix.toLowerCase()
 
     // 前缀匹配范围
-    if ('app'.startsWith(scopePrefix)) {
+    if ('app'.startsWith(scopePrefixLower)) {
       items.push({
         label: 'app',
         kind: 14, // CompletionItemKind.Keyword
         detail: '应用资源',
         documentation: '引用应用本地资源',
-        insertText: scopePrefix === 'app' ? '.' : 'app.',
+        insertText: scopePrefixLower === 'app' ? '.' : 'app.',
         filterText: 'app',
       })
     }
 
-    if ('sys'.startsWith(scopePrefix)) {
+    if ('sys'.startsWith(scopePrefixLower)) {
       items.push({
         label: 'sys',
         kind: 14, // CompletionItemKind.Keyword
         detail: '系统资源',
         documentation: '引用系统预定义资源',
-        insertText: scopePrefix === 'sys' ? '.' : 'sys.',
+        insertText: scopePrefixLower === 'sys' ? '.' : 'sys.',
         filterText: 'sys',
       })
     }
 
     // 如果是完整的scope（'app' 或 'sys'），还要提供类型选项
-    const scope = parts[0] as 'app' | 'sys'
+    const scope = scopePrefix as 'app' | 'sys'
     if (scope === 'app' || scope === 'sys') {
       const types = new Set<string>()
       resources
@@ -178,9 +230,11 @@ export function generateResourceCompletionItems(
     return items
   }
 
-  // 处理第二段：类型匹配（如 'app.c', 'sys.str'）
-  if (parts.length === 2) {
-    const [scope, typePrefix] = parts
+  /**
+   * 生成类型和资源选项
+   */
+  private generateTypeAndResourceOptions(scope: string, typePrefix: string, resources: ResourceIndexItem[]): CompletionItem[] {
+    const items: CompletionItem[] = []
 
     if (scope === 'app' || scope === 'sys') {
       const types = new Set<string>()
@@ -221,9 +275,11 @@ export function generateResourceCompletionItems(
     return items
   }
 
-  // 处理第三段：资源名称匹配（如 'app.color.p', 'sys.string.ohos'）
-  if (parts.length === 3) {
-    const [scope, type, namePrefix] = parts
+  /**
+   * 生成资源名称选项
+   */
+  private generateResourceNameOptions(scope: string, type: string, namePrefix: string, resources: ResourceIndexItem[]): CompletionItem[] {
+    const items: CompletionItem[] = []
 
     const filteredResources = resources.filter(
       r => r.reference.scope === scope
@@ -244,18 +300,21 @@ export function generateResourceCompletionItems(
 
     return items
   }
+}
 
-  logger.getConsola().info(`Generated ${items.length} completion items for prefix '${prefix}'`)
-  return items
+/**
+ * 生成资源补全项（向后兼容的导出函数）
+ * @deprecated 建议使用 ResourceCompletionGenerator 类
+ */
+export function generateResourceCompletionItems(context: ResourceCompletionContext, resources: ResourceIndexItem[]): CompletionItem[] {
+  const generator = new ResourceCompletionGenerator()
+  return generator.generateItems(context, resources)
 }
 
 /**
  * 创建资源补全服务
  */
-export function createResourceCompletionService(
-  projectRoot: string,
-  sdkPathGetter: () => string,
-): LanguageServicePlugin {
+export function createResourceCompletionService(projectRoot: string, lspConfiguration: LanguageServerConfigManager): LanguageServicePlugin {
   logger.getConsola().info('Creating resource completion service with project root:', projectRoot)
 
   // 清理项目根路径（移除 file:// 前缀）
@@ -264,13 +323,9 @@ export function createResourceCompletionService(
     : projectRoot
 
   logger.getConsola().info('Cleaned project root:', cleanProjectRoot)
-
-  // 设置全局变量
-  globalProjectRoot = cleanProjectRoot
-  globalSdkPathGetter = sdkPathGetter
-
-  // 尝试初始化资源解析器
-  initializeGlobalResourceResolver()
+  // 设置项目根并尝试初始化资源解析器
+  ResourceResolverManager.getInstance().setProjectRoot(cleanProjectRoot)
+  ResourceResolverManager.getInstance().initialize(lspConfiguration)
 
   return {
     name: 'arkts-resource-completion',
@@ -280,40 +335,61 @@ export function createResourceCompletionService(
         resolveProvider: false,
       },
     },
-    create(_context) {
+    create(context) {
       return {
         async provideCompletionItems(document: TextDocument, position: Position): Promise<CompletionList | null> {
+          const decoded = context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
+          if (!decoded)
+            return null
+          const [decodedUri] = decoded
+          const languageService = context.inject<TSProvider>(`typescript/languageService`)
+          if (!languageService)
+            return null
+          const program = languageService.getProgram()
+          if (!program)
+            return null
+          const sourceFile = program.getSourceFile(decodedUri.fsPath)
+          if (!sourceFile)
+            return null
+
           try {
-            logger.getConsola().info('provideCompletionItems called for:', document.uri, 'at position:', position)
+            logger.getConsola().info('[resource-completion] provideCompletionItems called for:', document.uri, 'at position:', position)
 
             // 只处理 .ets 文件
             if (!document.uri.endsWith('.ets')) {
-              logger.getConsola().info('Not an .ets file, skipping')
+              logger.getConsola().info('[resource-completion] Not an .ets file, skipping')
               return null
             }
 
-            // 分析补全上下文
-            const completionContext = analyzeResourceCompletionContext(document, position)
+            // 导入 ohos-typescript
+            const ets = await import('ohos-typescript')
+
+            // 创建分析器和生成器
+            const analyzer = new ResourceCompletionAnalyzer(ets)
+            const generator = new ResourceCompletionGenerator()
+
+            // 分析补全上下文（使用 AST 分析，简化版本）
+            const completionContext = analyzer.analyzeContext(document, position, sourceFile)
             if (!completionContext) {
-              logger.getConsola().info('No resource completion context found')
+              logger.getConsola().info('[resource-completion] No resource completion context found')
               return null
             }
 
             logger.getConsola().info('Completion context:', completionContext)
 
             // 确保资源解析器已初始化且是最新的
-            if (!ensureResourceResolverInitialized()) {
-              logger.getConsola().info('Resource resolver not available')
+            if (!ResourceResolverManager.getInstance().ensureInitialized(lspConfiguration)) {
+              logger.getConsola().info('[resource-completion] Resource resolver not available')
               return null
             }
 
             // 获取所有资源
-            const allResources = globalResourceResolver!.getAllResources()
+            const allResources = ResourceResolverManager.getInstance().getAllResources()
 
             // 生成补全项
-            const completionItems = generateResourceCompletionItems(completionContext, allResources)
+            const completionItems = generator.generateItems(completionContext, allResources)
 
-            logger.getConsola().info(`Generated ${completionItems.length} completion items`)
+            logger.getConsola().info(`[resource-completion] Generated ${completionItems.length} completion items`)
 
             return {
               isIncomplete: false,
@@ -321,7 +397,7 @@ export function createResourceCompletionService(
             }
           }
           catch (error) {
-            logger.getConsola().error('Error in provideCompletionItems:', error)
+            logger.getConsola().error('[resource-completion] Error in provideCompletionItems:', error)
             return null
           }
         },
