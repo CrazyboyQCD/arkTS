@@ -3,29 +3,29 @@ packages:
   - ohos-typescript
 catalogs:
   build:
-    tsdown: 0.15.0
-    unplugin-swc: ^1.5.5
+    tsdown: 0.15.2
+    unplugin-swc: ^1.5.7
   dev:
     '@types/node': latest
     '@types/progress-stream': ^2.0.5
-    '@types/vscode': ^1.102.0
+    '@types/vscode': ^1.104.0
     fast-glob: ^3.3.3
-    reactive-vscode: ^0.3.1
-    ts-macro: ^0.3.4
+    reactive-vscode: ^0.3.2
+    ts-macro: ^0.3.6
     type-fest: ^4.41.0
     vscode-ext-gen: ^1.1.0
   frontend:
     '@vitejs/plugin-vue': ^6.0.1
-    '@vitejs/plugin-vue-jsx': ^5.0.1
-    '@vueuse/core': ^13.6.0
+    '@vitejs/plugin-vue-jsx': ^5.1.1
+    '@vueuse/core': ^13.9.0
     pinia: ^3.0.3
-    unocss: ^66.4.2
+    unocss: ^66.5.1
     vite: npm:rolldown-vite@latest
-    vue: ^3.5.18
+    vue: ^3.5.21
   lint:
     '@antfu/eslint-config': latest
     eslint: latest
-    oxlint: ^1.11.2
+    oxlint: ^1.16.0
   polyfill:
     reflect-metadata: ^0.2.2
   prod:
@@ -38,7 +38,7 @@ catalogs:
     '@volar/typescript': ~2.4.23
     '@volar/vscode': ~2.4.23
     '@vscode/l10n': ^0.0.18
-    axios: ^1.11.0
+    axios: ^1.12.2
     chokidar: ^4.0.3
     consola: ^3.4.2
     defu: ^6.1.4
@@ -61,16 +61,16 @@ catalogs:
   scripts:
     '@antfu/nip': ^0.1.0
     '@changesets/changelog-github': ^0.5.1
-    '@changesets/cli': ^2.29.5
+    '@changesets/cli': ^2.29.7
     '@release-it/bumper': ^7.0.5
     '@vscode/vsce': latest
     cross-env: ^10.0.0
     ovsx: ^0.10.5
-    oxc-parser: ^0.82.1
-    oxc-walker: ^0.4.0
-    pnpm: ^10.14.0
+    oxc-parser: ^0.90.0
+    oxc-walker: ^0.5.2
+    pnpm: ^10.17.0
     simple-git-hooks: ^2.13.1
-    tsx: ^4.20.4
+    tsx: ^4.20.5
   test:
     '@vitest/coverage-v8': 2.1.9
     '@vitest/ui': 2.1.9
