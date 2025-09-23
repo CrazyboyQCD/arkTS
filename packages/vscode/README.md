@@ -1,18 +1,18 @@
 <div align="center">
 
-<img src="https://github.com/Groupguanfang/arkTS/blob/next-dev/packages/vscode/assets/icon.png?raw=true" width="100" />
+<img src="https://github.com/ohosvscode/arkTS/blob/next-dev/packages/vscode/assets/icon.png?raw=true" width="100" />
 
 # Naily's ArkTS Support
 
-[English](./https://github.com/Groupguanfang/arkTS/blob/next/README-en.md) | 简体中文
+[English](https://github.com/ohosvscode/arkTS/blob/next/README-en.md) | 简体中文
 
-![GitHub Repo stars](https://img.shields.io/github/stars/groupguanfang/arkTS?style=flat)&nbsp;
+![GitHub Repo stars](https://img.shields.io/github/stars/ohosvscode/arkTS?style=flat)&nbsp;
 [![VSCode Marketplace version](https://img.shields.io/visual-studio-marketplace/v/NailyZero.vscode-naily-ets?style=flat&label=vscode%20marketplace%20version)](https://marketplace.visualstudio.com/items?itemName=NailyZero.vscode-naily-ets)&nbsp;
 [![@arkts/declarations NPM version](https://img.shields.io/npm/v/%40arkts%2Fdeclarations?logo=npm&logoColor=red&label=arkts%2Fdeclarations)](https://www.npmjs.com/package/@arkts/declarations)&nbsp;
 [![@arkts/language-server NPM version](https://img.shields.io/npm/v/%40arkts%2Flanguage-server?logo=npm&logoColor=red&label=arkts%2Flanguage-server)](https://www.npmjs.com/package/@arkts/language-server)&nbsp;
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/groupguanfang/arkTS)&nbsp;
-![GitHub repo size](https://img.shields.io/github/repo-size/groupguanfang/arkTS)&nbsp;
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/groupguanfang/arkTS/main?label=Main%20Branch%20Last%20Commit)&nbsp;
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ohosvscode/arkTS)&nbsp;
+![GitHub repo size](https://img.shields.io/github/repo-size/ohosvscode/arkTS)&nbsp;
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/ohosvscode/arkTS/main?label=Main%20Branch%20Last%20Commit)&nbsp;
 
 </div>
 
@@ -74,7 +74,9 @@ toolchains/
 
 此设置是用来配置`OpenHarmony SDK`的`基础路径`，所有版本的`OpenHarmony SDK`都会安装在此路径下。
 
-假如该路径配置为`${os.homedir}/OpenHarmony`，那么插件会自动在`~/OpenHarmony/[API版本，数字]`文件夹下安装`OpenHarmony SDK`，并且会自动探测当前项目所使用的`API版本`，并自动切换到对应的`OpenHarmony SDK`。如你现在想安装`API20`的`OpenHarmony SDK`，那么插件会自动在`~/OpenHarmony/20`文件夹下安装`OpenHarmony SDK`：
+假如该路径配置为`${os.homedir}/OpenHarmony`，那么插件会自动在`~/OpenHarmony/[API版本，数字]`文件夹下安装`OpenHarmony SDK`（比如你装的是API18，那么就是`~/OpenHarmony/18`），并且会自动探测当前项目所使用的`API版本`，并自动切换到对应的`OpenHarmony SDK`。
+
+如你现在想安装`API20`的`OpenHarmony SDK`，那么插件会自动在`~/OpenHarmony/20`文件夹下安装`OpenHarmony SDK`：
 
 ```
 ~/OpenHarmony

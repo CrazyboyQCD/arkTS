@@ -49,6 +49,7 @@
     "lodash": "catalog:prod",
     "magic-string": "^0.30.17",
     "minimatch": "^10.0.3",
+    "ohos-typescript": "workspace:*",
     "oxc-parser": "catalog:scripts",
     "oxc-walker": "catalog:scripts",
     "oxlint": "catalog:lint",

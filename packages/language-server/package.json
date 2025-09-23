@@ -4,14 +4,14 @@
   "description": "ArkTS Language Server.",
   "author": "Naily Zero <zero@naily.cc>",
   "license": "MIT",
-  "homepage": "https://github.com/Groupguanfang/arkTS/tree/main/packages/language-server",
+  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/language-server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Groupguanfang/arkTS",
+    "url": "https://github.com/ohosvscode/arkTS",
     "directory": "packages/language-server"
   },
   "bugs": {
-    "url": "https://github.com/Groupguanfang/arkTS/issues",
+    "url": "https://github.com/ohosvscode/arkTS/issues",
     "email": "zero@naily.cc"
   },
   "keywords": [
@@ -51,12 +51,12 @@
   },
   "devDependencies": {
     "@arkts/language-plugin": "workspace:*",
+    "@arkts/language-service": "workspace:*",
     "@arkts/shared": "workspace:*",
     "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",
     "@volar/language-server": "catalog:prod",
     "@volar/typescript": "catalog:prod",
-    "ohos-typescript": "workspace:*",
     "volar-service-css": "catalog:prod",
     "volar-service-emmet": "catalog:prod",
     "volar-service-html": "catalog:prod",
