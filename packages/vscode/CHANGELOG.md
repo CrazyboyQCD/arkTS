@@ -1,5 +1,20 @@
 # vscode-naily-ets
 
+## 1.1.4
+
+### Patch Changes
+
+- 6f22ab2: refactor: 删除旧版格式化逻辑，使用`language-service`替代并删除用于格式化的 languageService，大幅提高性能
+- 4b92a91: chore: 移除位于 vscode 插件内部的资源自动补全机制
+- 9737adc: fix: 替换不安全的`new Function()`, 改为 createRequire 加载 SDK 中的`sysResource.js`
+
+## 1.1.3
+
+### Patch Changes
+
+- d8eaa76: fix: update galleryBanner theme color
+- be25ace: feat: 支持$r()资源引用补全 (#6) 感谢 github @frezs 的贡献 🎉!
+
 ## 1.1.2
 
 ### Patch Changes

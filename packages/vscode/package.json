@@ -2,7 +2,7 @@
   "publisher": "NailyZero",
   "name": "vscode-naily-ets",
   "displayName": "Naily's ArkTS Support",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "private": true,
   "description": "自用ArkTS扩展,支持代码跳转,欢迎PR! Naily's ArkTS Support.",
   "author": "Naily Zero <zero@naily.cc>",
@@ -27,7 +27,7 @@
   "main": "./dist/client.js",
   "icon": "assets/icon.png",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.104.1"
   },
   "galleryBanner": {
     "theme": "dark",
@@ -275,7 +275,7 @@
     "@arkts/headless-jsonrpc": "catalog:prod",
     "@arkts/language-server": "workspace:*",
     "@arkts/sdk-downloader": "catalog:prod",
-    "@types/vscode": "^1.22.0",
+    "@types/vscode": "^1.104.0",
     "@volar/language-server": "catalog:prod",
     "@volar/vscode": "catalog:prod",
     "@vscode/l10n": "catalog:prod",

@@ -1,5 +1,17 @@
 # @arkts/language-plugin
 
+## 1.1.3
+
+### Patch Changes
+
+- 9737adc: fix: 替换不安全的`new Function()`, 改为 createRequire 加载 SDK 中的`sysResource.js`
+
+## 1.1.2
+
+### Patch Changes
+
+- be25ace: feat: 支持$r()资源引用补全 (#6) 感谢 github @frezs 的贡献 🎉!
+
 ## 1.1.1
 
 ### Patch Changes
