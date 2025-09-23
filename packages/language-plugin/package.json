@@ -4,14 +4,14 @@
   "description": "ArkTS Volar Language Plugin.",
   "author": "Naily Zero <zero@naily.cc>",
   "license": "MIT",
-  "homepage": "https://github.com/Groupguanfang/arkTS/tree/main/packages/language-plugin",
+  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/language-plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Groupguanfang/arkTS",
+    "url": "https://github.com/ohosvscode/arkTS",
     "directory": "packages/language-plugin"
   },
   "bugs": {
-    "url": "https://github.com/Groupguanfang/arkTS/issues",
+    "url": "https://github.com/ohosvscode/arkTS/issues",
     "email": "zero@naily.cc"
   },
   "keywords": [
