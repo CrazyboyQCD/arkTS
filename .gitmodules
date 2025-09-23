@@ -1,4 +1,4 @@
 [submodule "ohos-typescript"]
 	path = ohos-typescript
-	url = https://gitee.com/openharmony/third_party_typescript
+	url = https://gitcode.com/openharmony/third_party_typescript
 	shallow = true

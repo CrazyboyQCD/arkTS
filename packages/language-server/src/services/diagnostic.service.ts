@@ -1,12 +1,11 @@
 import type { LanguageServerLogger } from '@arkts/shared'
 import type { LanguageServicePlugin } from '@volar/language-server'
-import { URI } from 'vscode-uri'
-
-interface TSProvider {
-  'typescript/languageServiceHost': () => import('ohos-typescript').LanguageServiceHost
-}
+import { Range } from '@volar/language-server'
+import { ContextUtil } from '../utils/finder'
 
 export function createETSLinterDiagnosticService(ets: typeof import('ohos-typescript'), logger: LanguageServerLogger): LanguageServicePlugin {
+  let builderProgram: import('ohos-typescript').EmitAndSemanticDiagnosticsBuilderProgram | undefined
+
   return {
     name: 'arkts-diagnostic',
     capabilities: {
@@ -16,26 +15,36 @@ export function createETSLinterDiagnosticService(ets: typeof import('ohos-typesc
       },
     },
     create(context) {
-      const languageServiceHost = context.inject<TSProvider>('typescript/languageServiceHost')
-      if (!languageServiceHost)
-        return {}
-
-      const languageService = ets.createLanguageService(languageServiceHost)
-
       return {
-        provideDiagnostics(document, token) {
-          if (token.isCancellationRequested)
-            return
+        provideDiagnostics(document) {
+          const ctx = new ContextUtil(context)
+          const sourceFile = ctx.decodeSourceFile(document)
+          const languageService = ctx.getLanguageService()
+          if (!sourceFile || !languageService)
+            return []
+          if (!builderProgram) {
+            builderProgram = ets.createIncrementalProgramForArkTs({
+              rootNames: languageService.getProgram()?.getRootFileNames() ?? [],
+              options: languageService.getProgram()?.getCompilerOptions() ?? {},
+            })
+          }
 
           try {
-            // eslint-disable-next-line ts/ban-ts-comment
-            // @ts-expect-error
-            const builderProgram = languageService.getBuilderProgram(/** withLinterProgram */ true)
-            const sourceFile = ets.createSourceFile(context.decodeEmbeddedDocumentUri(URI.parse(document.uri))?.[0].fsPath ?? 'index.ets', document.getText(), ets.ScriptTarget.Latest, true)
             return [
-              ...ets.ArkTSLinter_1_0.runArkTSLinter(builderProgram!, sourceFile, undefined, 'ArkTS_1_0'),
-              ...ets.ArkTSLinter_1_1.runArkTSLinter(builderProgram!, sourceFile, undefined, 'ArkTS_1_1'),
-            ] as any[]
+              ...ets.ArkTSLinter_1_0.runArkTSLinter(builderProgram, sourceFile, undefined, 'ArkTS_1_0'),
+              ...ets.ArkTSLinter_1_1.runArkTSLinter(builderProgram, sourceFile, undefined, 'ArkTS_1_1'),
+            ].filter(tsDiagnostic => tsDiagnostic.start !== undefined && tsDiagnostic.length !== undefined).map(
+              tsDiagnostic => ({
+                code: tsDiagnostic.code,
+                range: Range.create(
+                  document.positionAt(tsDiagnostic.start!),
+                  document.positionAt(tsDiagnostic.start! + tsDiagnostic.length!),
+                ),
+                message: typeof tsDiagnostic.messageText === 'string'
+                  ? tsDiagnostic.messageText
+                  : tsDiagnostic.messageText.messageText,
+              }),
+            )
           }
           catch (error) {
             logger.getConsola().error(`ArkTS Linter error: `)
