@@ -22,10 +22,12 @@ export function createETSLinterDiagnosticService(ets: typeof import('ohos-typesc
           const languageService = ctx.getLanguageService()
           if (!sourceFile || !languageService)
             return []
-          builderProgram ??= ets.createIncrementalProgramForArkTs({
-            rootNames: languageService.getProgram()?.getRootFileNames() ?? [],
-            options: languageService.getProgram()?.getCompilerOptions() ?? {},
-          })
+          if (!builderProgram) {
+            builderProgram = ets.createIncrementalProgramForArkTs({
+              rootNames: languageService.getProgram()?.getRootFileNames() ?? [],
+              options: languageService.getProgram()?.getCompilerOptions() ?? {},
+            })
+          }
 
           try {
             return [
