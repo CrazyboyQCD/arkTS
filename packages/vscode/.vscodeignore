@@ -7,3 +7,4 @@ dist/*.map
 shims.d.ts
 hilog.html
 scripts/
+test/

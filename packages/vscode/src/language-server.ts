@@ -200,11 +200,9 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
    *
    * @returns {Promise<void>}
    */
-  async stop(willRestart: boolean = false): Promise<void> {
+  async stop(): Promise<void> {
     if (this._client) {
       await this._client.stop()
-      if (!willRestart)
-        this.watcher.removeAllListeners()
       this.getConsola().info('ETS Language Server stopped!')
       vscode.window.setStatusBarMessage('ETS Language Server stopped!', 1000)
     }
@@ -220,7 +218,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
   async restart(force: boolean = false, overrideClientOptions: LanguageClientOptions = {}): Promise<void> {
     this.getConsola().info(`======================= Restarting ETS Language Server =======================`)
     await executeCommand('typescript.restartTsServer')
-    await this.stop(true)
+    await this.stop()
     await this.start(force, overrideClientOptions)
     const reloadWindow = this.translator.t('ets.language-server.restart.reloadWindow.button')
     const reloadWindowChoice = await vscode.window.showInformationMessage(

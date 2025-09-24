@@ -13,3 +13,5 @@ oh_modules
 .hvigor
 .idea
 coverage
+.vscode-test
+

@@ -2,12 +2,14 @@
 import type { ETSPluginOptions, TypescriptLanguageFeatures } from '@arkts/shared'
 import type { LabsInfo } from '@volar/vscode'
 import type { LanguageClient, LanguageClientOptions } from '@volar/vscode/node'
+import type { IOnActivate } from 'unioc/vscode'
 import type { Translator } from '../translate'
+import path from 'node:path'
 import { executeCommand } from 'reactive-vscode'
 import * as vscode from 'vscode'
 import { AbstractWatcher } from '../abstract-watcher'
 
-export abstract class LanguageServerContext extends AbstractWatcher {
+export abstract class LanguageServerContext extends AbstractWatcher implements IOnActivate {
   /** Start the language server. */
   abstract start(force: boolean, overrideClientOptions: LanguageClientOptions): Promise<[LabsInfo | undefined, LanguageClientOptions]>
   /** Stop the language server. */
@@ -71,27 +73,22 @@ export abstract class LanguageServerContext extends AbstractWatcher {
   }
 
   /** Listen to all local.properties files in the workspace. */
-  protected listenAllLocalPropertiesFile(): void {
-    const workspaceFolders = vscode.workspace.workspaceFolders ?? []
-
-    for (const workspaceFolder of workspaceFolders) {
-      this.watcher.add(vscode.Uri.joinPath(workspaceFolder.uri, 'local.properties').fsPath)
-      this.getConsola().info(`Listening ${vscode.Uri.joinPath(workspaceFolder.uri, 'local.properties').fsPath}`)
-      this.watcher.add(vscode.Uri.joinPath(workspaceFolder.uri, 'build-profile.json5').fsPath)
-      this.getConsola().info(`Listening ${vscode.Uri.joinPath(workspaceFolder.uri, 'build-profile.json5').fsPath}`)
-    }
-
+  onActivate(): void {
     const debouncedOnLocalPropertiesChanged = this.debounce(this.onLocalPropertiesChanged.bind(this), 1000)
-    this.watcher.on('change', path => debouncedOnLocalPropertiesChanged('change', path))
-    this.watcher.on('unlink', path => debouncedOnLocalPropertiesChanged('unlink', path))
+    this.vscodeWatcher.onDidChange(uri => debouncedOnLocalPropertiesChanged('change', uri))
+    this.vscodeWatcher.onDidDelete(uri => debouncedOnLocalPropertiesChanged('unlink', uri))
+    this.vscodeWatcher.onDidCreate(uri => debouncedOnLocalPropertiesChanged('create', uri))
   }
 
   private isFirstStart: boolean = true
-  private async onLocalPropertiesChanged(event: string, path: string): Promise<void> {
+  private async onLocalPropertiesChanged(event: string, uri: vscode.Uri): Promise<void> {
     if (this.isFirstStart) {
       this.isFirstStart = false
       return
     }
+    const basename = path.basename(uri.fsPath)
+    if (basename !== 'local.properties' && basename !== 'build-profile.json5')
+      return
     this.getConsola().warn(`${path} is ${event.toUpperCase()}, restarting ETS Language Server...`)
     this.restart()
   }
