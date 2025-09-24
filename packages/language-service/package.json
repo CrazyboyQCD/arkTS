@@ -1,14 +1,14 @@
 {
-  "name": "@arkts/language-plugin",
-  "version": "1.1.3",
-  "description": "ArkTS Volar Language Plugin.",
+  "name": "@arkts/language-service",
+  "version": "1.1.0",
+  "description": "ArkTS Language Service.",
   "author": "Naily Zero <zero@naily.cc>",
   "license": "MIT",
-  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/language-plugin",
+  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/language-service",
   "repository": {
     "type": "git",
     "url": "https://github.com/ohosvscode/arkTS",
-    "directory": "packages/language-plugin"
+    "directory": "packages/language-server"
   },
   "bugs": {
     "url": "https://github.com/ohosvscode/arkTS/issues",
@@ -23,18 +23,16 @@
   ],
   "exports": {
     ".": {
-      "types": {
-        "import": "./out/index.d.mts",
-        "require": "./out/index.d.cts"
-      },
+      "types": "./out/index.d.ts",
       "import": "./out/index.mjs",
-      "require": "./out/index.js"
+      "default": "./out/index.js"
     },
-    "./out/*": "./out/*"
+    "./dist/*": "./dist/*"
   },
-  "main": "./out/index.js",
-  "module": "./out/index.mjs",
-  "types": "./out/index.d.ts",
+  "main": "out/index.js",
+  "bin": {
+    "ets-language-server": "./bin/ets-language-server.js"
+  },
   "files": [
     "bin",
     "out",
@@ -51,9 +49,14 @@
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@arkts/shared": "workspace:*",
+    "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",
-    "ts-macro": "^0.3.6",
+    "@volar/language-server": "catalog:prod",
+    "fast-glob": "catalog:dev",
+    "json5": "catalog:prod",
+    "ts-macro": "^0.3.4",
     "vscode-uri": "catalog:prod"
   }
 }

@@ -1,7 +1,7 @@
 import type { LanguageServicePlugin } from '@volar/language-service'
 import type * as ets from 'ohos-typescript'
 import { Range } from '@volar/language-server/node'
-import { ContextUtil } from '../utils/finder'
+import { ContextUtil } from '../utils/context-util'
 
 export function createETSFormattingService(): LanguageServicePlugin {
   return {

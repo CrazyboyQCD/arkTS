@@ -48,7 +48,10 @@ const plugin: ts.server.PluginModuleFactory = createLanguageServicePlugin((ts, i
 
   return {
     languagePlugins: [
-      ETSLanguagePlugin(ts, { sdkPaths: [sdkPath, hmsSdkPath].filter(Boolean) as string[], tsdk: info.config?.lspOptions?.typescript?.tsdk }),
+      ETSLanguagePlugin(ts, {
+        excludePaths: [sdkPath, hmsSdkPath].filter(Boolean) as string[],
+        tsdk: info.config?.lspOptions?.typescript?.tsdk,
+      }),
     ],
   }
 })

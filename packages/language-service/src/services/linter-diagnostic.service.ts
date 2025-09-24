@@ -1,10 +1,13 @@
-import type { LanguageServerLogger } from '@arkts/shared'
 import type { LanguageServicePlugin } from '@volar/language-server'
+import type { ArkTSExtraLanguageService } from '../language-service'
+import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
+import { typeAssert } from '@arkts/shared'
 import { Range } from '@volar/language-server'
-import { ContextUtil } from '../utils/finder'
+import { ContextUtil } from '../utils/context-util'
 
-export function createETSLinterDiagnosticService(ets: typeof import('ohos-typescript'), logger: LanguageServerLogger): LanguageServicePlugin {
-  let builderProgram: import('ohos-typescript').EmitAndSemanticDiagnosticsBuilderProgram | undefined
+export function createETSLinterDiagnosticService(arktsExtraLanguageService: ArkTSExtraLanguageService): LanguageServicePlugin {
+  typeAssert<ArkTSExtraLanguageServiceImpl>(arktsExtraLanguageService)
+  const ets = arktsExtraLanguageService.getETS()
 
   return {
     name: 'arkts-diagnostic',
@@ -22,19 +25,15 @@ export function createETSLinterDiagnosticService(ets: typeof import('ohos-typesc
           const languageService = ctx.getLanguageService()
           if (!sourceFile || !languageService)
             return []
-          if (!builderProgram) {
-            builderProgram = ets.createIncrementalProgramForArkTs({
-              rootNames: languageService.getProgram()?.getRootFileNames() ?? [],
-              options: languageService.getProgram()?.getCompilerOptions() ?? {},
-            })
-          }
+          const builderProgram = arktsExtraLanguageService.getBuilderProgram(languageService)
 
           try {
             return [
               ...ets.ArkTSLinter_1_0.runArkTSLinter(builderProgram, sourceFile, undefined, 'ArkTS_1_0'),
               ...ets.ArkTSLinter_1_1.runArkTSLinter(builderProgram, sourceFile, undefined, 'ArkTS_1_1'),
-            ].filter(tsDiagnostic => tsDiagnostic.start !== undefined && tsDiagnostic.length !== undefined).map(
-              tsDiagnostic => ({
+            ]
+              .filter(tsDiagnostic => tsDiagnostic.start !== undefined && tsDiagnostic.length !== undefined)
+              .map(tsDiagnostic => ({
                 code: tsDiagnostic.code,
                 range: Range.create(
                   document.positionAt(tsDiagnostic.start!),
@@ -43,11 +42,10 @@ export function createETSLinterDiagnosticService(ets: typeof import('ohos-typesc
                 message: typeof tsDiagnostic.messageText === 'string'
                   ? tsDiagnostic.messageText
                   : tsDiagnostic.messageText.messageText,
-              }),
-            )
+              }))
           }
           catch (error) {
-            logger.getConsola().error(`ArkTS Linter error: `)
+            console.error(`ArkTS Linter error: `)
             console.error(error)
             return []
           }
