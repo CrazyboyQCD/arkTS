@@ -6,7 +6,7 @@ import * as ets from 'ohos-typescript'
 import { URI } from 'vscode-uri'
 
 export interface TSProvider {
-  'typescript/languageService': () => import('ohos-typescript').LanguageService
+  'typescript/languageService'(): import('ohos-typescript').LanguageService
 }
 
 /** @see https://github.com/microsoft/vscode/blob/5b34b12d958fbb656b624629a242e78b3b667cf0/extensions/html-language-features/server/src/modes/javascriptMode.ts#L547 */
