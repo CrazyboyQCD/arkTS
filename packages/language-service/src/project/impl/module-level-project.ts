@@ -50,26 +50,16 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     return this._mainFolderExists
   }
 
-  private _resourceFolderExists: boolean | null = null
-
-  async isExistResourceFolder(): Promise<boolean> {
-    if (this._resourceFolderExists !== null)
-      return this._resourceFolderExists
-    const resourceFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src', 'main', 'resources')
-    this._resourceFolderExists = fs.existsSync(resourceFolderPath) && fs.statSync(resourceFolderPath).isDirectory()
-    return this._resourceFolderExists
-  }
-
   private _baseFolderExists: false | ResourceChildFolder[] | null = null
 
-  async readResourceChildFolder(force: boolean = false): Promise<ResourceChildFolder[] | false> {
+  async readResourceFolder(force: boolean = false): Promise<ResourceChildFolder[] | false> {
     if (this._baseFolderExists !== null && !force)
       return this._baseFolderExists
     const resourceFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src', 'main', 'resources')
     if (!fs.existsSync(resourceFolderPath) || !fs.statSync(resourceFolderPath).isDirectory())
       return false
     this._baseFolderExists = fs.readdirSync(resourceFolderPath).map(
-      filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath, filename)), filename, this),
+      filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath, filename)), this),
     )
     return this._baseFolderExists
   }

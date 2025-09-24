@@ -1,10 +1,10 @@
 import type { OpenHarmonyProjectDetector } from '../project-detector'
 import fs from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 import fg from 'fast-glob'
 import { URI } from 'vscode-uri'
-import { OpenHarmonyProject } from '../project'
+import { toPattern } from '../../utils/to-pattern'
+import { ModuleOpenHarmonyProject, OpenHarmonyProject } from '../project'
 
 export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetector {
   constructor(private readonly workspaceFolder: URI) {}
@@ -13,9 +13,7 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     return this.workspaceFolder
   }
 
-  private toPattern(path: string): string {
-    return process.platform === 'win32' ? fg.convertPathToPattern(path) : path
-  }
+  private _projects: OpenHarmonyProject[] | null = null
 
   /**
    * Find the projects in the workspace folder.
@@ -27,11 +25,13 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     '**/node_modules/**',
     '**/oh_modules/**',
     '**/.git/**',
-  ]): Promise<OpenHarmonyProject[]> {
+  ], force: boolean = false): Promise<OpenHarmonyProject[]> {
+    if (!force && this._projects)
+      return this._projects
     const workspaceFolder = this.getWorkspaceFolder().fsPath
     if (!fs.existsSync(workspaceFolder) || !fs.statSync(workspaceFolder).isDirectory())
       return []
-    const pattern = this.toPattern(path.resolve(workspaceFolder, '**', 'oh-package.json5'))
+    const pattern = toPattern(path.resolve(workspaceFolder, '**', 'oh-package.json5'))
     const ohPackageJson5Files = fg.sync(pattern, {
       onlyFiles: true,
       onlyDirectories: false,
@@ -45,6 +45,23 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
       if (project)
         projects.push(project)
     }
+    this._projects = projects
     return projects
+  }
+
+  async searchProject<InstanceType extends string>(filePath: URI, instanceType?: InstanceType): Promise<any | null> {
+    const projects = await this.findProjects()
+    for (const project of projects) {
+      if (!filePath.fsPath.startsWith(project.getProjectRoot().fsPath))
+        continue
+      if (!instanceType)
+        return project
+      if (!ModuleOpenHarmonyProject.is(project))
+        continue
+      if (!ModuleOpenHarmonyProject.is(project))
+        continue
+      return project
+    }
+    return null
   }
 }

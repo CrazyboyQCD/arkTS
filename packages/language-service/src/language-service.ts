@@ -28,6 +28,17 @@ export interface $$ThisPosition extends Range {
   ast: ets.PropertyAccessExpression
 }
 
+export interface $rCallExpression extends Range {
+  /**
+   * 对应的AST节点，必为`CallExpression`。
+   */
+  ast: ets.CallExpression
+  /**
+   * $r('foo.bar.baz') 的文本。
+   */
+  text: string
+}
+
 export interface ArkTSExtraLanguageService {
   /**
    * 获取 $$this 的位置
@@ -37,6 +48,14 @@ export interface ArkTSExtraLanguageService {
    * @returns 位置
    */
   get$$ThisPositions(sourceFile: ets.SourceFile, document: TextDocument): $$ThisPosition[]
+  /**
+   * 获取 $r 的位置
+   *
+   * @param sourceFile 源文件
+   * @param document 文档
+   * @returns 位置
+   */
+  get$rCallExpressions(sourceFile: ets.SourceFile, document: TextDocument): $rCallExpression[]
   /** 获取当前语言代码。 */
   getLocale(): string
   /**

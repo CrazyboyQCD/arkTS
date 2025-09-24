@@ -75,15 +75,53 @@ export interface ElementJsonFile {
   readJsonSourceFile(ets: typeof import('ohos-typescript'), force?: boolean): Promise<import('ohos-typescript').JsonSourceFile>
 }
 
+export interface ResourceMediaFile {
+  /**
+   * Get the element media file URI.
+   */
+  getUri(): URI
+  /**
+   * Get the resource child folder.
+   */
+  getResourceChildFolder(): ResourceChildFolder
+  /**
+   * Check if the element media file exists in the resource child folder.
+   */
+  isExist(force?: boolean): Promise<boolean>
+}
+
+export interface ResourceRawFile {
+  /**
+   * Get the resource raw file URI.
+   */
+  getUri(): URI
+  /**
+   * Get the resource child folder.
+   */
+  getResourceChildFolder(): ResourceChildFolder
+  /**
+   * Check if the resource raw file exists in the resource child folder.
+   */
+  isExist(force?: boolean): Promise<boolean>
+  /**
+   * Get the relative path of the resource raw file.
+   */
+  getRelativePath(): string
+  /**
+   * Get the completion text of the resource raw file.
+   */
+  getCompletionText(currentInput: string): string
+}
+
 export interface ResourceChildFolder {
+  /**
+   * Get the resource child folder URI.
+   */
+  getUri(): URI
   /**
    * Get the module open harmony project.
    */
   getModuleOpenHarmonyProject(): ModuleOpenHarmonyProject
-  /**
-   * Get the folder name.
-   */
-  getFolderName(): 'base' | 'dark' | 'rawfile' | 'resfile' | (string & {})
   /**
    * Check if the resource child folder exists in the project.
    */
@@ -96,7 +134,7 @@ export interface ResourceChildFolder {
    * |  |-- main
    * |  |  |-- resources
    * |  |  |  |-- base
-   * |  |  |  |  |-- element <-- check this folder is exist
+   * |  |  |  |  |-- element <--
    * |  |  |  |  |-- ...
    * |  |  |  |-- ...
    * |  |-- ...
@@ -106,9 +144,34 @@ export interface ResourceChildFolder {
    */
   readElementFolder(force?: boolean): Promise<false | ElementJsonFile[]>
   /**
+   * Read the media folder in the resource child folder.
+   *
+   * ```txt
+   * |-- src
+   * |  |-- main
+   * |  |  |-- resources
+   * |  |  |  |-- base
+   * |  |  |  |  |-- media <--
+   * |  |  |  |  |-- ...
+   * |  |  |  |-- ...
+   * |  |-- ...
+   * ```
+   *
+   * @param force - If true, the media folder will be read again. If not provided, the cached value will be returned.
+   */
+  readMediaFolder(force?: boolean): Promise<false | ResourceMediaFile[]>
+  /**
+   * Read the file paths in the resource child folder (folder will be ignored).
+   *
+   * It is useful when the resource child folder is `rawfile` or `resfile`.
+   *
+   * @param force - If true, the file paths will be read again. If not provided, the cached value will be returned.
+   */
+  readRawFile(force?: boolean): Promise<ResourceRawFile[]>
+  /**
    * Get the element folder path in the resource child folder.
    */
-  getElementFolderPath(): Promise<URI>
+  getElementFolderPath(): URI
 }
 
 export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
@@ -122,7 +185,7 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    * ```txt
    * |-- src
    * |  |-- main
-   * |  |  |-- module.json5 <-- read this file
+   * |  |  |-- module.json5 <--
    * |  |-- mock
    * |  |-- test
    * |  |-- ...
@@ -155,24 +218,13 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    */
   isExistSourceFolder(): Promise<boolean>
   /**
-   * Check if the resources folder exists in the project.
-   *
-   * ```txt
-   * |-- src
-   * |  |-- main
-   * |  |  |-- ets
-   * |  |  |-- resources <-- check this folder is exist
-   * |  |-- ...
-   */
-  isExistResourceFolder(): Promise<boolean>
-  /**
    * Check if the resource child folder exists in the project.
    *
    * ```txt
    * |-- src
    * |  |-- main
    * |  |  |-- resources
-   * |  |  |  |-- base <---- check those folder is exist
+   * |  |  |  |-- base ---|
    * |  |  |  |-- dark    |
    * |  |  |  |-- rawfile |
    * |  |  |  |-- resfile |
@@ -180,7 +232,7 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    * |  |  |  |-- ...  ---|
    * |  |-- ...
    */
-  readResourceChildFolder(force?: boolean): Promise<ResourceChildFolder[] | false>
+  readResourceFolder(force?: boolean): Promise<ResourceChildFolder[] | false>
   /**
    * Reset the project state & clear the cache.
    *

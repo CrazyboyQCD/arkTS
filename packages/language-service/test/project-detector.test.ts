@@ -11,6 +11,7 @@ describe('project-detector', (it) => {
   let openHarmonyProjectDetector: OpenHarmonyProjectDetector
   const workspaceFolder = URI.file(path.resolve(__dirname, 'mock', 'workspace'))
   const workspaceFolderProject1 = Utils.joinPath(workspaceFolder, 'harmony-project-1')
+  const testingRawfile = 'nest-folder/foo.txt'
 
   it.sequential('should create', () => {
     openHarmonyProjectDetector = createOpenHarmonyProjectDetector(workspaceFolder)
@@ -42,11 +43,11 @@ describe('project-detector', (it) => {
     // check resource child folder exists
     const resourceChildFolder = await childrenProjects?.[0].readResourceChildFolder()
     expect(resourceChildFolder).not.toBe(false)
-    expect(resourceChildFolder).toHaveLength(1)
     typeAssert<ResourceChildFolder[]>(resourceChildFolder)
+    expect(resourceChildFolder.length).toBeGreaterThanOrEqual(1)
 
     // find base folder and check it
-    const baseFolder = resourceChildFolder.find(folder => folder.getFolderName() === 'base')
+    const baseFolder = resourceChildFolder.find(folder => path.basename(folder.getUri().fsPath) === 'base')
     expect(baseFolder).toBeDefined()
     expect(await baseFolder?.isExist()).toBe(true)
 
@@ -64,5 +65,30 @@ describe('project-detector', (it) => {
     const jsonSourceFile = await firstElementFolder.readJsonSourceFile(ets)
     expect(jsonSourceFile).toBeDefined()
     expect(jsonSourceFile.getText()).toEqual(jsonText)
+
+    // check rawfile folder exists
+    const rawfileFolder = resourceChildFolder.find(folder => path.basename(folder.getUri().fsPath) === 'rawfile')
+    expect(rawfileFolder).toBeDefined()
+    expect(await rawfileFolder?.isExist()).toBe(true)
+    const rawFiles = await rawfileFolder?.readRawFile()
+    expect(rawFiles?.length).toBeGreaterThanOrEqual(1)
+    const fooTxt = rawFiles?.find(file => path.basename(file.getUri().fsPath) === 'foo.txt')
+    expect(fooTxt).toBeDefined()
+    expect(await fooTxt?.isExist()).toBe(true)
+    expect(fooTxt?.getRelativePath()).toBe(testingRawfile)
+
+    // completion text test
+    // empty input, will return the first path segment
+    expect(fooTxt?.getCompletionText('')).toMatchInlineSnapshot(`"nest-folder"`)
+    // no complete, will return the completion text
+    expect(fooTxt?.getCompletionText('nest-fo')).toMatchInlineSnapshot(`"lder"`)
+    // complete, will return the current input
+    expect(fooTxt?.getCompletionText('nest-folder')).toMatchInlineSnapshot(`"nest-folder"`)
+    // when with trailing slash will return the completion text
+    expect(fooTxt?.getCompletionText('nest-folder/')).toMatchInlineSnapshot(`"foo.txt"`)
+    // no complete, will return the completion text
+    expect(fooTxt?.getCompletionText('nest-folder/foo.t')).toMatchInlineSnapshot(`"xt"`)
+    // complete, will return the current input
+    expect(fooTxt?.getCompletionText('nest-folder/foo.txt')).toMatchInlineSnapshot(`"nest-folder/foo.txt"`)
   })
 })

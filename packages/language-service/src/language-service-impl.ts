@@ -1,6 +1,6 @@
 import type * as ets from 'ohos-typescript'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import type { $$ThisPosition, ArkTSExtraLanguageService, ArkTSExtraLanguageServiceOptions } from './language-service'
+import type { $$ThisPosition, $rCallExpression, ArkTSExtraLanguageService, ArkTSExtraLanguageServiceOptions } from './language-service'
 import { SymbolKind as LspSymbolKind, Range } from '@volar/language-server'
 import { deepRemoveFalsyValue } from './utils/deep-remove-falsy-value'
 
@@ -29,6 +29,33 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
         start: document.positionAt(node.expression.getStart(sourceFile)),
         end: document.positionAt(node.expression.getEnd()),
         ast: node,
+      })
+    })
+
+    return ranges
+  }
+
+  get$rCallExpressions(sourceFile: ets.SourceFile, document: TextDocument): $rCallExpression[] {
+    const ranges: $rCallExpression[] = []
+    const ets = this.getETS()
+
+    sourceFile.forEachChild(function visitor(node): void {
+      node.forEachChild(visitor)
+
+      if (!ets.isCallExpression(node))
+        return
+      if (node.expression.getText(sourceFile) !== '$r')
+        return
+
+      const firstArgument = node.arguments[0]
+      if (firstArgument && !ets.isStringLiteral(firstArgument))
+        return
+
+      ranges.push({
+        start: document.positionAt(node.expression.getStart(sourceFile)),
+        end: document.positionAt(node.expression.getEnd()),
+        ast: node,
+        text: firstArgument.getText(sourceFile),
       })
     })
 
