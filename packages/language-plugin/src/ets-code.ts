@@ -38,5 +38,5 @@ export function createEmptyVirtualCode(snapshot: ts.IScriptSnapshot, languageId:
 export class ETSVirtualCode extends TsmVirtualCode {}
 
 export type ETSMacroPlugin = Omit<TsmLanguagePlugin, 'resolveVirtualCode'> & {
-  resolveVirtualCode?: (virtualCode: ETSVirtualCode) => void
+  resolveVirtualCode?(virtualCode: ETSVirtualCode): void
 }

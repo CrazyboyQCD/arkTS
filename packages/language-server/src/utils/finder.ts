@@ -4,7 +4,7 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 
 export interface TSProvider {
-  'typescript/languageService': () => ets.LanguageService
+  'typescript/languageService'(): ets.LanguageService
 }
 
 /** 一些工具类，用于services中获取一些对象。 */
