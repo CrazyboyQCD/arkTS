@@ -9,9 +9,6 @@ export class AbstractWatcher extends FileSystem implements Disposable {
   get vscodeWatcher(): vscode.FileSystemWatcher {
     if (!this._vscodeWatcher) {
       this._vscodeWatcher = vscode.workspace.createFileSystemWatcher('**/*')
-      this._vscodeWatcher.onDidChange((uri) => {
-        this.getConsola().warn(`${uri.fsPath} is changed.`)
-      })
     }
     return this._vscodeWatcher
   }

@@ -1,6 +1,6 @@
 import type { ModuleJson5 } from '../../types/module-json5'
 import type { DeepPartial } from '../../types/util'
-import type { ModuleOpenHarmonyProject, ResourceChildFolder } from '../project'
+import type { ModuleOpenHarmonyProject, ResourceFolder } from '../project'
 import fs from 'node:fs'
 import path from 'node:path'
 import json5 from 'json5'
@@ -29,6 +29,10 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     try {
       if (!fs.existsSync(moduleJson5Path) || !fs.statSync(moduleJson5Path).isFile())
         return null
+      this.getProjectDetector()
+        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/readModuleJson5')
+        .getConsola()
+        .info(`Read module.json5: ${moduleJson5Path}`)
       const moduleJson5 = fs.readFileSync(moduleJson5Path, 'utf-8')
       const moduleJson = json5.parse(moduleJson5)
       this._moduleJson5 = moduleJson
@@ -46,18 +50,26 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     if (this._mainFolderExists !== null)
       return this._mainFolderExists
     const mainFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src', 'main')
+    this.getProjectDetector()
+      .getLogger('ProjectDetector/ModuleOpenHarmonyProject/isExistMainFolder')
+      .getConsola()
+      .info(`Check main folder: ${mainFolderPath}`)
     this._mainFolderExists = fs.existsSync(mainFolderPath) && fs.statSync(mainFolderPath).isDirectory()
     return this._mainFolderExists
   }
 
-  private _baseFolderExists: false | ResourceChildFolder[] | null = null
+  private _baseFolderExists: false | ResourceFolder[] | null = null
 
-  async readResourceFolder(force: boolean = false): Promise<ResourceChildFolder[] | false> {
+  async readResourceFolder(force: boolean = false): Promise<ResourceFolder[] | false> {
     if (this._baseFolderExists !== null && !force)
       return this._baseFolderExists
     const resourceFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src', 'main', 'resources')
     if (!fs.existsSync(resourceFolderPath) || !fs.statSync(resourceFolderPath).isDirectory())
       return false
+    this.getProjectDetector()
+      .getLogger('ProjectDetector/ModuleOpenHarmonyProject/readResourceFolder')
+      .getConsola()
+      .info(`Readed resource folder: ${resourceFolderPath}`)
     this._baseFolderExists = fs.readdirSync(resourceFolderPath).map(
       filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath, filename)), this),
     )
@@ -70,17 +82,36 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     if (this._sourceFolderExists !== null)
       return this._sourceFolderExists
     const sourceFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src')
+    this.getProjectDetector()
+      .getLogger('ProjectDetector/ModuleOpenHarmonyProject/isExistSourceFolder')
+      .getConsola()
+      .info(`Check src folder: ${sourceFolderPath}`)
     this._sourceFolderExists = fs.existsSync(sourceFolderPath) && fs.statSync(sourceFolderPath).isDirectory()
     return this._sourceFolderExists
   }
 
   async reset(resetTypes: readonly ModuleOpenHarmonyProject.ResetType[] = ModuleOpenHarmonyProjectImpl.defaultResetTypes): Promise<void> {
-    if (resetTypes?.includes('module.json5'))
+    if (resetTypes?.includes('module.json5')) {
       this._moduleJson5 = null
-    if (resetTypes?.includes('main'))
+      this.getProjectDetector()
+        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/reset')
+        .getConsola()
+        .info(`Reset project: ${this.getProjectRoot().toString()}, module.json5`)
+    }
+    if (resetTypes?.includes('main')) {
       this._mainFolderExists = null
-    if (resetTypes?.includes('src'))
+      this.getProjectDetector()
+        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/reset')
+        .getConsola()
+        .info(`Reset project: ${this.getProjectRoot().toString()}, main`)
+    }
+    if (resetTypes?.includes('src')) {
       this._sourceFolderExists = null
+      this.getProjectDetector()
+        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/reset')
+        .getConsola()
+        .info(`Reset project: ${this.getProjectRoot().toString()}, src`)
+    }
     await super.reset(resetTypes)
   }
 

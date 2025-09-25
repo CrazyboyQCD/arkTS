@@ -1,7 +1,9 @@
+import type { Position } from '@volar/language-server'
 import type { URI } from 'vscode-uri'
 import type { BuildProfile } from '../types/build-profile'
 import type { ModuleJson5 } from '../types/module-json5'
 import type { OhPackageJson5 } from '../types/oh-package5'
+import type { ResourceElementFile } from '../types/resource-element-file'
 import type { DeepPartial } from '../types/util'
 import type { OpenHarmonyProjectDetector } from './project-detector'
 import { ModuleOpenHarmonyProjectImpl } from './impl/module-level-project'
@@ -13,6 +15,10 @@ export interface OpenHarmonyProject {
    * Get the project root URI.
    */
   getProjectRoot(): URI
+  /**
+   * Get the project detector.
+   */
+  getProjectDetector(): OpenHarmonyProjectDetector
   /**
    * Read the oh-package.json5 file in the project root. If the file does not exist, return null.
    */
@@ -42,16 +48,25 @@ export namespace OpenHarmonyProject {
     // 先检测是否是模块级项目，后检测是否是工作空间级项目。
     // 因为一般来讲，模块极项目的数量会比工作空间级项目的数量多，这样能减少不必要的检测。
     const moduleProject = new ModuleOpenHarmonyProjectImpl(projectRoot, projectDetector)
-    if (await moduleProject.is())
+    if (await moduleProject.is()) {
+      projectDetector.getLogger('ProjectDetector/ModuleProject').getConsola().info(`Project created: ${moduleProject.getProjectRoot().toString()}`)
       return moduleProject
+    }
     const workspaceProject = new WorkspaceOpenHarmonyProjectImpl(projectRoot, projectDetector)
-    if (await workspaceProject.is())
+    if (await workspaceProject.is()) {
+      projectDetector.getLogger('ProjectDetector/WorkspaceProject').getConsola().info(`Project created: ${workspaceProject.getProjectRoot().toString()}`)
       return workspaceProject
+    }
+    return workspaceProject
     return false
   }
 }
 
-export interface ElementJsonFile {
+export type ElementJsonFileBase = {
+  [K in keyof ResourceElementFile as `get${Capitalize<string & K>}`]-?: (force?: boolean) => Promise<ResourceElementFile[K]>
+}
+
+export interface ElementJsonFile extends ElementJsonFileBase {
   /**
    * Get the element json file URI.
    */
@@ -59,7 +74,7 @@ export interface ElementJsonFile {
   /**
    * Get the resource element folder.
    */
-  getResourceChildFolder(): ResourceChildFolder
+  getResourceFolder(): ResourceFolder
   /**
    * Read the json text of the element json file.
    *
@@ -73,6 +88,52 @@ export interface ElementJsonFile {
    * @param force - If true, the json source file will be read again. If not provided, the cached value will be returned.
    */
   readJsonSourceFile(ets: typeof import('ohos-typescript'), force?: boolean): Promise<import('ohos-typescript').JsonSourceFile>
+  /**
+   * Safe parse the json text of the element json file.
+   *
+   * @returns The parsed json object. If the json text is null, return null.
+   */
+  safeParse(): Promise<DeepPartial<ResourceElementFile> | null>
+  /**
+   * Get the name ranges of the element json file.
+   *
+   * @param ets - The ohos typescript instance.
+   * @param force - If true, the name or id ranges will be read again. If not provided, the cached value will be returned.
+   */
+  getNameRange(ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRange[]>
+}
+
+export namespace ElementJsonFile {
+  export enum ElementKind {
+    String = 'string',
+    Color = 'color',
+    Integer = 'integer',
+    Float = 'float',
+    IntArray = 'intarray',
+    Boolean = 'boolean',
+    Plural = 'plural',
+    Pattern = 'pattern',
+    StrArray = 'strarray',
+    Theme = 'theme',
+  }
+  export namespace ElementKind {
+    export function is(value: unknown): value is ElementKind {
+      return Object.values(ElementKind).includes(value as ElementKind)
+    }
+  }
+
+  export interface NameRange {
+    kind: ElementKind
+    start: Position
+    end: Position
+    text: string
+    uri: URI
+  }
+
+  export interface NameRangeReference {
+    name: string
+    references: NameRange[]
+  }
 }
 
 export interface ResourceMediaFile {
@@ -83,7 +144,7 @@ export interface ResourceMediaFile {
   /**
    * Get the resource child folder.
    */
-  getResourceChildFolder(): ResourceChildFolder
+  getResourceFolder(): ResourceFolder
   /**
    * Check if the element media file exists in the resource child folder.
    */
@@ -98,7 +159,7 @@ export interface ResourceRawFile {
   /**
    * Get the resource child folder.
    */
-  getResourceChildFolder(): ResourceChildFolder
+  getResourceFolder(): ResourceFolder
   /**
    * Check if the resource raw file exists in the resource child folder.
    */
@@ -113,7 +174,11 @@ export interface ResourceRawFile {
   getCompletionText(currentInput: string): string
 }
 
-export interface ResourceChildFolder {
+export interface ResourceFolder {
+  /**
+   * Get the module open harmony project.
+   */
+  getModuleOpenHarmonyProject(): ModuleOpenHarmonyProject
   /**
    * Get the resource child folder URI.
    */
@@ -126,6 +191,26 @@ export interface ResourceChildFolder {
    * Check if the resource child folder exists in the project.
    */
   isExist(): Promise<boolean>
+  /**
+   * Check if the resource child folder is the base folder.
+   */
+  isBase(): boolean
+  /**
+   * Check if the resource child folder is the dark folder.
+   */
+  isDark(): boolean
+  /**
+   * Check if the resource child folder is the rawfile folder.
+   */
+  isRawfile(): boolean
+  /**
+   * Check if the resource child folder is the resfile folder.
+   */
+  isResfile(): boolean
+  /**
+   * Check if the resource child folder is the element folder.
+   */
+  isElementFolder(): boolean
   /**
    * Check if the element folder exists in the resource child folder.
    *
@@ -143,6 +228,13 @@ export interface ResourceChildFolder {
    * @param force - If true, the element folder will be read again. If not provided, the cached value will be returned.
    */
   readElementFolder(force?: boolean): Promise<false | ElementJsonFile[]>
+  /**
+   * Get the name range references of the element json files in the resource child folder.
+   *
+   * @param ets - The ohos typescript instance.
+   * @param force - If true, the name range references will be read again. If not provided, the cached value will be returned.
+   */
+  getElementNameRangeReference(ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRangeReference[]>
   /**
    * Read the media folder in the resource child folder.
    *
@@ -172,6 +264,10 @@ export interface ResourceChildFolder {
    * Get the element folder path in the resource child folder.
    */
   getElementFolderPath(): URI
+  /**
+   * Reset the resource folder state & clear the cache.
+   */
+  reset(): Promise<void>
 }
 
 export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
@@ -232,7 +328,7 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    * |  |  |  |-- ...  ---|
    * |  |-- ...
    */
-  readResourceFolder(force?: boolean): Promise<ResourceChildFolder[] | false>
+  readResourceFolder(force?: boolean): Promise<ResourceFolder[] | false>
   /**
    * Reset the project state & clear the cache.
    *

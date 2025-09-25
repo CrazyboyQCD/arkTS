@@ -1,14 +1,14 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceChildFolder, ResourceMediaFile } from '../project'
+import type { ResourceFolder, ResourceMediaFile } from '../project'
 import fs from 'node:fs'
 
 export class ResourceMediaFileImpl implements ResourceMediaFile {
   constructor(
-    private readonly resourceChildFolder: ResourceChildFolder,
+    private readonly resourceChildFolder: ResourceFolder,
     private readonly elementMediaFile: URI,
   ) {}
 
-  getResourceChildFolder(): ResourceChildFolder {
+  getResourceFolder(): ResourceFolder {
     return this.resourceChildFolder
   }
 
@@ -22,6 +22,12 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
     if (this._isExist !== null && !force)
       return this._isExist
     this._isExist = fs.existsSync(this.elementMediaFile.fsPath) && fs.statSync(this.elementMediaFile.fsPath).isFile()
+    this.getResourceFolder()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/ResourceMediaFile/isExist')
+      .getConsola()
+      .info(`Check media file: ${this.elementMediaFile.toString()}`)
     return this._isExist
   }
 }

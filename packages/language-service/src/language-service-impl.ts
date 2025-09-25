@@ -52,10 +52,12 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
         return
 
       ranges.push({
-        start: document.positionAt(node.expression.getStart(sourceFile)),
-        end: document.positionAt(node.expression.getEnd()),
+        start: document.positionAt(node.getStart(sourceFile)),
+        end: document.positionAt(node.getEnd()),
         ast: node,
-        text: firstArgument.getText(sourceFile),
+        text: firstArgument.getText(sourceFile).replace(/["'`]/g, ''),
+        stringStart: document.positionAt(firstArgument.getStart(sourceFile)),
+        stringEnd: document.positionAt(firstArgument.getEnd()),
       })
     })
 

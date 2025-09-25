@@ -1,11 +1,11 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceChildFolder, ResourceRawFile } from '../project'
+import type { ResourceFolder, ResourceRawFile } from '../project'
 import fs from 'node:fs'
 import path from 'node:path'
 
 export class ResourceRawFileImpl implements ResourceRawFile {
   constructor(
-    private readonly resourceChildFolder: ResourceChildFolder,
+    private readonly resourceChildFolder: ResourceFolder,
     private readonly uri: URI,
   ) {}
 
@@ -13,7 +13,7 @@ export class ResourceRawFileImpl implements ResourceRawFile {
     return this.uri
   }
 
-  getResourceChildFolder(): ResourceChildFolder {
+  getResourceFolder(): ResourceFolder {
     return this.resourceChildFolder
   }
 
@@ -27,7 +27,7 @@ export class ResourceRawFileImpl implements ResourceRawFile {
   }
 
   getRelativePath(): string {
-    const parentFolderPath = this.getResourceChildFolder().getUri().fsPath
+    const parentFolderPath = this.getResourceFolder().getUri().fsPath
     const filePath = this.getUri().fsPath
     return path.relative(parentFolderPath, filePath).replace(/\\/g, '/')
   }

@@ -1,10 +1,12 @@
 import type { LanguageServicePlugin, Range } from '@volar/language-server'
 import type * as ets from 'ohos-typescript'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
+import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import type { OpenHarmonyProjectDetector } from './project'
 import { ArkTSExtraLanguageServiceImpl } from './language-service-impl'
 import { createETS$$ThisService } from './services/$$this.service'
 import { createETSFormattingService } from './services/formatting.service'
 import { createETSLinterDiagnosticService } from './services/linter-diagnostic.service'
+import { createETSResourceService } from './services/resource.service'
 import { createETSSymbolTreeService } from './services/symbol-tree.service'
 
 export interface ArkTSExtraLanguageServiceOptions {
@@ -37,6 +39,8 @@ export interface $rCallExpression extends Range {
    * $r('foo.bar.baz') 的文本。
    */
   text: string
+  stringStart: Position
+  stringEnd: Position
 }
 
 export interface ArkTSExtraLanguageService {
@@ -100,7 +104,7 @@ export interface ArkTServices extends Array<LanguageServicePlugin> {
  *
  * @returns 语言服务集合，并且提供一个`getArkTSExtraLanguageService`方法，用于获取ArkTS高级语言服务。
  */
-export function createArkTServices(options: ArkTSExtraLanguageServiceOptions): ArkTServices {
+export function createArkTServices(options: ArkTSExtraLanguageServiceOptions, detector: OpenHarmonyProjectDetector): ArkTServices {
   const arktsExtraLanguageService = createArkTSExtraLanguageService(options)
 
   const services: ArkTServices = [
@@ -108,6 +112,7 @@ export function createArkTServices(options: ArkTSExtraLanguageServiceOptions): A
     createETS$$ThisService(arktsExtraLanguageService),
     createETSFormattingService(),
     createETSSymbolTreeService(arktsExtraLanguageService),
+    createETSResourceService(detector, arktsExtraLanguageService),
   ] as ArkTServices
 
   services.getArkTSExtraLanguageService = () => arktsExtraLanguageService

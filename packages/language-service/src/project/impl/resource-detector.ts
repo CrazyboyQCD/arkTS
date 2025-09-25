@@ -1,4 +1,4 @@
-import type { ElementJsonFile, ModuleOpenHarmonyProject, ResourceChildFolder, ResourceMediaFile, ResourceRawFile } from '../project'
+import type { ElementJsonFile, ModuleOpenHarmonyProject, ResourceFolder, ResourceMediaFile, ResourceRawFile } from '../project'
 import fs from 'node:fs'
 import path from 'node:path'
 import fg from 'fast-glob'
@@ -8,7 +8,7 @@ import { ElementJsonFileImpl } from './element-json-file'
 import { ResourceMediaFileImpl } from './element-media-file'
 import { ResourceRawFileImpl } from './resource-raw-file'
 
-export class ResourceChildFolderImpl implements ResourceChildFolder {
+export class ResourceChildFolderImpl implements ResourceFolder {
   constructor(
     private readonly resourceChildFolder: URI,
     private readonly moduleOpenHarmonyProject: ModuleOpenHarmonyProject,
@@ -24,6 +24,27 @@ export class ResourceChildFolderImpl implements ResourceChildFolder {
 
   getUri(): URI {
     return this.resourceChildFolder
+  }
+
+  isBase(): boolean {
+    return path.basename(this.resourceChildFolder.fsPath) === 'base'
+  }
+
+  isDark(): boolean {
+    return path.basename(this.resourceChildFolder.fsPath) === 'dark'
+  }
+
+  isRawfile(): boolean {
+    return path.basename(this.resourceChildFolder.fsPath) === 'rawfile'
+  }
+
+  isResfile(): boolean {
+    return path.basename(this.resourceChildFolder.fsPath) === 'resfile'
+  }
+
+  isElementFolder(): boolean {
+    // rawfile文件夹和resfile文件夹内部不可以有element文件夹（就算有也不处理）
+    return !this.isRawfile() && !this.isResfile()
   }
 
   getElementFolderPath(): URI {
@@ -54,33 +75,85 @@ export class ResourceChildFolderImpl implements ResourceChildFolder {
       this._elementFolderExists = fs.readdirSync(elementFolderPath.fsPath).map(
         filename => new ElementJsonFileImpl(this, URI.file(path.resolve(elementFolderPath.fsPath, filename))),
       )
+      this.getModuleOpenHarmonyProject()
+        .getProjectDetector()
+        .getLogger('ProjectDetector/ResourceFolder/readElementFolder')
+        .getConsola()
+        .info(`Read element folder: ${elementFolderPath.toString()}`)
     }
     else {
       this._elementFolderExists = false
+      this.getModuleOpenHarmonyProject()
+        .getProjectDetector()
+        .getLogger('ProjectDetector/ResourceFolder/readElementFolder')
+        .getConsola()
+        .warn(`Element folder not found: ${elementFolderPath.toString()}`)
     }
     return this._elementFolderExists
   }
 
+  private _elementNameRangeReference: ElementJsonFile.NameRangeReference[] | null = null
+
+  async getElementNameRangeReference(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {
+    if (this._elementNameRangeReference !== null && !force)
+      return this._elementNameRangeReference
+    const elementFolder = await this.readElementFolder(force)
+    if (!elementFolder)
+      return []
+
+    const references: ElementJsonFile.NameRangeReference[] = []
+
+    for (const element of elementFolder) {
+      const nameRanges = await element.getNameRange(ets, force)
+
+      for (const nameRange of nameRanges) {
+        const foundIndex = references.findIndex(reference => reference.name === nameRange.text)
+        if (foundIndex === -1) {
+          references.push({
+            name: nameRange.text,
+            references: [nameRange],
+          })
+        }
+        else {
+          references[foundIndex].references.push(nameRange)
+        }
+      }
+    }
+
+    this._elementNameRangeReference = references
+    return this._elementNameRangeReference
+  }
+
   private _mediaFolderExists: false | ResourceMediaFile[] | null = null
 
-  async readMediaFolder(force?: boolean): Promise<false | ResourceMediaFile[]> {
+  async readMediaFolder(force: boolean = false): Promise<false | ResourceMediaFile[]> {
     if (this._mediaFolderExists !== null && !force)
       return this._mediaFolderExists
     const mediaFolderPath = this.getElementFolderPath()
     if (fs.existsSync(mediaFolderPath.fsPath) && fs.statSync(mediaFolderPath.fsPath).isDirectory()) {
+      this.getModuleOpenHarmonyProject()
+        .getProjectDetector()
+        .getLogger('ProjectDetector/ResourceFolder/readMediaFolder')
+        .getConsola()
+        .info(`Read media folder: ${mediaFolderPath.toString()}`)
       this._mediaFolderExists = fs.readdirSync(mediaFolderPath.fsPath).map(
         filename => new ResourceMediaFileImpl(this, URI.file(path.resolve(mediaFolderPath.fsPath, filename))),
       )
     }
     else {
       this._mediaFolderExists = false
+      this.getModuleOpenHarmonyProject()
+        .getProjectDetector()
+        .getLogger('ProjectDetector/ResourceFolder/readMediaFolder')
+        .getConsola()
+        .warn(`Media folder not found: ${mediaFolderPath.toString()}`)
     }
     return this._mediaFolderExists
   }
 
   private _filePaths: ResourceRawFile[] | null = null
 
-  async readRawFile(force?: boolean): Promise<ResourceRawFile[]> {
+  async readRawFile(force: boolean = false): Promise<ResourceRawFile[]> {
     if (this._filePaths !== null && !force)
       return this._filePaths
     const pattern = toPattern(path.resolve(this.resourceChildFolder.fsPath, '**', '*'))
@@ -89,6 +162,23 @@ export class ResourceChildFolderImpl implements ResourceChildFolder {
       onlyDirectories: false,
       absolute: true,
     }).map(filePath => new ResourceRawFileImpl(this, URI.file(filePath)))
+    this.getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/ResourceFolder/readRawFile')
+      .getConsola()
+      .info(`Read raw file: ${pattern}`)
     return this._filePaths
+  }
+
+  async reset(): Promise<void> {
+    this._elementFolderExists = null
+    this._elementNameRangeReference = null
+    this._mediaFolderExists = null
+    this._filePaths = null
+    this.getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/ResourceFolder/reset')
+      .getConsola()
+      .info(`Reset resource folder: ${this.resourceChildFolder.toString()}`)
   }
 }

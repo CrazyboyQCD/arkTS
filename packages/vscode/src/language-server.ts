@@ -123,6 +123,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       documentSelector: [
         { language: 'ets' },
         { language: 'typescript' },
+        { language: 'json' },
       ],
       outputChannel: this.getOutputChannel(),
       initializationOptions: {

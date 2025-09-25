@@ -1,5 +1,5 @@
 import type { OpenHarmonyProjectDetector } from '../src/index'
-import type { ElementJsonFile, ResourceChildFolder } from '../src/project/project'
+import type { ElementJsonFile, ResourceFolder } from '../src/project/project'
 import path from 'node:path'
 import { typeAssert } from '@arkts/shared'
 import * as ets from 'ohos-typescript'
@@ -38,12 +38,11 @@ describe('project-detector', (it) => {
 
     // check resource folder exists
     expect(childrenProjects?.[0]?.projectType).toBe('module')
-    expect(await childrenProjects?.[0].isExistResourceFolder()).toBe(true)
 
     // check resource child folder exists
-    const resourceChildFolder = await childrenProjects?.[0].readResourceChildFolder()
+    const resourceChildFolder = await childrenProjects?.[0].readResourceFolder()
     expect(resourceChildFolder).not.toBe(false)
-    typeAssert<ResourceChildFolder[]>(resourceChildFolder)
+    typeAssert<ResourceFolder[]>(resourceChildFolder)
     expect(resourceChildFolder.length).toBeGreaterThanOrEqual(1)
 
     // find base folder and check it
@@ -65,6 +64,8 @@ describe('project-detector', (it) => {
     const jsonSourceFile = await firstElementFolder.readJsonSourceFile(ets)
     expect(jsonSourceFile).toBeDefined()
     expect(jsonSourceFile.getText()).toEqual(jsonText)
+    const nameRanges = await firstElementFolder.getNameRange(ets)
+    expect(nameRanges.length).toBeGreaterThanOrEqual(1)
 
     // check rawfile folder exists
     const rawfileFolder = resourceChildFolder.find(folder => path.basename(folder.getUri().fsPath) === 'rawfile')
@@ -90,5 +91,39 @@ describe('project-detector', (it) => {
     expect(fooTxt?.getCompletionText('nest-folder/foo.t')).toMatchInlineSnapshot(`"xt"`)
     // complete, will return the current input
     expect(fooTxt?.getCompletionText('nest-folder/foo.txt')).toMatchInlineSnapshot(`"nest-folder/foo.txt"`)
+
+    // check element name range reference
+    const elementNameRangeReference = await baseFolder?.getElementNameRangeReference(ets)
+    expect(elementNameRangeReference).toBeDefined()
+    expect(elementNameRangeReference?.length).toBeGreaterThanOrEqual(1)
+    const primaryColor = elementNameRangeReference?.find(reference => reference.name === 'primary_color')
+    expect(primaryColor).toBeDefined()
+    expect(primaryColor?.references?.length).toBeGreaterThanOrEqual(1)
+    expect(primaryColor).toMatchInlineSnapshot(`
+      {
+        "name": "primary_color",
+        "references": [
+          {
+            "end": {
+              "character": 29,
+              "line": 3,
+            },
+            "kind": "color",
+            "start": {
+              "character": 14,
+              "line": 3,
+            },
+            "text": "primary_color",
+            "uri": {
+              "$mid": 1,
+              "_sep": undefined,
+              "fsPath": "/Users/naily/Documents/Developer/ohosvscode/arkTS/packages/language-service/test/mock/workspace/harmony-project-1/entry/src/main/resources/base/element/color.json",
+              "path": "/Users/naily/Documents/Developer/ohosvscode/arkTS/packages/language-service/test/mock/workspace/harmony-project-1/entry/src/main/resources/base/element/color.json",
+              "scheme": "file",
+            },
+          },
+        ],
+      }
+    `)
   })
 })

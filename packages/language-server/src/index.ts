@@ -1,7 +1,7 @@
 import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
-import { createArkTServices } from '@arkts/language-service'
+import { createArkTServices, createOpenHarmonyProjectDetector } from '@arkts/language-service'
 import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
@@ -10,8 +10,6 @@ import { LanguageServerConfigManager } from './classes/config-manager'
 import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
 import { createETSResourceCompletionService } from './services/resource-completion.service'
-import { createETSIntegratedResourceDefinitionService } from './services/resource-definition.service'
-import { createETSResourceDiagnosticService } from './services/resource-diagnostic.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -64,8 +62,22 @@ connection.onInitialize(async (params) => {
   logger.getConsola().info('Server initialization - Project root:', projectRoot)
   logger.getConsola().info('Server initialization - SDK path:', sdkPath)
   logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
-  const arktsServices = createArkTServices({ ets, locale: params.locale ?? '' })
+  const workspaceDetector = createOpenHarmonyProjectDetector(URI.file(projectRoot))
+  const arktsServices = createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
   const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'))
+
+  // connection.onDidChangeTextDocument((params) => {
+  //   logger.getConsola().info('Text document changed:', JSON.stringify(params))
+  //   workspaceDetector.setForce(true)
+  //   workspaceDetector.update(URI.file(params.textDocument.uri))
+  // })
+
+  connection.onDidChangeWatchedFiles((params) => {
+    logger.getConsola().info('Watched files changed:', JSON.stringify(params))
+    workspaceDetector.setForce(true)
+    for (const change of params.changes)
+      workspaceDetector.update(URI.file(change.uri))
+  })
 
   return server.initialize(
     params,
@@ -92,9 +104,7 @@ connection.onInitialize(async (params) => {
     [
       ...typescriptServices,
       ...arktsServices,
-      createETSIntegratedResourceDefinitionService(projectRoot, lspConfiguration),
       createETSResourceCompletionService(projectRoot, lspConfiguration),
-      createETSResourceDiagnosticService(lspConfiguration, projectRoot, () => globalResourceDiagnosticLevel),
     ],
   )
 })
