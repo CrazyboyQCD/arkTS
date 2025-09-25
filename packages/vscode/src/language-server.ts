@@ -124,6 +124,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
         { language: 'ets' },
         { language: 'typescript' },
         { language: 'json' },
+        { pattern: '**/*.json5', scheme: 'file' },
       ],
       outputChannel: this.getOutputChannel(),
       initializationOptions: {

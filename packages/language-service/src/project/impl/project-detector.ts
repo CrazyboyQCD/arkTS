@@ -103,6 +103,51 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     return null
   }
 
+  async searchResourceElementRange(elementKind: ElementJsonFile.ElementKind, name: string, ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRange[] | null> {
+    const projects = await this.findProjects(force)
+    const nameRanges: ElementJsonFile.NameRange[] = []
+
+    for (const project of projects) {
+      if (!ModuleOpenHarmonyProject.is(project))
+        continue
+      const resourceFolders = await project.readResourceFolder()
+      if (!resourceFolders)
+        continue
+
+      for (const resourceFolder of resourceFolders) {
+        const elementFolder = await resourceFolder.readElementFolder()
+        if (!elementFolder)
+          continue
+
+        for (const elementFile of elementFolder) {
+          const elementNameRanges = await elementFile.getNameRange(ets, force)
+
+          for (const elementNameRange of elementNameRanges) {
+            if (elementNameRange.text === name && elementNameRange.kind === elementKind)
+              nameRanges.push(elementNameRange)
+          }
+        }
+      }
+    }
+
+    return nameRanges
+  }
+
+  async searchProjectByModuleJson5<T = ModuleOpenHarmonyProject>(filePath: URI, ets: typeof import('ohos-typescript'), force: boolean = false): Promise<T | null> {
+    const projects = await this.findProjects(force)
+    for (const project of projects) {
+      if (!ModuleOpenHarmonyProject.is(project))
+        continue
+      const moduleJson5SourceFile = await project.readModuleJson5SourceFile(ets, force)
+      if (!moduleJson5SourceFile)
+        continue
+      if (moduleJson5SourceFile.fileName !== filePath.fsPath)
+        continue
+      return project as T
+    }
+    return null
+  }
+
   private _force: boolean = false
 
   setForce(force: boolean): void {

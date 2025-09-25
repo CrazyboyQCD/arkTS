@@ -22,6 +22,8 @@ export function createETSSymbolTreeService(arktsExtraLanguageService: ArkTSExtra
           if (!decodeDocumentUri)
             return []
           const [documentUri] = decodeDocumentUri
+          if (documentUri.fsPath.endsWith('.json') || documentUri.fsPath.endsWith('.json5') || documentUri.fsPath.endsWith('.jsonc'))
+            return []
           const navigationBarItems = languageService.getNavigationTree(documentUri.fsPath)
           return navigationBarItems.childItems?.map(item => arktsExtraLanguageService.getSymbolTree(item, document))
             .filter(item => item !== undefined) || []

@@ -2,6 +2,7 @@ import type { LanguageServicePlugin, Range } from '@volar/language-server'
 import type * as ets from 'ohos-typescript'
 import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import type { OpenHarmonyProjectDetector } from './project'
+import type { ElementJsonFile } from './project/project'
 import { ArkTSExtraLanguageServiceImpl } from './language-service-impl'
 import { createETS$$ThisService } from './services/$$this.service'
 import { createETSFormattingService } from './services/formatting.service'
@@ -39,8 +40,25 @@ export interface $rCallExpression extends Range {
    * $r('foo.bar.baz') 的文本。
    */
   text: string
+  /** The start position of the string. */
   stringStart: Position
+  /** The end position of the string. */
   stringEnd: Position
+}
+
+export interface ModuleJson5ResourceReference extends Range {
+  /**
+   * The name of the resource.
+   */
+  name: string
+  /**
+   * The kind of the resource.
+   */
+  kind: ElementJsonFile.ElementKind
+  /**
+   * The full text of the resource reference.
+   */
+  fullText: string
 }
 
 export interface ArkTSExtraLanguageService {
@@ -60,6 +78,14 @@ export interface ArkTSExtraLanguageService {
    * @returns 位置
    */
   get$rCallExpressions(sourceFile: ets.SourceFile, document: TextDocument): $rCallExpression[]
+  /**
+   * 获取 module.json5 资源引用
+   *
+   * @param sourceFile 源文件
+   * @param document 文档
+   * @returns 资源引用
+   */
+  getModuleJson5ResourceReferences(sourceFile: ets.SourceFile, document: TextDocument): ModuleJson5ResourceReference[]
   /** 获取当前语言代码。 */
   getLocale(): string
   /**

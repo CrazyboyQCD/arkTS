@@ -1,7 +1,6 @@
 import type { Position } from '@volar/language-server'
 import type { URI } from 'vscode-uri'
 import type { BuildProfile } from '../types/build-profile'
-import type { ModuleJson5 } from '../types/module-json5'
 import type { OhPackageJson5 } from '../types/oh-package5'
 import type { ResourceElementFile } from '../types/resource-element-file'
 import type { DeepPartial } from '../types/util'
@@ -287,7 +286,14 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    * |  |-- ...
    * ```
    */
-  readModuleJson5(): Promise<DeepPartial<ModuleJson5> | null>
+  readModuleJson5Text(): Promise<string | null>
+  /**
+   * Read the module.json5 source file. If the file does not exist, throw an error.
+   *
+   * @param ets - The ohos typescript instance.
+   * @param force - If true, the module.json5 source file will be read again. If not provided, the cached value will be returned.
+   */
+  readModuleJson5SourceFile(ets: typeof import('ohos-typescript'), force?: boolean): Promise<import('ohos-typescript').JsonSourceFile | null>
   /**
    * Check if the main folder exists in the project.
    *

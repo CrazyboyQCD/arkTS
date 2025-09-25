@@ -11,8 +11,6 @@ import { ResourceChildFolderImpl } from './resource-detector'
 export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl implements ModuleOpenHarmonyProject {
   projectType = 'module' as const
 
-  private _moduleJson5: DeepPartial<ModuleJson5> | null = null
-
   static readonly defaultResetTypes: readonly ModuleOpenHarmonyProject.ResetType[] = [
     'build-profile.json5',
     'main',
@@ -21,10 +19,18 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     'src',
   ]
 
-  async readModuleJson5(): Promise<DeepPartial<ModuleJson5> | null> {
-    if (this._moduleJson5 !== null)
+  private _moduleJson5Path = path.resolve(this.getProjectRoot().fsPath, 'src', 'main', 'module.json5')
+
+  getModuleJson5Path(): string {
+    return this._moduleJson5Path
+  }
+
+  private _moduleJson5: string | null = null
+
+  async readModuleJson5Text(force: boolean = false): Promise<string | null> {
+    if (this._moduleJson5 !== null && !force)
       return this._moduleJson5
-    const moduleJson5Path = path.resolve(this.getProjectRoot().fsPath, 'src', 'main', 'module.json5')
+    const moduleJson5Path = this.getModuleJson5Path()
 
     try {
       if (!fs.existsSync(moduleJson5Path) || !fs.statSync(moduleJson5Path).isFile())
@@ -33,15 +39,47 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
         .getLogger('ProjectDetector/ModuleOpenHarmonyProject/readModuleJson5')
         .getConsola()
         .info(`Read module.json5: ${moduleJson5Path}`)
-      const moduleJson5 = fs.readFileSync(moduleJson5Path, 'utf-8')
-      const moduleJson = json5.parse(moduleJson5)
-      this._moduleJson5 = moduleJson
-      return moduleJson
+      this._moduleJson5 = fs.readFileSync(moduleJson5Path, 'utf-8')
+      return this._moduleJson5
     }
     catch (error) {
       console.error(`Read ${moduleJson5Path} failed, error:`, error)
       return null
     }
+  }
+
+  private _moduleJson5Parsed: DeepPartial<ModuleJson5> | null = null
+
+  async safeParseModuleJson5(force: boolean = false): Promise<DeepPartial<ModuleJson5> | null> {
+    if (this._moduleJson5Parsed !== null && !force)
+      return this._moduleJson5Parsed
+    const moduleJson5 = await this.readModuleJson5Text(force)
+    if (moduleJson5 === null)
+      return null
+
+    try {
+      this._moduleJson5Parsed = json5.parse(moduleJson5)
+      return this._moduleJson5Parsed
+    }
+    catch (error) {
+      this.getProjectDetector()
+        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/safeParseModuleJson5')
+        .getConsola()
+        .error(`Parse module.json5 failed, error:`, error)
+      return null
+    }
+  }
+
+  private _moduleJson5SourceFile: import('ohos-typescript').JsonSourceFile | null = null
+
+  async readModuleJson5SourceFile(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<import('ohos-typescript').JsonSourceFile | null> {
+    if (this._moduleJson5SourceFile !== null && !force)
+      return this._moduleJson5SourceFile
+    const moduleJson5 = await this.readModuleJson5Text(force)
+    if (moduleJson5 === null)
+      return null
+    this._moduleJson5SourceFile = ets.parseJsonText(this.getModuleJson5Path(), moduleJson5)
+    return this._moduleJson5SourceFile
   }
 
   private _mainFolderExists: boolean | null = null
@@ -118,7 +156,7 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
   async is(): Promise<boolean> {
     return await this.isExistMainFolder()
       && await this.isExistSourceFolder()
-      && await this.readModuleJson5() !== null
+      && await this.safeParseModuleJson5() !== null
       && await super.is()
   }
 }

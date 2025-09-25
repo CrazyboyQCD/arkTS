@@ -54,6 +54,16 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         return references
       }
 
+      async function getModuleJson5SourceFile(document: TextDocument): Promise<import('ohos-typescript').JsonSourceFile | null> {
+        const tsSourceFile = contextUtil.decodeSourceFile(document)
+        if (!tsSourceFile)
+          return null
+        const project = await detector.searchProjectByModuleJson5(URI.file(tsSourceFile.fileName), ets, detector.getForce())
+        if (!project)
+          return null
+        return project.readModuleJson5SourceFile(ets, detector.getForce())
+      }
+
       async function getResourceElementName(document: TextDocument, position: Position): Promise<ElementJsonFile.NameRange | null> {
         const tsSourceFile = contextUtil.decodeSourceFile(document)
         if (!tsSourceFile)
@@ -106,15 +116,46 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         },
 
         async provideDefinition(document, position): Promise<LocationLink[]> {
-          if (document.languageId === 'json') {
+          if (document.languageId === 'json' || document.languageId === 'jsonc') {
             const jsonSourceFile = contextUtil.decodeSourceFile<import('ohos-typescript').JsonSourceFile>(document)
             if (!jsonSourceFile)
               return []
             const locationLinks: LocationLink[] = []
+            const moduleJson5SourceFile = await getModuleJson5SourceFile(document)
+            // If the module.json5 source file found, return the location links
+            if (moduleJson5SourceFile) {
+              const moduleJson5ResourceReferences = service.getModuleJson5ResourceReferences(moduleJson5SourceFile, document)
+              const matchedModuleJson5ResourceReference = moduleJson5ResourceReferences.find(reference => reference.start.line === position.line && reference.start.character <= position.character && reference.end.character >= position.character)
+              if (!matchedModuleJson5ResourceReference)
+                return []
+              const matchedModuleJson5ResourceRange = await detector.searchResourceElementRange(matchedModuleJson5ResourceReference.kind, matchedModuleJson5ResourceReference.name, ets, detector.getForce())
+              if (!matchedModuleJson5ResourceRange)
+                return []
+              return matchedModuleJson5ResourceRange.map((nameRange): LocationLink => {
+                return {
+                  targetUri: nameRange.uri.toString(),
+                  targetRange: Range.create(
+                    nameRange.start,
+                    nameRange.end,
+                  ),
+                  targetSelectionRange: Range.create(
+                    nameRange.start,
+                    nameRange.end,
+                  ),
+                  originSelectionRange: Range.create(
+                    matchedModuleJson5ResourceReference.start,
+                    matchedModuleJson5ResourceReference.end,
+                  ),
+                }
+              })
+              return []
+            }
+
+            // If the other element json file found, return the location links
+            const resourceReferences = await getResourceReference(document)
             const matchedNameRange = await getResourceElementName(document, position)
             if (!matchedNameRange)
               return []
-            const resourceReferences = await getResourceReference(document)
             const resourceReference = resourceReferences.find(reference => reference.name === matchedNameRange?.text)?.references ?? []
 
             for (const reference of resourceReference) {

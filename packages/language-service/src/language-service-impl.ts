@@ -1,6 +1,7 @@
 import type * as ets from 'ohos-typescript'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import type { $$ThisPosition, $rCallExpression, ArkTSExtraLanguageService, ArkTSExtraLanguageServiceOptions } from './language-service'
+import type { $$ThisPosition, $rCallExpression, ArkTSExtraLanguageService, ArkTSExtraLanguageServiceOptions, ModuleJson5ResourceReference } from './language-service'
+import type { ElementJsonFile } from './project/project'
 import { SymbolKind as LspSymbolKind, Range } from '@volar/language-server'
 import { deepRemoveFalsyValue } from './utils/deep-remove-falsy-value'
 
@@ -142,5 +143,38 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
         .map(item => this.getSymbolTree(item, document))
         .filter(child => child !== undefined),
     })
+  }
+
+  static readonly moduleJson5ResourceReferenceStartSymbols: readonly string[] = [
+    '$profile',
+    '$color',
+    '$string',
+  ]
+
+  getModuleJson5ResourceReferences(sourceFile: ets.SourceFile, document: TextDocument): ModuleJson5ResourceReference[] {
+    const ranges: ModuleJson5ResourceReference[] = []
+    const ets = this.getETS()
+
+    sourceFile.forEachChild(function visitor(node) {
+      node.forEachChild(visitor)
+
+      if (!ets.isStringLiteral(node))
+        return
+
+      const fullText = node.getText(sourceFile).replace(/["'`]/g, '').trim()
+      if (!ArkTSExtraLanguageServiceImpl.moduleJson5ResourceReferenceStartSymbols.some(symbol => fullText.startsWith(symbol)))
+        return
+
+      const [kind, name] = fullText.split(':')
+      ranges.push({
+        name,
+        fullText,
+        kind: kind.replace(/^\$/, '') as ElementJsonFile.ElementKind,
+        start: document.positionAt(node.getStart(sourceFile)),
+        end: document.positionAt(node.getEnd()),
+      })
+    })
+
+    return ranges
   }
 }
