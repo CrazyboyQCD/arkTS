@@ -1,3 +1,4 @@
+import type { ElementJsonFile } from '../project'
 import type { OpenHarmonyProjectDetector } from '../project-detector'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -71,6 +72,30 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
         continue
       return project
     }
+    return null
+  }
+
+  async searchResourceElementFile(filePath: URI, force: boolean = false): Promise<ElementJsonFile | null> {
+    const projects = await this.findProjects(force)
+
+    for (const project of projects) {
+      if (!filePath.fsPath.startsWith(project.getProjectRoot().fsPath))
+        continue
+      if (!ModuleOpenHarmonyProject.is(project))
+        continue
+      const resourceFolders = await project.readResourceFolder()
+      if (!resourceFolders)
+        continue
+      for (const resourceFolder of resourceFolders) {
+        if (filePath.toString().startsWith(resourceFolder.getUri().toString())) {
+          const elementFolder = await resourceFolder.readElementFolder()
+          if (!elementFolder)
+            continue
+          return elementFolder.find(elementFile => filePath.toString() === elementFile.getUri().toString()) ?? null
+        }
+      }
+    }
+
     return null
   }
 

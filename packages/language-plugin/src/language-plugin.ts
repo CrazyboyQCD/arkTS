@@ -50,6 +50,8 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
         return 'ets'
       if (filePath.endsWith('.ts'))
         return 'typescript'
+      if (filePath.endsWith('.json'))
+        return 'json'
       return undefined
     },
     createVirtualCode(uri, languageId, snapshot) {
@@ -58,6 +60,30 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
       const isInTsdkPath = filePath.startsWith(tsdk)
       const isDTS = filePath.endsWith('.d.ts')
       const isDETS = filePath.endsWith('.d.ets')
+      const isJSON = filePath.endsWith('.json')
+      const isBuildInfoFile = filePath.endsWith('.tsBuildInfo')
+
+      if (isBuildInfoFile) {
+        return createEmptyVirtualCode(snapshot, languageId, {
+          completion: false,
+          format: false,
+          navigation: false,
+          semantic: false,
+          structure: false,
+          verification: false,
+        })
+      }
+
+      if (isJSON) {
+        return createVirtualCode(snapshot, languageId, {
+          completion: true,
+          format: true,
+          navigation: true,
+          semantic: false,
+          structure: true,
+          verification: false,
+        })
+      }
 
       // ets files
       if (languageId === 'ets') {

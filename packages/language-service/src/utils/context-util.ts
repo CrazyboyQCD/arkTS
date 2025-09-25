@@ -34,7 +34,7 @@ export class ContextUtil {
    * @param document 当前 `TextDocument` 对象
    * @returns 如果获取失败则返回 `null`
    */
-  decodeSourceFile(document: TextDocument): ets.SourceFile | null {
+  decodeSourceFile<T extends ets.SourceFile = ets.SourceFile>(document: TextDocument): T | null {
     const decoded = this.context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
     if (!decoded)
       return null
@@ -48,7 +48,7 @@ export class ContextUtil {
     const sourceFile = program.getSourceFile(decodedUri.fsPath)
     if (!sourceFile)
       return null
-    return sourceFile
+    return sourceFile as T
   }
 
   /**

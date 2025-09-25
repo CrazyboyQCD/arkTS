@@ -1,6 +1,6 @@
 import type { LanguageServerLogger } from '@arkts/shared'
 import type { URI } from 'vscode-uri'
-import type { ModuleOpenHarmonyProject, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
+import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
 import { OpenHarmonyProjectDetectorImpl } from './impl/project-detector'
 
 export interface OpenHarmonyProjectDetector {
@@ -21,6 +21,8 @@ export interface OpenHarmonyProjectDetector {
         ? WorkspaceOpenHarmonyProject
         : OpenHarmonyProject) | null
   >
+  /** Search the element json file by the file path. */
+  searchResourceElementFile(filePath: URI, force?: boolean): Promise<ElementJsonFile | null>
   setForce(force: boolean): void
   getForce(): boolean
   update(uri: URI): Promise<void>

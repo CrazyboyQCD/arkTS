@@ -1,5 +1,5 @@
 import type { LanguageServicePlugin } from '@volar/language-server'
-import type { Diagnostic, LocationLink } from 'vscode-languageserver-protocol'
+import type { Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ArkTSExtraLanguageService } from '../language-service'
 import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
@@ -28,27 +28,41 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
 
       async function getResourceReference(document: TextDocument): Promise<ElementJsonFile.NameRangeReference[]> {
         const sourceFile = contextUtil.decodeSourceFile(document)
-        if (!sourceFile) {
-          console.warn('[ARKTS_RESOURCE] sourceFile is null.', document.uri)
+        if (!sourceFile)
           return []
-        }
         const project = await detector.searchProject(URI.file(sourceFile.fileName), 'module', detector.getForce())
-        if (!project) {
-          console.warn('[ARKTS_RESOURCE] project is null.', sourceFile.fileName)
+        if (!project)
           return []
-        }
         const resourceFolder = await project.readResourceFolder(detector.getForce())
-        if (!resourceFolder) {
-          console.warn('[ARKTS_RESOURCE] resourceFolder is null.', sourceFile.fileName)
+        if (!resourceFolder)
           return []
-        }
         const references = await Promise.all(
           resourceFolder
             .filter(folder => folder.isElementFolder())
             .map(folder => folder.getElementNameRangeReference(ets, detector.getForce())),
-        ).then(references => references.flat())
+        )
+          .then(references => references.flat())
+          .then(
+            references => references.reduce<ElementJsonFile.NameRangeReference[]>((acc, reference) => {
+              const foundIndex = acc.findIndex(item => item.name === reference.name)
+              if (foundIndex === -1)
+                acc.push(reference)
+              return acc
+            }, []),
+          )
         detector.setForce(false)
         return references
+      }
+
+      async function getResourceElementName(document: TextDocument, position: Position): Promise<ElementJsonFile.NameRange | null> {
+        const tsSourceFile = contextUtil.decodeSourceFile(document)
+        if (!tsSourceFile)
+          return null
+        const elementJsonFile = await detector.searchResourceElementFile(URI.file(tsSourceFile.fileName), detector.getForce())
+        if (!elementJsonFile)
+          return null
+        const nameRanges = await elementJsonFile.getNameRange(ets, detector.getForce())
+        return nameRanges.find(nameRange => nameRange.start.line === position.line && nameRange.start.character <= position.character && nameRange.end.character >= position.character) ?? null
       }
 
       return {
@@ -71,7 +85,6 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
             if (resourceScope !== 'app')
               continue
 
-            console.warn('[ARKTS_RESOURCE] resourceReference:', resourceReference)
             const nameRanges = (resourceReference?.find(reference => reference.name === resourceName)?.references ?? []).filter((reference) => {
               return reference.kind === resourceType
             })
@@ -93,8 +106,38 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         },
 
         async provideDefinition(document, position): Promise<LocationLink[]> {
-          if (document.languageId === 'json')
-            return []
+          if (document.languageId === 'json') {
+            const jsonSourceFile = contextUtil.decodeSourceFile<import('ohos-typescript').JsonSourceFile>(document)
+            if (!jsonSourceFile)
+              return []
+            const locationLinks: LocationLink[] = []
+            const matchedNameRange = await getResourceElementName(document, position)
+            if (!matchedNameRange)
+              return []
+            const resourceReferences = await getResourceReference(document)
+            const resourceReference = resourceReferences.find(reference => reference.name === matchedNameRange?.text)?.references ?? []
+
+            for (const reference of resourceReference) {
+              locationLinks.push({
+                targetUri: reference.uri.toString(),
+                targetRange: Range.create(
+                  reference.start,
+                  reference.end,
+                ),
+                targetSelectionRange: Range.create(
+                  reference.start,
+                  reference.end,
+                ),
+                originSelectionRange: Range.create(
+                  matchedNameRange.start,
+                  matchedNameRange.end,
+                ),
+              })
+            }
+
+            return locationLinks
+          }
+
           const sourceFile = contextUtil.decodeSourceFile(document)
           if (!sourceFile)
             return []
