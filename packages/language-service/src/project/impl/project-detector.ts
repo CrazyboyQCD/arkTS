@@ -68,8 +68,6 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
         return project
       if (!ModuleOpenHarmonyProject.is(project))
         continue
-      if (!ModuleOpenHarmonyProject.is(project))
-        continue
       return project
     }
     return null
