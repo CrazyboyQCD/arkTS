@@ -89,7 +89,7 @@ export abstract class LanguageServerContext extends AbstractWatcher implements I
     const basename = path.basename(uri.fsPath)
     if (basename !== 'local.properties' && basename !== 'build-profile.json5')
       return
-    this.getConsola().warn(`${path} is ${event.toUpperCase()}, restarting ETS Language Server...`)
+    this.getConsola().warn(`${uri.fsPath} is ${event.toUpperCase()}, restarting ETS Language Server...`)
     this.restart()
   }
 
