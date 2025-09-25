@@ -27,7 +27,7 @@
   "main": "./dist/client.js",
   "icon": "assets/icon.png",
   "engines": {
-    "vscode": "^1.104.1"
+    "vscode": "^1.22.0"
   },
   "galleryBanner": {
     "theme": "dark",
@@ -281,7 +281,6 @@
     "@vscode/l10n": "catalog:prod",
     "@vscode/vsce": "catalog:scripts",
     "axios": "catalog:prod",
-    "chokidar": "catalog:prod",
     "extract-zip": "catalog:prod",
     "fast-glob": "catalog:dev",
     "json5": "catalog:prod",

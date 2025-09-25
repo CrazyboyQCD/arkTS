@@ -200,9 +200,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
       const ohPackageJson5 = this.fileSystem.readOhPackageJson5<unknown>(vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath))
       if (!ohPackageJson5)
         continue
-      const [ohPackageJson5Path, ohPackageJson] = ohPackageJson5
-      this.fileSystem.watcher.add(ohPackageJson5Path.fsPath)
-      this.fileSystem.getConsola().info(`Listening ${ohPackageJson5Path}`)
+      const [, ohPackageJson] = ohPackageJson5
       if (typeof ohPackageJson !== 'object' || !ohPackageJson || !('name' in ohPackageJson) || typeof ohPackageJson.name !== 'string')
         continue
       relativeWithConfigFilePaths[ohPackageJson.name] = [

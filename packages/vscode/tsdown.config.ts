@@ -35,7 +35,6 @@ export default defineConfig({
         class: true,
       },
     },
-    sourcemap: isDev,
   },
   outDir: '.',
   env: {
@@ -56,6 +55,7 @@ export default defineConfig({
     '@arkts/shared/vscode': path.join(process.cwd(), '../shared/src/vscode.ts'),
     '@arkts/language-plugin': path.join(process.cwd(), '../language-plugin/src/index.ts'),
     '@arkts/sdk-downloader': path.join(process.cwd(), 'node_modules/@arkts/sdk-downloader/dist/index.js'),
+    '@arkts/language-service': path.join(process.cwd(), '../language-service/src/index.ts'),
   },
   watch: isDev
     ? [
@@ -64,6 +64,7 @@ export default defineConfig({
         '../language-server/src',
         '../typescript-plugin/src',
         '../language-plugin/src',
+        '../language-service/src',
         '../shared/src',
       ].map(p => path.join(process.cwd(), p))
     : false,

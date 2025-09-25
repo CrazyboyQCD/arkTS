@@ -1,14 +1,13 @@
 import type { MaybeRefOrGetter, WebviewViewRegisterOptions } from 'reactive-vscode'
 import fs from 'node:fs'
 import path from 'node:path'
-import { watch as watchFile } from 'chokidar'
 import { ref, toValue, useWebviewView, watch } from 'reactive-vscode'
 import * as vscode from 'vscode'
 
+/** @deprecated */
 export function useCompiledWebview(htmlPath: MaybeRefOrGetter<string>, options: WebviewViewRegisterOptions = {}): ReturnType<typeof useWebviewView> {
   const html = ref('')
 
-  watchFile(path.dirname(toValue(htmlPath))).on('all', () => loadHtml(toValue(htmlPath)))
   watch(() => htmlPath, () => loadHtml(toValue(htmlPath)))
 
   const webviewView = useWebviewView('ets-hilog-view', html, {

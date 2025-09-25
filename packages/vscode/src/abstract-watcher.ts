@@ -1,23 +1,20 @@
-import type { FSWatcher } from 'chokidar'
-import { watch } from 'chokidar'
 import { Disposable } from 'unioc/vscode'
+import * as vscode from 'vscode'
 import { FileSystem } from './fs/file-system'
 
 @Disposable
 export class AbstractWatcher extends FileSystem implements Disposable {
-  private _watcher: FSWatcher | undefined
-  private static readonly watchers: FSWatcher[] = []
+  private _vscodeWatcher: vscode.FileSystemWatcher | undefined
 
-  get watcher(): FSWatcher {
-    if (!this._watcher) {
-      this._watcher = watch([])
-      AbstractWatcher.watchers.push(this._watcher)
+  get vscodeWatcher(): vscode.FileSystemWatcher {
+    if (!this._vscodeWatcher) {
+      this._vscodeWatcher = vscode.workspace.createFileSystemWatcher('**/*')
     }
-    return this._watcher
+    return this._vscodeWatcher
   }
 
   async dispose(): Promise<void> {
-    await Promise.all(AbstractWatcher.watchers.map(watcher => watcher.close()))
+    this._vscodeWatcher?.dispose()
   }
 
   async [Symbol.asyncDispose](): Promise<void> {

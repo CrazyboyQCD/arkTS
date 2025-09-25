@@ -5,20 +5,19 @@ import type { URI } from 'vscode-uri'
 import path from 'node:path'
 import { $$thisFixerPlugin } from './$$this-fixer-plugin'
 import { createEmptyVirtualCode, createVirtualCode, ETSVirtualCode } from './ets-code'
-import '@volar/typescript'
 
 function isEts(tsOrEts: typeof ets | typeof ts): tsOrEts is typeof ets {
   return 'ETS' in tsOrEts.ScriptKind && tsOrEts.ScriptKind.ETS === 8
 }
 
 export interface ETSLanguagePluginOptions {
-  sdkPaths?: string[]
+  excludePaths?: string[]
   tsdk?: string
 }
 
 export function ETSLanguagePlugin(tsOrEts: typeof ts, options?: ETSLanguagePluginOptions): LanguagePlugin<URI | string>
 export function ETSLanguagePlugin(tsOrEts: typeof ets, options?: ETSLanguagePluginOptions): LanguagePlugin<URI | string>
-export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { sdkPaths = [], tsdk = '' }: ETSLanguagePluginOptions = {}): LanguagePlugin<URI | string> {
+export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePaths = [], tsdk = '' }: ETSLanguagePluginOptions = {}): LanguagePlugin<URI | string> {
   const isETSServerMode = isEts(tsOrEts)
   const isTSPluginMode = !isETSServerMode
 
@@ -51,14 +50,28 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { sdkPaths = 
         return 'ets'
       if (filePath.endsWith('.ts'))
         return 'typescript'
+      if (filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc'))
+        return 'json'
       return undefined
     },
     createVirtualCode(uri, languageId, snapshot) {
       const filePath = path.resolve(typeof uri === 'string' ? uri : uri.fsPath)
-      const isInSdkPath = sdkPaths.some(sdkPath => filePath.startsWith(sdkPath))
+      const isInExcludePath = excludePaths.some(excludePath => filePath.startsWith(excludePath))
       const isInTsdkPath = filePath.startsWith(tsdk)
       const isDTS = filePath.endsWith('.d.ts')
       const isDETS = filePath.endsWith('.d.ets')
+      const isJSON = filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc')
+
+      if (isJSON) {
+        return createVirtualCode(snapshot, languageId, {
+          completion: true,
+          format: true,
+          navigation: true,
+          semantic: false,
+          structure: true,
+          verification: false,
+        })
+      }
 
       // ets files
       if (languageId === 'ets') {
@@ -70,10 +83,10 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { sdkPaths = 
         )
       }
       // ETS Server mode
-      if (isETSServerMode && !(isDTS || isDETS) && !isInSdkPath)
+      if (isETSServerMode && !(isDTS || isDETS) && !isInExcludePath)
         return getDisabledVirtualCode(snapshot, languageId)
       // TS Plugin mode
-      if (isTSPluginMode && (isDTS || isDETS) && isInSdkPath) {
+      if (isTSPluginMode && (isDTS || isDETS) && isInExcludePath) {
         return createEmptyVirtualCode(snapshot, languageId, {
           completion: false,
           format: false,

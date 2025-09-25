@@ -1,0 +1,62 @@
+{
+  "name": "@arkts/language-service",
+  "version": "1.1.0",
+  "description": "ArkTS Language Service.",
+  "author": "Naily Zero <zero@naily.cc>",
+  "license": "MIT",
+  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/language-service",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohosvscode/arkTS",
+    "directory": "packages/language-server"
+  },
+  "bugs": {
+    "url": "https://github.com/ohosvscode/arkTS/issues",
+    "email": "zero@naily.cc"
+  },
+  "keywords": [
+    "language-server",
+    "language-server-protocol",
+    "harmonyos",
+    "arkts",
+    "ets"
+  ],
+  "exports": {
+    ".": {
+      "types": "./out/index.d.ts",
+      "import": "./out/index.mjs",
+      "default": "./out/index.js"
+    },
+    "./dist/*": "./dist/*"
+  },
+  "main": "out/index.js",
+  "bin": {
+    "ets-language-server": "./bin/ets-language-server.js"
+  },
+  "files": [
+    "bin",
+    "out",
+    "src"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown --tsconfig ./tsconfig.build.json",
+    "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
+    "release": "pnpm publish"
+  },
+  "devDependencies": {
+    "@arkts/shared": "workspace:*",
+    "@types/vscode": "catalog:dev",
+    "@volar/language-core": "catalog:prod",
+    "@volar/language-server": "catalog:prod",
+    "fast-glob": "catalog:dev",
+    "json5": "catalog:prod",
+    "ts-macro": "^0.3.4",
+    "vscode-uri": "catalog:prod"
+  }
+}

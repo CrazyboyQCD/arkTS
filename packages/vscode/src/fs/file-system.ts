@@ -14,8 +14,21 @@ export class FileSystem extends ExtensionLogger {
    */
   getCurrentWorkspaceDir(): vscode.Uri | undefined {
     const workspaceFolders = vscode.workspace.workspaceFolders
-    if (!workspaceFolders)
+    if (!workspaceFolders || workspaceFolders.length === 0)
       return undefined
+
+    // 如果有活动文档，找到包含该文档的工作区
+    if (vscode.window.activeTextEditor) {
+      const documentUri = vscode.window.activeTextEditor.document.uri
+      const containingWorkspace = workspaceFolders.find(folder =>
+        documentUri.fsPath.startsWith(folder.uri.fsPath),
+      )
+      if (containingWorkspace) {
+        return containingWorkspace.uri
+      }
+    }
+
+    // 回退到第一个工作区
     return workspaceFolders[0]?.uri
   }
 
