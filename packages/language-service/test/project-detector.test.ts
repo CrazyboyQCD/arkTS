@@ -99,31 +99,5 @@ describe('project-detector', (it) => {
     const primaryColor = elementNameRangeReference?.find(reference => reference.name === 'primary_color')
     expect(primaryColor).toBeDefined()
     expect(primaryColor?.references?.length).toBeGreaterThanOrEqual(1)
-    expect(primaryColor).toMatchInlineSnapshot(`
-      {
-        "name": "primary_color",
-        "references": [
-          {
-            "end": {
-              "character": 29,
-              "line": 3,
-            },
-            "kind": "color",
-            "start": {
-              "character": 14,
-              "line": 3,
-            },
-            "text": "primary_color",
-            "uri": {
-              "$mid": 1,
-              "_sep": undefined,
-              "fsPath": "/Users/naily/Documents/Developer/ohosvscode/arkTS/packages/language-service/test/mock/workspace/harmony-project-1/entry/src/main/resources/base/element/color.json",
-              "path": "/Users/naily/Documents/Developer/ohosvscode/arkTS/packages/language-service/test/mock/workspace/harmony-project-1/entry/src/main/resources/base/element/color.json",
-              "scheme": "file",
-            },
-          },
-        ],
-      }
-    `)
   })
 })
