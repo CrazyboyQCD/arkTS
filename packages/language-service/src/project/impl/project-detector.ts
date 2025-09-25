@@ -86,14 +86,18 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
       const resourceFolders = await project.readResourceFolder()
       if (!resourceFolders)
         continue
+      let foundElementFile: ElementJsonFile | null = null
       for (const resourceFolder of resourceFolders) {
         if (filePath.toString().startsWith(resourceFolder.getUri().toString())) {
           const elementFolder = await resourceFolder.readElementFolder()
           if (!elementFolder)
             continue
-          return elementFolder.find(elementFile => filePath.toString() === elementFile.getUri().toString()) ?? null
+          const currentFoundElementFile = elementFolder.find(elementFile => filePath.toString() === elementFile.getUri().toString())
+          if (currentFoundElementFile)
+            foundElementFile = currentFoundElementFile
         }
       }
+      return foundElementFile
     }
 
     return null
