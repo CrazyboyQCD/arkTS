@@ -159,6 +159,17 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     return null
   }
 
+  async getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {
+    const project: ModuleOpenHarmonyProject | null = await this.searchProject(URI.file(filePath.fsPath), 'module', force)
+    if (!project)
+      return []
+    const openHarmonyModules = await project.readOpenHarmonyModules(force)
+    const openHarmonyModule = openHarmonyModules.find(openHarmonyModule => filePath.toString().startsWith(openHarmonyModule.getModulePath().toString()))
+    if (!openHarmonyModule)
+      return []
+    return openHarmonyModule.groupByResourceReference(ets, force)
+  }
+
   private _force: boolean = false
 
   setForce(force: boolean): void {

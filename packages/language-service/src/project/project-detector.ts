@@ -58,6 +58,20 @@ export interface OpenHarmonyProjectDetector {
    * @param force - If true, the project will be read again. If not provided, the cached value will be returned.
    */
   searchProjectByModuleJson5<T = ModuleOpenHarmonyProject>(filePath: URI, ets: typeof import('ohos-typescript'), force?: boolean): Promise<T | null>
+  /**
+   * Get the resource reference by the file path.
+   *
+   * @description
+   * It will be searched the project by the file path and return the related resource reference.
+   *
+   * ⚠️ NOTE: It just only return the same {@linkcode OpenHarmonyModule} resource reference.
+   *
+   * @param filePath - The file path.
+   * @param ets - The ohos typescript instance.
+   * @param force - If true, the resource reference will be read again. If not provided, the cached value will be returned.
+   */
+  getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRangeReference[]>
+
   setForce(force: boolean): void
   getForce(): boolean
   update(uri: URI): Promise<void>

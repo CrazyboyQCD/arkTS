@@ -63,7 +63,7 @@ connection.onInitialize(async (params) => {
   logger.getConsola().info('Server initialization - SDK path:', sdkPath)
   logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
   const workspaceDetector = createOpenHarmonyProjectDetector(URI.file(projectRoot))
-  const arktsServices = createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
+  const arktsServices = await createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
   const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'))
 
   // connection.onDidChangeTextDocument((params) => {
