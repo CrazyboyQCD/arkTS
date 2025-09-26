@@ -1,16 +1,14 @@
 import type { LanguageServicePlugin } from '@volar/language-server'
-import type { Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
+import type { CompletionList, Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ArkTSExtraLanguageService } from '../language-service'
 import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
 import type { OpenHarmonyProjectDetector } from '../project'
-import type { ElementJsonFile } from '../project/project'
 import { typeAssert } from '@arkts/shared'
 import { DiagnosticSeverity, Range } from 'vscode-languageserver-protocol'
-import { URI } from 'vscode-uri'
 import { ContextUtil } from '../utils/context-util'
 
-export function createETSResourceService(detector: OpenHarmonyProjectDetector, service: ArkTSExtraLanguageService): LanguageServicePlugin {
+export function createETSResourceService(service: ArkTSExtraLanguageService, detector: OpenHarmonyProjectDetector): LanguageServicePlugin {
   typeAssert<ArkTSExtraLanguageServiceImpl>(service)
   const ets = service.getETS()
 
@@ -22,68 +20,24 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         workspaceDiagnostics: true,
       },
       definitionProvider: true,
+      completionProvider: {
+        triggerCharacters: ['.', '"', '\'', '`', ':'],
+        resolveProvider: false,
+      },
     },
     create(context) {
       const contextUtil = new ContextUtil(context)
-
-      async function getResourceReference(document: TextDocument): Promise<ElementJsonFile.NameRangeReference[]> {
-        const sourceFile = contextUtil.decodeSourceFile(document)
-        if (!sourceFile)
-          return []
-        const project = await detector.searchProject(URI.file(sourceFile.fileName), 'module', detector.getForce())
-        if (!project)
-          return []
-        const resourceFolder = await project.readResourceFolder(detector.getForce())
-        if (!resourceFolder)
-          return []
-        const references = await Promise.all(
-          resourceFolder
-            .filter(folder => folder.isElementFolder())
-            .map(folder => folder.getElementNameRangeReference(ets, detector.getForce())),
-        )
-          .then(references => references.flat())
-          .then(
-            references => references.reduce<ElementJsonFile.NameRangeReference[]>((acc, reference) => {
-              const foundIndex = acc.findIndex(item => item.name === reference.name)
-              if (foundIndex === -1)
-                acc.push(reference)
-              return acc
-            }, []),
-          )
-        detector.setForce(false)
-        return references
-      }
-
-      async function getModuleJson5SourceFile(document: TextDocument): Promise<import('ohos-typescript').JsonSourceFile | null> {
-        const tsSourceFile = contextUtil.decodeSourceFile(document)
-        if (!tsSourceFile)
-          return null
-        const project = await detector.searchProjectByModuleJson5(URI.file(tsSourceFile.fileName), ets, detector.getForce())
-        if (!project)
-          return null
-        return project.readModuleJson5SourceFile(ets, detector.getForce())
-      }
-
-      async function getResourceElementName(document: TextDocument, position: Position): Promise<ElementJsonFile.NameRange | null> {
-        const tsSourceFile = contextUtil.decodeSourceFile(document)
-        if (!tsSourceFile)
-          return null
-        const elementJsonFile = await detector.searchResourceElementFile(URI.file(tsSourceFile.fileName), detector.getForce())
-        if (!elementJsonFile)
-          return null
-        const nameRanges = await elementJsonFile.getNameRange(ets, detector.getForce())
-        return nameRanges.find(nameRange => nameRange.start.line === position.line && nameRange.start.character <= position.character && nameRange.end.character >= position.character) ?? null
-      }
+      const resourceUtil = contextUtil.getResourceUtil(detector, ets)
 
       return {
         async provideDiagnostics(document): Promise<Diagnostic[]> {
-          if (document.languageId === 'json')
+          if (document.languageId === 'json' || document.languageId === 'jsonc')
             return []
           const sourceFile = contextUtil.decodeSourceFile(document)
           if (!sourceFile)
             return []
           const $rCallExpressions = service.get$rCallExpressions(sourceFile, document)
-          const resourceReference = await getResourceReference(document)
+          const resourceReference = await resourceUtil.getResourceReference(document)
 
           const diagnostics: Diagnostic[] = []
 
@@ -115,75 +69,20 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
           return diagnostics
         },
 
+        async provideCompletionItems(document: TextDocument, _position: Position): Promise<CompletionList | null> {
+          if (document.languageId === 'json' || document.languageId === 'jsonc')
+            return null
+          return null
+        },
+
         async provideDefinition(document, position): Promise<LocationLink[]> {
-          if (document.languageId === 'json' || document.languageId === 'jsonc') {
-            const jsonSourceFile = contextUtil.decodeSourceFile<import('ohos-typescript').JsonSourceFile>(document)
-            if (!jsonSourceFile)
-              return []
-            const locationLinks: LocationLink[] = []
-            const moduleJson5SourceFile = await getModuleJson5SourceFile(document)
-            // If the module.json5 source file found, return the location links
-            if (moduleJson5SourceFile) {
-              const moduleJson5ResourceReferences = service.getModuleJson5ResourceReferences(moduleJson5SourceFile, document)
-              const matchedModuleJson5ResourceReference = moduleJson5ResourceReferences.find(reference => reference.start.line === position.line && reference.start.character <= position.character && reference.end.character >= position.character)
-              if (!matchedModuleJson5ResourceReference)
-                return []
-              const matchedModuleJson5ResourceRange = await detector.searchResourceElementRange(matchedModuleJson5ResourceReference.kind, matchedModuleJson5ResourceReference.name, ets, detector.getForce())
-              if (!matchedModuleJson5ResourceRange)
-                return []
-              return matchedModuleJson5ResourceRange.map((nameRange): LocationLink => {
-                return {
-                  targetUri: nameRange.uri.toString(),
-                  targetRange: Range.create(
-                    nameRange.start,
-                    nameRange.end,
-                  ),
-                  targetSelectionRange: Range.create(
-                    nameRange.start,
-                    nameRange.end,
-                  ),
-                  originSelectionRange: Range.create(
-                    matchedModuleJson5ResourceReference.start,
-                    matchedModuleJson5ResourceReference.end,
-                  ),
-                }
-              })
-              return []
-            }
-
-            // If the other element json file found, return the location links
-            const resourceReferences = await getResourceReference(document)
-            const matchedNameRange = await getResourceElementName(document, position)
-            if (!matchedNameRange)
-              return []
-            const resourceReference = resourceReferences.find(reference => reference.name === matchedNameRange?.text)?.references ?? []
-
-            for (const reference of resourceReference) {
-              locationLinks.push({
-                targetUri: reference.uri.toString(),
-                targetRange: Range.create(
-                  reference.start,
-                  reference.end,
-                ),
-                targetSelectionRange: Range.create(
-                  reference.start,
-                  reference.end,
-                ),
-                originSelectionRange: Range.create(
-                  matchedNameRange.start,
-                  matchedNameRange.end,
-                ),
-              })
-            }
-
-            return locationLinks
-          }
-
+          if (document.languageId === 'json' || document.languageId === 'jsonc')
+            return []
           const sourceFile = contextUtil.decodeSourceFile(document)
           if (!sourceFile)
             return []
           const $rCallExpressions = service.get$rCallExpressions(sourceFile, document)
-          const resourceReference = await getResourceReference(document)
+          const resourceReference = await resourceUtil.getResourceReference(document)
 
           const locationLinks: LocationLink[] = []
           for (const $rCallExpression of $rCallExpressions) {
@@ -205,7 +104,7 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
             locationLinks.push(
               ...nameRanges.map((nameRange) => {
                 return {
-                  targetUri: nameRange.uri.toString(),
+                  targetUri: nameRange.getElementJsonFile().getUri().toString(),
                   targetRange: Range.create(
                     nameRange.start,
                     nameRange.end,

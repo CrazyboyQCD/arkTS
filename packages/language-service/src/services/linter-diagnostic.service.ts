@@ -5,9 +5,9 @@ import { typeAssert } from '@arkts/shared'
 import { Range } from '@volar/language-server'
 import { ContextUtil } from '../utils/context-util'
 
-export function createETSLinterDiagnosticService(arktsExtraLanguageService: ArkTSExtraLanguageService): LanguageServicePlugin {
-  typeAssert<ArkTSExtraLanguageServiceImpl>(arktsExtraLanguageService)
-  const ets = arktsExtraLanguageService.getETS()
+export function createETSLinterDiagnosticService(service: ArkTSExtraLanguageService): LanguageServicePlugin {
+  typeAssert<ArkTSExtraLanguageServiceImpl>(service)
+  const ets = service.getETS()
 
   return {
     name: 'arkts-diagnostic',
@@ -25,7 +25,7 @@ export function createETSLinterDiagnosticService(arktsExtraLanguageService: ArkT
           const languageService = ctx.getLanguageService()
           if (!sourceFile || !languageService)
             return []
-          const builderProgram = arktsExtraLanguageService.getBuilderProgram(languageService)
+          const builderProgram = service.getBuilderProgram(languageService)
 
           try {
             return [

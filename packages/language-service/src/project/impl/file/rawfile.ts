@@ -1,5 +1,5 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceFolder, ResourceRawFile } from '../project'
+import type { ResourceFolder, ResourceRawFile } from '../../project'
 import fs from 'node:fs'
 import path from 'node:path'
 

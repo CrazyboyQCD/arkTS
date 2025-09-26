@@ -1,7 +1,9 @@
 import type { LanguageServiceContext } from '@volar/language-server'
 import type * as ets from 'ohos-typescript'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
+import type { OpenHarmonyProjectDetector } from '../project'
 import { URI } from 'vscode-uri'
+import { ResourceUtil } from './resource-util'
 
 export interface TSProvider {
   'typescript/languageService'(): ets.LanguageService
@@ -11,7 +13,9 @@ export interface TSProvider {
  * 工具类，用于services中获取一些对象。
  */
 export class ContextUtil {
-  constructor(private readonly context: LanguageServiceContext) {}
+  constructor(
+    private readonly context: LanguageServiceContext,
+  ) {}
 
   /**
    * 获取已有的`LanguageService`对象
@@ -71,5 +75,20 @@ export class ContextUtil {
     if (ets && !ets.isSourceFile(virtualCode.ast as ets.Node))
       return null
     return virtualCode.ast as ets.SourceFile
+  }
+
+  private _resourceUtil: ResourceUtil | null = null
+
+  /**
+   * 获取资源引用工具类（单例）。
+   *
+   * @param detector - 项目检测器
+   * @param ets - ohos typescript 实例
+   * @returns 资源引用工具类
+   */
+  getResourceUtil(detector: OpenHarmonyProjectDetector, ets: typeof import('ohos-typescript')): ResourceUtil {
+    if (!this._resourceUtil)
+      this._resourceUtil = new ResourceUtil(this, detector, ets)
+    return this._resourceUtil
   }
 }

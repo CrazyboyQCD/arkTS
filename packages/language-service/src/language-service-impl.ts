@@ -1,5 +1,5 @@
 import type * as ets from 'ohos-typescript'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
+import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import type { $$ThisPosition, $rCallExpression, ArkTSExtraLanguageService, ArkTSExtraLanguageServiceOptions, ModuleJson5ResourceReference } from './language-service'
 import type { ElementJsonFile } from './project/project'
 import { SymbolKind as LspSymbolKind, Range } from '@volar/language-server'
@@ -176,5 +176,21 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
     })
 
     return ranges
+  }
+
+  getCurrentPositionNode<T extends ets.Node>(sourceFile: ets.SourceFile, document: TextDocument, position: Position, filter?: (node: ets.Node) => boolean): T | undefined {
+    let matchedNode: T | undefined
+    const positionOffset = document.offsetAt(position)
+
+    sourceFile.forEachChild(function visitor(node) {
+      node.forEachChild(visitor)
+
+      if (node.getStart(sourceFile) <= positionOffset && node.getEnd() >= positionOffset) {
+        if (filter && !filter(node))
+          return
+        matchedNode = node as T
+      }
+    })
+    return matchedNode
   }
 }

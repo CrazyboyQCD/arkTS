@@ -1,5 +1,5 @@
 import type { OpenHarmonyProjectDetector } from '../src/index'
-import type { ElementJsonFile, ResourceFolder } from '../src/project/project'
+import type { ElementJsonFile, ResourceFolder, ResourceMediaFile } from '../src/project/project'
 import path from 'node:path'
 import { typeAssert } from '@arkts/shared'
 import * as ets from 'ohos-typescript'
@@ -38,17 +38,28 @@ describe('project-detector', (it) => {
 
     // check resource folder exists
     expect(childrenProjects?.[0]?.projectType).toBe('module')
+    const openharmonyModules = await childrenProjects?.[0].readOpenHarmonyModules()
+    expect(openharmonyModules?.length).toBeGreaterThanOrEqual(1)
+    const openharmonyModule = openharmonyModules?.[0]
+    expect(openharmonyModule).toBeDefined()
+    const moduleJson5Text = await openharmonyModule?.readModuleJson5Text()
+    const moduleJson5SourceFile = await openharmonyModule?.readModuleJson5SourceFile(ets)
+    expect(moduleJson5Text).toEqual(moduleJson5SourceFile?.getText())
 
     // check resource child folder exists
-    const resourceChildFolder = await childrenProjects?.[0].readResourceFolder()
-    expect(resourceChildFolder).not.toBe(false)
-    typeAssert<ResourceFolder[]>(resourceChildFolder)
-    expect(resourceChildFolder.length).toBeGreaterThanOrEqual(1)
+    const resourceChildFolders = await openharmonyModule?.readResourceFolder()
+    expect(resourceChildFolders).not.toBe(false)
+    typeAssert<ResourceFolder[]>(resourceChildFolders)
+    expect(resourceChildFolders.length).toBeGreaterThanOrEqual(1)
 
     // find base folder and check it
-    const baseFolder = resourceChildFolder.find(folder => path.basename(folder.getUri().fsPath) === 'base')
+    const baseFolder = resourceChildFolders.find(folder => path.basename(folder.getUri().fsPath) === 'base')
     expect(baseFolder).toBeDefined()
     expect(await baseFolder?.isExist()).toBe(true)
+    expect(baseFolder?.isBase()).toBe(true)
+    expect(baseFolder?.isDark()).toBe(false)
+    expect(baseFolder?.isResfile()).toBe(false)
+    expect(baseFolder?.isRawfile()).toBe(false)
 
     // check base/element folder exists
     const elementFolder = await baseFolder?.readElementFolder()
@@ -67,9 +78,19 @@ describe('project-detector', (it) => {
     const nameRanges = await firstElementFolder.getNameRange(ets)
     expect(nameRanges.length).toBeGreaterThanOrEqual(1)
 
+    // check media folder
+    const mediaFolder = await resourceChildFolders?.[0].readMediaFolder()
+    expect(mediaFolder).not.toBe(false)
+    typeAssert<ResourceMediaFile[]>(mediaFolder)
+    expect(mediaFolder.length).toBeGreaterThanOrEqual(1)
+    const barTxt = mediaFolder.find(file => path.basename(file.getUri().fsPath) === 'bar.txt')
+    expect(barTxt).toBeDefined()
+    expect(await barTxt?.isExist()).toBe(true)
+
     // check rawfile folder exists
-    const rawfileFolder = resourceChildFolder.find(folder => path.basename(folder.getUri().fsPath) === 'rawfile')
+    const rawfileFolder = resourceChildFolders.find(folder => path.basename(folder.getUri().fsPath) === 'rawfile')
     expect(rawfileFolder).toBeDefined()
+    expect(rawfileFolder?.isRawfile()).toBe(true)
     expect(await rawfileFolder?.isExist()).toBe(true)
     const rawFiles = await rawfileFolder?.readRawFile()
     expect(rawFiles?.length).toBeGreaterThanOrEqual(1)

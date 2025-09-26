@@ -1,6 +1,6 @@
-import type { WorkspaceOpenHarmonyProject } from '../project'
-import { ModuleOpenHarmonyProject } from '../project'
-import { OpenHarmonyProjectImpl } from './openharmony-project'
+import type { WorkspaceOpenHarmonyProject } from '../../project'
+import { ModuleOpenHarmonyProject } from '../../project'
+import { OpenHarmonyProjectImpl } from './abstract-project'
 
 export class WorkspaceOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl implements WorkspaceOpenHarmonyProject {
   projectType = 'workspace' as const

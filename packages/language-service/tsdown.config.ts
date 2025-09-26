@@ -5,7 +5,6 @@ export default defineConfig({
   outDir: './out',
   format: ['cjs', 'esm'],
   sourcemap: true,
-  dts: true,
   clean: true,
   inputOptions: {
     checks: {

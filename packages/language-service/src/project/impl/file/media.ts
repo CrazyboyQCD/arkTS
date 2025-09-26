@@ -1,5 +1,5 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceFolder, ResourceMediaFile } from '../project'
+import type { ResourceFolder, ResourceMediaFile } from '../../project'
 import fs from 'node:fs'
 
 export class ResourceMediaFileImpl implements ResourceMediaFile {
@@ -23,6 +23,7 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
       return this._isExist
     this._isExist = fs.existsSync(this.elementMediaFile.fsPath) && fs.statSync(this.elementMediaFile.fsPath).isFile()
     this.getResourceFolder()
+      .getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
       .getLogger('ProjectDetector/ResourceMediaFile/isExist')

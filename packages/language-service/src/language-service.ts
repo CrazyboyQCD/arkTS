@@ -4,11 +4,6 @@ import type { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import type { OpenHarmonyProjectDetector } from './project'
 import type { ElementJsonFile } from './project/project'
 import { ArkTSExtraLanguageServiceImpl } from './language-service-impl'
-import { createETS$$ThisService } from './services/$$this.service'
-import { createETSFormattingService } from './services/formatting.service'
-import { createETSLinterDiagnosticService } from './services/linter-diagnostic.service'
-import { createETSResourceService } from './services/resource.service'
-import { createETSSymbolTreeService } from './services/symbol-tree.service'
 
 export interface ArkTSExtraLanguageServiceOptions {
   /**
@@ -130,16 +125,15 @@ export interface ArkTServices extends Array<LanguageServicePlugin> {
  *
  * @returns 语言服务集合，并且提供一个`getArkTSExtraLanguageService`方法，用于获取ArkTS高级语言服务。
  */
-export function createArkTServices(options: ArkTSExtraLanguageServiceOptions, detector: OpenHarmonyProjectDetector): ArkTServices {
+export async function createArkTServices(options: ArkTSExtraLanguageServiceOptions, detector: OpenHarmonyProjectDetector): Promise<ArkTServices> {
   const arktsExtraLanguageService = createArkTSExtraLanguageService(options)
 
-  const services: ArkTServices = [
-    createETSLinterDiagnosticService(arktsExtraLanguageService),
-    createETS$$ThisService(arktsExtraLanguageService),
-    createETSFormattingService(),
-    createETSSymbolTreeService(arktsExtraLanguageService),
-    createETSResourceService(detector, arktsExtraLanguageService),
-  ] as ArkTServices
+  const importedServices = await import('./services')
+  const services = await Promise.all(
+    Object.values(importedServices).map(
+      service => service(arktsExtraLanguageService, detector),
+    ),
+  ) as ArkTServices
 
   services.getArkTSExtraLanguageService = () => arktsExtraLanguageService
   return services

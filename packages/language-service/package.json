@@ -30,9 +30,6 @@
     "./dist/*": "./dist/*"
   },
   "main": "out/index.js",
-  "bin": {
-    "ets-language-server": "./bin/ets-language-server.js"
-  },
   "files": [
     "bin",
     "out",
@@ -49,7 +46,7 @@
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish"
   },
-  "devDependencies": {
+  "dependencies": {
     "@arkts/shared": "workspace:*",
     "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",

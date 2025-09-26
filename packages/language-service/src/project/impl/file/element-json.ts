@@ -1,10 +1,10 @@
 import type { URI } from 'vscode-uri'
-import type { BooleanItem, ColorItem, FloatItem, IntArrayItem, IntegerItem, PatternItem, PluralItem, ResourceElementFile, StrArrayItem, StringItem, ThemeItem } from '../../types/resource-element-file'
-import type { DeepPartial } from '../../types/util'
-import type { ResourceFolder } from '../project'
+import type { ResourceElementFile } from '../../../types/resource-element-file'
+import type { DeepPartial } from '../../../types/util'
+import type { ResourceFolder } from '../../project'
 import fs from 'node:fs'
-import { TextDocument } from 'vscode-languageserver-textdocument'
-import { ElementJsonFile } from '../project'
+import { TextDocument } from '@volar/language-server'
+import { ElementJsonFile } from '../../project'
 
 export class ElementJsonFileImpl implements ElementJsonFile {
   constructor(
@@ -50,56 +50,6 @@ export class ElementJsonFileImpl implements ElementJsonFile {
     return this._jsonObject
   }
 
-  async getString(force: boolean = false): Promise<StringItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.string ?? []) as StringItem[]
-  }
-
-  async getColor(force: boolean = false): Promise<ColorItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.color ?? []) as ColorItem[]
-  }
-
-  async getInteger(force: boolean = false): Promise<IntegerItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.integer ?? []) as IntegerItem[]
-  }
-
-  async getFloat(force: boolean = false): Promise<FloatItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.float ?? []) as FloatItem[]
-  }
-
-  async getIntarray(force: boolean = false): Promise<IntArrayItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.intarray ?? []) as IntArrayItem[]
-  }
-
-  async getBoolean(force: boolean = false): Promise<BooleanItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.boolean ?? []) as BooleanItem[]
-  }
-
-  async getPlural(force: boolean = false): Promise<PluralItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.plural ?? []) as PluralItem[]
-  }
-
-  async getPattern(force: boolean = false): Promise<PatternItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.pattern ?? []) as PatternItem[]
-  }
-
-  async getStrarray(force: boolean = false): Promise<StrArrayItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.strarray ?? []) as StrArrayItem[]
-  }
-
-  async getTheme(force: boolean = false): Promise<ThemeItem[]> {
-    const jsonObject = await this.safeParse(force)
-    return (jsonObject?.theme ?? []) as ThemeItem[]
-  }
-
   private _nameRanges: ElementJsonFile.NameRange[] | null = null
 
   async getNameRange(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRange[]> {
@@ -134,10 +84,10 @@ export class ElementJsonFileImpl implements ElementJsonFile {
 
           nameRanges.push({
             kind,
-            uri: this.getUri(),
             start: textDocument.positionAt(nameProperty.initializer.getStart(ast)),
             end: textDocument.positionAt(nameProperty.initializer.getEnd()),
             text: nameProperty.initializer.getText(ast).replace(/["'`]/g, ''),
+            getElementJsonFile: () => this,
           })
         }
       }
@@ -145,5 +95,18 @@ export class ElementJsonFileImpl implements ElementJsonFile {
 
     this._nameRanges = nameRanges
     return this._nameRanges
+  }
+
+  async reset(): Promise<void> {
+    this._jsonText = null
+    this._jsonObject = null
+    this._nameRanges = null
+    this.getResourceFolder()
+      .getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/ElementJsonFile/reset')
+      .getConsola()
+      .info(`Reset element json file: ${this.getUri().toString()}`)
   }
 }
