@@ -4,8 +4,8 @@ import type { OhPackageJson5 } from '../../../types/oh-package5'
 import type { DeepPartial } from '../../../types/util'
 import type { OpenHarmonyProjectDetector } from '../../project-detector'
 import type { Resetable } from '../common'
-import { ModuleOpenHarmonyProjectImpl } from '../../impl/project/module-project'
 import { OpenHarmonyProjectImpl } from '../../impl/project/abstract-project'
+import { ModuleOpenHarmonyProjectImpl } from '../../impl/project/module-project'
 import { WorkspaceOpenHarmonyProjectImpl } from '../../impl/project/workspace-project'
 
 export interface OpenHarmonyProject extends Resetable {
@@ -56,6 +56,5 @@ export namespace OpenHarmonyProject {
       return workspaceProject
     }
     return workspaceProject
-    return false
   }
 }

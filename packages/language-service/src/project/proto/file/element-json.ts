@@ -1,6 +1,6 @@
 import type { Position } from '@volar/language-server'
-import type { DeepPartial } from '../../../../../language-service/src/types/util'
 import type { ResourceElementFile } from '../../../types/resource-element-file'
+import type { DeepPartial } from '../../../types/util'
 import type { FileOrFolder, Resetable } from '../common'
 import type { ResourceFolder } from '../folder/resource'
 

@@ -1,7 +1,5 @@
 import type { URI } from 'vscode-uri'
-import type { BuildProfile } from '../../../types/build-profile'
-import type { OhPackageJson5 } from '../../../types/oh-package5'
-import type { DeepPartial } from '../../../types/util'
+import type { BuildProfile, DeepPartial, OhPackageJson5 } from '../../../types'
 import type { OpenHarmonyProject } from '../../project'
 import type { OpenHarmonyProjectDetector } from '../../project-detector'
 import fs from 'node:fs'
