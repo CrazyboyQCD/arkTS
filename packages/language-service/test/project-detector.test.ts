@@ -38,12 +38,16 @@ describe('project-detector', (it) => {
 
     // check resource folder exists
     expect(childrenProjects?.[0]?.projectType).toBe('module')
-    const moduleJson5Text = await childrenProjects?.[0].readModuleJson5Text()
-    const moduleJson5SourceFile = await childrenProjects?.[0].readModuleJson5SourceFile(ets)
+    const openharmonyModules = await childrenProjects?.[0].readOpenHarmonyModules()
+    expect(openharmonyModules?.length).toBeGreaterThanOrEqual(1)
+    const openharmonyModule = openharmonyModules?.[0]
+    expect(openharmonyModule).toBeDefined()
+    const moduleJson5Text = await openharmonyModule?.readModuleJson5Text()
+    const moduleJson5SourceFile = await openharmonyModule?.readModuleJson5SourceFile(ets)
     expect(moduleJson5Text).toEqual(moduleJson5SourceFile?.getText())
 
     // check resource child folder exists
-    const resourceChildFolders = await childrenProjects?.[0].readResourceFolder()
+    const resourceChildFolders = await openharmonyModule?.readResourceFolder()
     expect(resourceChildFolders).not.toBe(false)
     typeAssert<ResourceFolder[]>(resourceChildFolders)
     expect(resourceChildFolders.length).toBeGreaterThanOrEqual(1)

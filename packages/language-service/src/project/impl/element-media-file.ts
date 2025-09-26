@@ -23,6 +23,7 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
       return this._isExist
     this._isExist = fs.existsSync(this.elementMediaFile.fsPath) && fs.statSync(this.elementMediaFile.fsPath).isFile()
     this.getResourceFolder()
+      .getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
       .getLogger('ProjectDetector/ResourceMediaFile/isExist')
