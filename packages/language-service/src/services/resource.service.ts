@@ -1,12 +1,13 @@
 import type { LanguageServicePlugin } from '@volar/language-server'
-import type { Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
+import type { CompletionList, Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ArkTSExtraLanguageService } from '../language-service'
 import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
 import type { OpenHarmonyProjectDetector } from '../project'
 import type { ElementJsonFile } from '../project/project'
+import path from 'node:path'
 import { typeAssert } from '@arkts/shared'
-import { DiagnosticSeverity, Range } from 'vscode-languageserver-protocol'
+import { CompletionItemKind, DiagnosticSeverity, MarkupKind, Range } from 'vscode-languageserver-protocol'
 import { URI } from 'vscode-uri'
 import { ContextUtil } from '../utils/context-util'
 
@@ -22,6 +23,10 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         workspaceDiagnostics: true,
       },
       definitionProvider: true,
+      completionProvider: {
+        triggerCharacters: ['.', '"', '\'', '`', ':'],
+        resolveProvider: false,
+      },
     },
     create(context) {
       const contextUtil = new ContextUtil(context)
@@ -33,25 +38,11 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         const project = await detector.searchProject(URI.file(sourceFile.fileName), 'module', detector.getForce())
         if (!project)
           return []
-        const resourceFolder = await project.readResourceFolder(detector.getForce())
-        if (!resourceFolder)
+        const openHarmonyModules = await project.readOpenHarmonyModules(detector.getForce())
+        const openHarmonyModule = openHarmonyModules.find(openHarmonyModule => URI.file(sourceFile.fileName).toString().startsWith(openHarmonyModule.getModulePath().toString()))
+        if (!openHarmonyModule)
           return []
-        const references = await Promise.all(
-          resourceFolder
-            .filter(folder => folder.isElementFolder())
-            .map(folder => folder.getElementNameRangeReference(ets, detector.getForce())),
-        )
-          .then(references => references.flat())
-          .then(
-            references => references.reduce<ElementJsonFile.NameRangeReference[]>((acc, reference) => {
-              const foundIndex = acc.findIndex(item => item.name === reference.name)
-              if (foundIndex === -1)
-                acc.push(reference)
-              return acc
-            }, []),
-          )
-        detector.setForce(false)
-        return references
+        return openHarmonyModule.groupByResourceReference(ets, detector.getForce())
       }
 
       async function getModuleJson5SourceFile(document: TextDocument): Promise<import('ohos-typescript').JsonSourceFile | null> {
@@ -61,7 +52,11 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
         const project = await detector.searchProjectByModuleJson5(URI.file(tsSourceFile.fileName), ets, detector.getForce())
         if (!project)
           return null
-        return project.readModuleJson5SourceFile(ets, detector.getForce())
+        const openHarmonyModules = await project.readOpenHarmonyModules(detector.getForce())
+        const openHarmonyModule = openHarmonyModules.find(openHarmonyModule => URI.file(tsSourceFile.fileName).toString().startsWith(openHarmonyModule.getModulePath().toString()))
+        if (!openHarmonyModule)
+          return null
+        return ets.parseJsonText(openHarmonyModule.getModuleJson5Path().fsPath, document.getText())
       }
 
       async function getResourceElementName(document: TextDocument, position: Position): Promise<ElementJsonFile.NameRange | null> {
@@ -115,11 +110,43 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
           return diagnostics
         },
 
+        async provideCompletionItems(document: TextDocument, position: Position, context): Promise<CompletionList | null> {
+          if (document.languageId === 'json' || document.languageId === 'jsonc') {
+            if (context.triggerCharacter !== ':')
+              return null
+            const moduleJson5SourceFile = await getModuleJson5SourceFile(document)
+            if (!moduleJson5SourceFile)
+              return null
+            const references = await getResourceReference(document)
+            const matchedNode = service.getCurrentPositionNode(moduleJson5SourceFile, document, position, ets.isStringLiteral)
+            if (!matchedNode)
+              return null
+            const matchedNodeText = matchedNode.getText(moduleJson5SourceFile).replace(/^['"]|['"]$/g, '')
+            const matchedKind = matchedNodeText.split(':')[0].trim().replace(/^\$/, '')
+
+            return {
+              isIncomplete: true,
+              items: references
+                .filter(reference => reference.references.some(reference => reference.kind === matchedKind))
+                .map((reference) => {
+                  return {
+                    label: reference.name,
+                    kind: CompletionItemKind.Reference,
+                    documentation: {
+                      kind: MarkupKind.Markdown,
+                      value: reference.references.map((reference) => {
+                        return `- ${reference.kind}: [${path.relative(detector.getWorkspaceFolder().fsPath, reference.uri.fsPath)}](${reference.uri.toString()})`
+                      }).join('\n'),
+                    },
+                  }
+                }),
+            }
+          }
+          return null
+        },
+
         async provideDefinition(document, position): Promise<LocationLink[]> {
           if (document.languageId === 'json' || document.languageId === 'jsonc') {
-            const jsonSourceFile = contextUtil.decodeSourceFile<import('ohos-typescript').JsonSourceFile>(document)
-            if (!jsonSourceFile)
-              return []
             const locationLinks: LocationLink[] = []
             const moduleJson5SourceFile = await getModuleJson5SourceFile(document)
             // If the module.json5 source file found, return the location links
@@ -148,7 +175,6 @@ export function createETSResourceService(detector: OpenHarmonyProjectDetector, s
                   ),
                 }
               })
-              return []
             }
 
             // If the other element json file found, return the location links

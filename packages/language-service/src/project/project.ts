@@ -171,17 +171,13 @@ export interface ResourceRawFile {
 
 export interface ResourceFolder {
   /**
-   * Get the module open harmony project.
+   * Get the open harmony module.
    */
-  getModuleOpenHarmonyProject(): ModuleOpenHarmonyProject
+  getOpenHarmonyModule(): OpenHarmonyModule
   /**
    * Get the resource child folder URI.
    */
   getUri(): URI
-  /**
-   * Get the module open harmony project.
-   */
-  getModuleOpenHarmonyProject(): ModuleOpenHarmonyProject
   /**
    * Check if the resource child folder exists in the project.
    */
@@ -265,11 +261,19 @@ export interface ResourceFolder {
   reset(): Promise<void>
 }
 
-export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
+export interface OpenHarmonyModule {
   /**
-   * The project type.
+   * Get the module open harmony project.
    */
-  projectType: 'module'
+  getModuleOpenHarmonyProject(): ModuleOpenHarmonyProject
+  /**
+   * Get the module path.
+   */
+  getModulePath(): URI
+  /**
+   * Get the module.json5 path.
+   */
+  getModuleJson5Path(): URI
   /**
    * Read the module.json5 file. If the file does not exist, return null.
    *
@@ -291,31 +295,6 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    */
   readModuleJson5SourceFile(ets: typeof import('ohos-typescript'), force?: boolean): Promise<import('ohos-typescript').JsonSourceFile | null>
   /**
-   * Check if the main folder exists in the project.
-   *
-   * ```txt
-   * |-- src
-   * |  |-- main <-- check this folder is exist
-   * |  |  |-- ets
-   * |  |  |-- resources
-   * |  |  |-- module.json5
-   * |  |-- mock
-   * |  |-- test
-   * |  |-- ...
-   */
-  isExistMainFolder(): Promise<boolean>
-  /**
-   * Check if the src folder exists in the project.
-   *
-   * ```txt
-   * |-- src <-- check this folder is exist
-   * |  |-- main
-   * |  |-- mock
-   * |  |-- test
-   * |  |-- ...
-   */
-  isExistSourceFolder(): Promise<boolean>
-  /**
    * Check if the resource child folder exists in the project.
    *
    * ```txt
@@ -331,6 +310,37 @@ export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
    * |  |-- ...
    */
   readResourceFolder(force?: boolean): Promise<ResourceFolder[] | false>
+  /**
+   * Group the resource reference by the element kind and name.
+   *
+   * @param ets - The ohos typescript instance.
+   * @param force - If true, the resource reference will be read again. If not provided, the cached value will be returned.
+   */
+  groupByResourceReference(ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRangeReference[]>
+}
+
+export interface ModuleOpenHarmonyProject extends OpenHarmonyProject {
+  /**
+   * The project type.
+   */
+  projectType: 'module'
+  /**
+   * Check if the src folder exists in the project.
+   *
+   * ```txt
+   * |-- src <-- check this folder is exist
+   * |  |-- main
+   * |  |-- mock
+   * |  |-- test
+   * |  |-- ...
+   */
+  isExistSourceFolder(): Promise<boolean>
+  /**
+   * Read the open harmony modules in the project.
+   *
+   * @param force - If true, the open harmony modules will be read again. If not provided, the cached value will be returned.
+   */
+  readOpenHarmonyModules(force?: boolean): Promise<OpenHarmonyModule[]>
   /**
    * Reset the project state & clear the cache.
    *
@@ -352,7 +362,7 @@ export namespace ModuleOpenHarmonyProject {
 }
 
 export namespace ModuleOpenHarmonyProject {
-  export type ResetType = 'module.json5' | 'main' | 'src' | OpenHarmonyProject.ResetType
+  export type ResetType = 'src' | OpenHarmonyProject.ResetType
 }
 
 export interface WorkspaceOpenHarmonyProject extends OpenHarmonyProject {

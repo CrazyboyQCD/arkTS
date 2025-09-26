@@ -81,21 +81,24 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
         continue
       if (!ModuleOpenHarmonyProject.is(project))
         continue
-      const resourceFolders = await project.readResourceFolder()
-      if (!resourceFolders)
-        continue
-      let foundElementFile: ElementJsonFile | null = null
-      for (const resourceFolder of resourceFolders) {
-        if (filePath.toString().startsWith(resourceFolder.getUri().toString())) {
-          const elementFolder = await resourceFolder.readElementFolder()
-          if (!elementFolder)
-            continue
-          const currentFoundElementFile = elementFolder.find(elementFile => filePath.toString() === elementFile.getUri().toString())
-          if (currentFoundElementFile)
-            foundElementFile = currentFoundElementFile
+      const openHarmonyModules = await project.readOpenHarmonyModules(force)
+      for (const openHarmonyModule of openHarmonyModules) {
+        const resourceFolders = await openHarmonyModule.readResourceFolder(force)
+        if (!resourceFolders)
+          continue
+        let foundElementFile: ElementJsonFile | null = null
+        for (const resourceFolder of resourceFolders) {
+          if (filePath.toString().startsWith(resourceFolder.getUri().toString())) {
+            const elementFolder = await resourceFolder.readElementFolder(force)
+            if (!elementFolder)
+              continue
+            const currentFoundElementFile = elementFolder.find(elementFile => filePath.toString() === elementFile.getUri().toString())
+            if (currentFoundElementFile)
+              foundElementFile = currentFoundElementFile
+          }
         }
+        return foundElementFile
       }
-      return foundElementFile
     }
 
     return null
@@ -108,21 +111,26 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     for (const project of projects) {
       if (!ModuleOpenHarmonyProject.is(project))
         continue
-      const resourceFolders = await project.readResourceFolder()
-      if (!resourceFolders)
-        continue
 
-      for (const resourceFolder of resourceFolders) {
-        const elementFolder = await resourceFolder.readElementFolder()
-        if (!elementFolder)
+      const openHarmonyModules = await project.readOpenHarmonyModules(force)
+
+      for (const openHarmonyModule of openHarmonyModules) {
+        const resourceFolders = await openHarmonyModule.readResourceFolder(force)
+        if (!resourceFolders)
           continue
 
-        for (const elementFile of elementFolder) {
-          const elementNameRanges = await elementFile.getNameRange(ets, force)
+        for (const resourceFolder of resourceFolders) {
+          const elementFolder = await resourceFolder.readElementFolder(force)
+          if (!elementFolder)
+            continue
 
-          for (const elementNameRange of elementNameRanges) {
-            if (elementNameRange.text === name && elementNameRange.kind === elementKind)
-              nameRanges.push(elementNameRange)
+          for (const elementFile of elementFolder) {
+            const elementNameRanges = await elementFile.getNameRange(ets, force)
+
+            for (const elementNameRange of elementNameRanges) {
+              if (elementNameRange.text === name && elementNameRange.kind === elementKind)
+                nameRanges.push(elementNameRange)
+            }
           }
         }
       }
@@ -136,12 +144,17 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     for (const project of projects) {
       if (!ModuleOpenHarmonyProject.is(project))
         continue
-      const moduleJson5SourceFile = await project.readModuleJson5SourceFile(ets, force)
-      if (!moduleJson5SourceFile)
-        continue
-      if (moduleJson5SourceFile.fileName !== filePath.fsPath)
-        continue
-      return project as T
+
+      const openHarmonyModules = await project.readOpenHarmonyModules(force)
+
+      for (const openHarmonyModule of openHarmonyModules) {
+        const moduleJson5SourceFile = await openHarmonyModule.readModuleJson5SourceFile(ets, force)
+        if (!moduleJson5SourceFile)
+          continue
+        if (moduleJson5SourceFile.fileName !== filePath.fsPath)
+          continue
+        return project as T
+      }
     }
     return null
   }
@@ -166,14 +179,17 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
       }
 
       if (ModuleOpenHarmonyProject.is(project)) {
-        const resourceFolders = await project.readResourceFolder()
-        if (!resourceFolders)
-          continue
+        const openHarmonyModules = await project.readOpenHarmonyModules()
 
-        for (const resourceFolder of resourceFolders) {
-          if (uri.toString().startsWith(resourceFolder.getUri().toString())) {
-            await resourceFolder.reset()
+        for (const openHarmonyModule of openHarmonyModules) {
+          const resourceFolders = await openHarmonyModule.readResourceFolder()
+          if (!resourceFolders)
             continue
+          for (const resourceFolder of resourceFolders) {
+            if (uri.toString().startsWith(resourceFolder.getUri().toString())) {
+              await resourceFolder.reset()
+              continue
+            }
           }
         }
       }
