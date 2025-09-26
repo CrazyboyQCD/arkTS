@@ -2,6 +2,7 @@ import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.ser
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
 import { createArkTServices, createOpenHarmonyProjectDetector } from '@arkts/language-service'
+import { TextDocument } from '@volar/language-server'
 import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
@@ -65,18 +66,27 @@ connection.onInitialize(async (params) => {
   const workspaceDetector = createOpenHarmonyProjectDetector(URI.file(projectRoot))
   const arktsServices = await createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
   const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'))
-
-  // connection.onDidChangeTextDocument((params) => {
-  //   logger.getConsola().info('Text document changed:', JSON.stringify(params))
-  //   workspaceDetector.setForce(true)
-  //   workspaceDetector.update(URI.file(params.textDocument.uri))
-  // })
+  const etsLanguagePlugin = ETSLanguagePlugin(ets, {
+    excludePaths: [lspConfiguration.getSdkPath(), lspConfiguration.getHmsSdkPath()].filter(Boolean) as string[],
+    tsdk: lspConfiguration.getTsdkPath(),
+  })
 
   connection.onDidChangeWatchedFiles((params) => {
-    logger.getConsola().info('Watched files changed:', JSON.stringify(params))
-    workspaceDetector.setForce(true)
     for (const change of params.changes)
-      workspaceDetector.update(URI.file(change.uri))
+      workspaceDetector.updateFile(URI.file(change.uri))
+  })
+
+  connection.onDidChangeTextDocument((params) => {
+    for (const change of params.contentChanges) {
+      workspaceDetector.updateTextDocument(
+        TextDocument.create(
+          params.textDocument.uri,
+          etsLanguagePlugin.getLanguageId(params.textDocument.uri) ?? '',
+          params.textDocument.version,
+          change.text,
+        ),
+      )
+    }
   })
 
   return server.initialize(

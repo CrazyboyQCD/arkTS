@@ -1,12 +1,11 @@
 import type { CompletionList, LanguageServicePlugin, LocationLink } from '@volar/language-server'
-import type { Position } from 'vscode-languageserver-protocol'
+import type { CompletionItem, Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ArkTSExtraLanguageService } from '../language-service'
 import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
 import type { OpenHarmonyProjectDetector } from '../project'
-import path from 'node:path'
 import { typeAssert } from '@arkts/shared'
-import { CompletionItemKind, MarkupKind, Range } from '@volar/language-server'
+import { CompletionItemKind, Range } from '@volar/language-server'
 import { URI } from 'vscode-uri'
 import { ContextUtil } from '../utils/context-util'
 
@@ -19,7 +18,7 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
     capabilities: {
       definitionProvider: true,
       completionProvider: {
-        triggerCharacters: ['.', '"', '\'', '`', ':'],
+        triggerCharacters: ['"', '\'', '`', ':', '$'],
         resolveProvider: false,
       },
     },
@@ -42,8 +41,10 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
         if (!matchedModuleJson5ResourceRange)
           return []
         return matchedModuleJson5ResourceRange.map((nameRange): LocationLink => {
+          const elementJsonFile = nameRange.getElementJsonFile()
+
           return {
-            targetUri: nameRange.uri.toString(),
+            targetUri: elementJsonFile.getUri().toString(),
             targetRange: Range.create(
               nameRange.start,
               nameRange.end,
@@ -83,12 +84,10 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
           return provideImplementation(document, position)
         },
 
-        async provideCompletionItems(document: TextDocument, position: Position, context): Promise<CompletionList | null> {
+        async provideCompletionItems(document: TextDocument, position: Position): Promise<CompletionList | null> {
           if (document.languageId !== 'json' && document.languageId !== 'jsonc')
             return null
 
-          if (context.triggerCharacter !== ':')
-            return null
           const moduleJson5SourceFile = await getModuleJson5SourceFile(document)
           if (!moduleJson5SourceFile)
             return null
@@ -97,25 +96,39 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
           if (!matchedNode)
             return null
           const matchedNodeText = matchedNode.getText(moduleJson5SourceFile).replace(/^['"]|['"]$/g, '')
-          const matchedKind = matchedNodeText.split(':')[0].trim().replace(/^\$/, '')
 
-          return {
-            isIncomplete: true,
-            items: references
-              .filter(reference => reference.references.some(reference => reference.kind === matchedKind))
-              .map((reference) => {
-                return {
-                  label: reference.name,
-                  kind: CompletionItemKind.Reference,
-                  documentation: {
-                    kind: MarkupKind.Markdown,
-                    value: reference.references.map((reference) => {
-                      return `- ${reference.kind}: [${path.relative(detector.getWorkspaceFolder().fsPath, reference.uri.fsPath)}](${reference.uri.toString()})`
-                    }).join('\n'),
-                  },
-                }
-              }),
+          if (!matchedNodeText.includes(':') && matchedNodeText.startsWith('$')) {
+            return {
+              isIncomplete: true,
+              items: references.map((reference) => {
+                return reference.references.map((reference): CompletionItem => {
+                  return {
+                    label: `${reference.kind}:${reference.text}`,
+                    kind: CompletionItemKind.Reference,
+                  }
+                })
+              })
+                .flat()
+                .filter((reference, index, self) => self.findIndex(r => r.label === reference.label) === index),
+            }
           }
+
+          if (matchedNodeText.includes(':') && matchedNodeText.startsWith('$')) {
+            const matchedKind = matchedNodeText.split(':')[0].trim().replace(/^\$/, '')
+            return {
+              isIncomplete: true,
+              items: references
+                .filter(reference => reference.references.some(reference => reference.kind === matchedKind))
+                .map((reference) => {
+                  return {
+                    label: reference.name,
+                    kind: CompletionItemKind.Reference,
+                  }
+                }),
+            }
+          }
+
+          return null
         },
       }
     },

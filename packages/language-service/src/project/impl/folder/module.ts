@@ -1,11 +1,11 @@
-import type { ModuleJson5 } from '../../types/module-json5'
-import type { DeepPartial } from '../../types/util'
-import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyModule, ResourceFolder } from '../project'
+import type { ModuleJson5 } from '../../../types/module-json5'
+import type { DeepPartial } from '../../../types/util'
+import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyModule, ResourceFolder } from '../../project'
 import fs from 'node:fs'
 import path from 'node:path'
 import json5 from 'json5'
 import { URI, Utils } from 'vscode-uri'
-import { ResourceChildFolderImpl } from './resource-detector'
+import { ResourceChildFolderImpl } from './resource'
 
 export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
   constructor(
@@ -65,7 +65,7 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
     catch (error) {
       this.getModuleOpenHarmonyProject()
         .getProjectDetector()
-        .getLogger('ProjectDetector/ModuleOpenHarmonyProject/safeParseModuleJson5')
+        .getLogger('ProjectDetector/OpenHarmonyModule/safeParseModuleJson5')
         .getConsola()
         .error(`Parse module.json5 failed, error:`, error)
       return null
@@ -84,23 +84,29 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
     return this._moduleJson5SourceFile
   }
 
-  private _baseFolderExists: false | ResourceFolder[] | null = null
+  private resourceFolders: false | ResourceFolder[] | null = null
+
+  private resourceFolderPath = Utils.joinPath(this.getModulePath(), 'resources')
+
+  getResourceFolderPath(): URI {
+    return this.resourceFolderPath
+  }
 
   async readResourceFolder(force: boolean = false): Promise<ResourceFolder[] | false> {
-    if (this._baseFolderExists !== null && !force)
-      return this._baseFolderExists
-    const resourceFolderPath = Utils.joinPath(this.getModulePath(), 'resources')
+    if (this.resourceFolders !== null && !force)
+      return this.resourceFolders
+    const resourceFolderPath = this.getResourceFolderPath()
     if (!fs.existsSync(resourceFolderPath.fsPath) || !fs.statSync(resourceFolderPath.fsPath).isDirectory())
       return false
     this.getModuleOpenHarmonyProject()
       .getProjectDetector()
-      .getLogger('ProjectDetector/ModuleOpenHarmonyProject/readResourceFolder')
+      .getLogger('ProjectDetector/OpenHarmonyModule/readResourceFolder')
       .getConsola()
       .info(`Readed resource folder: ${resourceFolderPath.fsPath}`)
-    this._baseFolderExists = fs.readdirSync(resourceFolderPath.fsPath).map(
-      filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath.fsPath, filename)), this),
-    )
-    return this._baseFolderExists
+    this.resourceFolders = fs.readdirSync(resourceFolderPath.fsPath)
+      .filter(filename => fs.existsSync(path.resolve(resourceFolderPath.fsPath, filename)) && fs.statSync(path.resolve(resourceFolderPath.fsPath, filename)).isDirectory())
+      .map(filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath.fsPath, filename)), this))
+    return this.resourceFolders
   }
 
   async groupByResourceReference(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {
@@ -113,13 +119,43 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
         .map(folder => folder.getElementNameRangeReference(ets, force)),
     )
       .then(references => references.flat())
-      .then(
-        references => references.reduce<ElementJsonFile.NameRangeReference[]>((acc, reference) => {
-          const foundIndex = acc.findIndex(item => item.name === reference.name)
-          if (foundIndex === -1)
-            acc.push(reference)
-          return acc
-        }, []),
-      )
+      .then((references) => {
+        const result: ElementJsonFile.NameRangeReference[] = []
+
+        for (const reference of references) {
+          const existingIndex = result.findIndex(item => item.name === reference.name)
+
+          if (existingIndex === -1) {
+            result.push(reference)
+            continue
+          }
+
+          for (const newRef of reference.references) {
+            const isDuplicate = result[existingIndex].references.some(existingRef =>
+              existingRef.start.line === newRef.start.line
+              && existingRef.start.character === newRef.start.character
+              && existingRef.end.line === newRef.end.line
+              && existingRef.end.character === newRef.end.character
+              && existingRef.getElementJsonFile().getUri().toString() === newRef.getElementJsonFile().getUri().toString(),
+            )
+            if (!isDuplicate)
+              result[existingIndex].references.push(newRef)
+          }
+        }
+
+        return result
+      })
+  }
+
+  async reset(): Promise<void> {
+    this.resourceFolders = null
+    this._moduleJson5 = null
+    this._moduleJson5Parsed = null
+    this._moduleJson5SourceFile = null
+    this.getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/OpenHarmonyModule/reset')
+      .getConsola()
+      .info(`Reset open harmony module: ${this.getModulePath().toString()}`)
   }
 }

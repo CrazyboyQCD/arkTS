@@ -49,7 +49,7 @@
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish"
   },
-  "devDependencies": {
+  "dependencies": {
     "@arkts/shared": "workspace:*",
     "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",

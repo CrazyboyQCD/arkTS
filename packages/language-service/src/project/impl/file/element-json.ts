@@ -1,10 +1,10 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceElementFile } from '../../types/resource-element-file'
-import type { DeepPartial } from '../../types/util'
-import type { ResourceFolder } from '../project'
+import type { ResourceElementFile } from '../../../types/resource-element-file'
+import type { DeepPartial } from '../../../types/util'
+import type { ResourceFolder } from '../../project'
 import fs from 'node:fs'
-import { TextDocument } from 'vscode-languageserver-textdocument'
-import { ElementJsonFile } from '../project'
+import { TextDocument } from '@volar/language-server'
+import { ElementJsonFile } from '../../project'
 
 export class ElementJsonFileImpl implements ElementJsonFile {
   constructor(
@@ -84,10 +84,10 @@ export class ElementJsonFileImpl implements ElementJsonFile {
 
           nameRanges.push({
             kind,
-            uri: this.getUri(),
             start: textDocument.positionAt(nameProperty.initializer.getStart(ast)),
             end: textDocument.positionAt(nameProperty.initializer.getEnd()),
             text: nameProperty.initializer.getText(ast).replace(/["'`]/g, ''),
+            getElementJsonFile: () => this,
           })
         }
       }
@@ -95,5 +95,18 @@ export class ElementJsonFileImpl implements ElementJsonFile {
 
     this._nameRanges = nameRanges
     return this._nameRanges
+  }
+
+  async reset(): Promise<void> {
+    this._jsonText = null
+    this._jsonObject = null
+    this._nameRanges = null
+    this.getResourceFolder()
+      .getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getLogger('ProjectDetector/ElementJsonFile/reset')
+      .getConsola()
+      .info(`Reset element json file: ${this.getUri().toString()}`)
   }
 }

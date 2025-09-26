@@ -32,8 +32,9 @@ export function createETSElementJsonService(service: ArkTSExtraLanguageService, 
           const locationLinks: LocationLink[] = []
 
           for (const reference of resourceReference) {
+            const elementJsonFile = reference.getElementJsonFile()
             locationLinks.push({
-              targetUri: reference.uri.toString(),
+              targetUri: elementJsonFile.getUri().toString(),
               targetRange: Range.create(
                 reference.start,
                 reference.end,

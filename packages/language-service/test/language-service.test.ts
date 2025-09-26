@@ -1,7 +1,7 @@
 import type { ArkTSExtraLanguageService } from '../src/language-service'
+import { TextDocument } from '@volar/language-server'
 import * as ets from 'ohos-typescript'
 import { beforeAll, describe, expect } from 'vitest'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 import { createArkTSExtraLanguageService } from '../src/language-service'
 

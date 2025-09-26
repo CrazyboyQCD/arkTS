@@ -1,9 +1,9 @@
-import type { ModuleOpenHarmonyProject, OpenHarmonyModule } from '../project'
+import type { ModuleOpenHarmonyProject, OpenHarmonyModule } from '../../project'
 import fs from 'node:fs'
 import path from 'node:path'
 import { URI } from 'vscode-uri'
-import { OpenHarmonyModuleImpl } from './openharmony-module'
-import { OpenHarmonyProjectImpl } from './openharmony-project'
+import { OpenHarmonyModuleImpl } from '../folder/module'
+import { OpenHarmonyProjectImpl } from './abstract-project'
 
 export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl implements ModuleOpenHarmonyProject {
   projectType = 'module' as const

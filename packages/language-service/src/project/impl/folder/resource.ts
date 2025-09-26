@@ -1,12 +1,12 @@
-import type { ElementJsonFile, OpenHarmonyModule, ResourceFolder, ResourceMediaFile, ResourceRawFile } from '../project'
+import type { ElementJsonFile, OpenHarmonyModule, ResourceFolder, ResourceMediaFile, ResourceRawFile } from '../../project'
 import fs from 'node:fs'
 import path from 'node:path'
 import fg from 'fast-glob'
 import { URI } from 'vscode-uri'
-import { toPattern } from '../../utils/to-pattern'
-import { ElementJsonFileImpl } from './element-json-file'
-import { ResourceMediaFileImpl } from './element-media-file'
-import { ResourceRawFileImpl } from './resource-raw-file'
+import { toPattern } from '../../../utils/to-pattern'
+import { ElementJsonFileImpl } from '../file/element-json'
+import { ResourceMediaFileImpl } from '../file/media'
+import { ResourceRawFileImpl } from '../file/rawfile'
 
 export class ResourceChildFolderImpl implements ResourceFolder {
   constructor(

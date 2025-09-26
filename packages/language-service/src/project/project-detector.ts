@@ -1,4 +1,5 @@
 import type { LanguageServerLogger } from '@arkts/shared'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { URI } from 'vscode-uri'
 import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
 import { OpenHarmonyProjectDetectorImpl } from './impl/project-detector'
@@ -74,7 +75,8 @@ export interface OpenHarmonyProjectDetector {
 
   setForce(force: boolean): void
   getForce(): boolean
-  update(uri: URI): Promise<void>
+  updateFile(uri: URI): Promise<void>
+  updateTextDocument(textDocument: TextDocument): Promise<void>
 }
 
 export function createOpenHarmonyProjectDetector(workspaceFolder: URI): OpenHarmonyProjectDetector {

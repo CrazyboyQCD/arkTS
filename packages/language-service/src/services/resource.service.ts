@@ -104,7 +104,7 @@ export function createETSResourceService(service: ArkTSExtraLanguageService, det
             locationLinks.push(
               ...nameRanges.map((nameRange) => {
                 return {
-                  targetUri: nameRange.uri.toString(),
+                  targetUri: nameRange.getElementJsonFile().getUri().toString(),
                   targetRange: Range.create(
                     nameRange.start,
                     nameRange.end,

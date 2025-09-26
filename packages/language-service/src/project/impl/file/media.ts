@@ -1,5 +1,5 @@
 import type { URI } from 'vscode-uri'
-import type { ResourceFolder, ResourceMediaFile } from '../project'
+import type { ResourceFolder, ResourceMediaFile } from '../../project'
 import fs from 'node:fs'
 
 export class ResourceMediaFileImpl implements ResourceMediaFile {

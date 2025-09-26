@@ -1,3 +1,4 @@
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ElementJsonFile } from '../project'
 import type { OpenHarmonyProjectDetector } from '../project-detector'
 import fs from 'node:fs'
@@ -180,7 +181,27 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     return this._force
   }
 
-  async update(uri: URI): Promise<void> {
+  private readonly _updatedTextDocuments: TextDocument[] = []
+
+  async updateTextDocument(textDocument: TextDocument): Promise<void> {
+    const foundIndex = this._updatedTextDocuments.findIndex(updatedTextDocument => updatedTextDocument.uri === textDocument.uri)
+    if (foundIndex === -1)
+      this._updatedTextDocuments.push(textDocument)
+    else
+      this._updatedTextDocuments[foundIndex] = textDocument
+  }
+
+  async getUpdatedTextDocuments(): Promise<TextDocument[]> {
+    return this._updatedTextDocuments
+  }
+
+  async updateFile(uri: URI): Promise<void> {
+    const foundIndex = this._updatedTextDocuments.findIndex(updatedTextDocument => updatedTextDocument.uri === uri.toString()
+      || updatedTextDocument.uri === uri.fsPath
+      || updatedTextDocument.uri === uri.path)
+    if (foundIndex !== -1)
+      this._updatedTextDocuments.splice(foundIndex, 1)
+
     const projects = await this.findProjects()
 
     for (const project of projects) {
@@ -193,13 +214,29 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
         const openHarmonyModules = await project.readOpenHarmonyModules()
 
         for (const openHarmonyModule of openHarmonyModules) {
+          if (uri.toString() === openHarmonyModule.getModulePath().toString()) {
+            await openHarmonyModule.reset()
+            continue
+          }
+
           const resourceFolders = await openHarmonyModule.readResourceFolder()
           if (!resourceFolders)
             continue
           for (const resourceFolder of resourceFolders) {
-            if (uri.toString().startsWith(resourceFolder.getUri().toString())) {
+            if (uri.toString() === resourceFolder.getUri().toString()) {
               await resourceFolder.reset()
               continue
+            }
+
+            const elementFolder = await resourceFolder.readElementFolder()
+            if (!elementFolder)
+              continue
+
+            for (const elementFile of elementFolder) {
+              if (uri.toString() === elementFile.getUri().toString()) {
+                await elementFile.reset()
+                continue
+              }
             }
           }
         }
