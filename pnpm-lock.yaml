@@ -531,7 +531,7 @@ importers:
         version: 3.1.0
 
   packages/language-service:
-    devDependencies:
+    dependencies:
       '@arkts/shared':
         specifier: workspace:*
         version: link:../shared

@@ -30,9 +30,6 @@
     "./dist/*": "./dist/*"
   },
   "main": "out/index.js",
-  "bin": {
-    "ets-language-server": "./bin/ets-language-server.js"
-  },
   "files": [
     "bin",
     "out",
