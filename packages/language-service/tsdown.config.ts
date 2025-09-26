@@ -6,9 +6,4 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   sourcemap: true,
   clean: true,
-  inputOptions: {
-    checks: {
-      eval: false,
-    },
-  },
 })
