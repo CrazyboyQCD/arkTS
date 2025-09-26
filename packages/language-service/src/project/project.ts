@@ -61,11 +61,7 @@ export namespace OpenHarmonyProject {
   }
 }
 
-export type ElementJsonFileBase = {
-  [K in keyof ResourceElementFile as `get${Capitalize<string & K>}`]-?: (force?: boolean) => Promise<ResourceElementFile[K]>
-}
-
-export interface ElementJsonFile extends ElementJsonFileBase {
+export interface ElementJsonFile {
   /**
    * Get the element json file URI.
    */

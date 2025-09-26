@@ -51,6 +51,10 @@ export class ResourceChildFolderImpl implements ResourceFolder {
     return URI.file(path.resolve(this.resourceChildFolder.fsPath, 'element'))
   }
 
+  getMediaFolderPath(): URI {
+    return URI.file(path.resolve(this.resourceChildFolder.fsPath, 'media'))
+  }
+
   private _elementFolderExists: false | ElementJsonFile[] | null = null
 
   /**
@@ -129,7 +133,7 @@ export class ResourceChildFolderImpl implements ResourceFolder {
   async readMediaFolder(force: boolean = false): Promise<false | ResourceMediaFile[]> {
     if (this._mediaFolderExists !== null && !force)
       return this._mediaFolderExists
-    const mediaFolderPath = this.getElementFolderPath()
+    const mediaFolderPath = this.getMediaFolderPath()
     if (fs.existsSync(mediaFolderPath.fsPath) && fs.statSync(mediaFolderPath.fsPath).isDirectory()) {
       this.getModuleOpenHarmonyProject()
         .getProjectDetector()
