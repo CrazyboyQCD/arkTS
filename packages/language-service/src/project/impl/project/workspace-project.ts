@@ -1,5 +1,5 @@
 import type { WorkspaceOpenHarmonyProject } from '../../project'
-import { ModuleOpenHarmonyProject } from '../../project'
+import { ModuleOpenHarmonyProject } from '../../proto/project/module-project'
 import { OpenHarmonyProjectImpl } from './abstract-project'
 
 export class WorkspaceOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl implements WorkspaceOpenHarmonyProject {
