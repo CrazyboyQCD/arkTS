@@ -38,7 +38,6 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
           return [[], null]
         const moduleJson5ResourceReferences = service.getModuleJson5ResourceReferences(moduleJson5SourceFile, document)
         const matchedModuleJson5ResourceReference = moduleJson5ResourceReferences.find(reference => reference.start.line === position.line && reference.start.character <= position.character && reference.end.character >= position.character)
-        console.warn(matchedModuleJson5ResourceReference)
         if (!matchedModuleJson5ResourceReference)
           return [[], null]
         const resources = await detector.searchResource(`app.${matchedModuleJson5ResourceReference.kind}.${matchedModuleJson5ResourceReference.name}`, ets, detector.getForce())
@@ -207,26 +206,28 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
           const matchedNodeText = matchedNode.getText(moduleJson5SourceFile).replace(/^['"]|['"]$/g, '')
 
           if (!matchedNodeText.includes(':') && matchedNodeText.startsWith('$')) {
-            return {
-              isIncomplete: true,
-              items: references.map((reference) => {
-                if (ElementJsonFile.isNameRangeReference(reference)) {
-                  return reference.references.map((reference): CompletionItem => {
-                    return {
-                      label: `${reference.kind}:${reference.getText()}`,
-                      kind: CompletionItemKind.Reference,
-                    }
+            const completionItems: CompletionItem[] = []
+
+            for (const reference of references) {
+              if (ElementJsonFile.isNameRangeReference(reference)) {
+                for (const nameRange of reference.references) {
+                  completionItems.push({
+                    label: `${nameRange.kind}:${nameRange.getText()}`,
+                    kind: CompletionItemKind.Reference,
                   })
                 }
-                else {
-                  return {
-                    label: `${reference.kind}:${reference.getFileNameWithoutExtension()}`,
-                    kind: CompletionItemKind.File,
-                  }
-                }
-              })
-                .flat()
-                .filter((reference, index, self) => self.findIndex(r => r.label === reference.label) === index),
+              }
+              else {
+                completionItems.push({
+                  label: `${reference.kind}:${reference.getFileNameWithoutExtension()}`,
+                  kind: CompletionItemKind.File,
+                })
+              }
+            }
+
+            return {
+              isIncomplete: true,
+              items: completionItems.filter((reference, index, self) => self.findIndex(r => r.label === reference.label) === index),
             }
           }
 
