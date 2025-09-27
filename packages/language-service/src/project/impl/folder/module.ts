@@ -202,9 +202,7 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
         const existingIndex = references.findIndex(item => ResourceMediaFile.is(item) && item.getFileName() === resourceMediaFile.getFileName())
         if (existingIndex === -1) {
           references.push(resourceMediaFile)
-          continue
         }
-        references.push(resourceMediaFile)
       }
     }
 
