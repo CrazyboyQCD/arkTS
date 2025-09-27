@@ -10,7 +10,6 @@ import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './classes/config-manager'
 import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
-import { createETSResourceCompletionService } from './services/resource-completion.service'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -73,7 +72,7 @@ connection.onInitialize(async (params) => {
 
   connection.onDidChangeWatchedFiles((params) => {
     for (const change of params.changes)
-      workspaceDetector.updateFile(URI.file(change.uri))
+      workspaceDetector.updateFile(URI.parse(change.uri))
   })
 
   connection.onDidChangeTextDocument((params) => {
@@ -114,7 +113,6 @@ connection.onInitialize(async (params) => {
     [
       ...typescriptServices,
       ...arktsServices,
-      createETSResourceCompletionService(projectRoot, lspConfiguration),
     ],
   )
 })

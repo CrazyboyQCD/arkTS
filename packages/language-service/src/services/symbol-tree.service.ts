@@ -1,6 +1,6 @@
 import type { LanguageServicePlugin } from '@volar/language-server'
 import type { ArkTSExtraLanguageService } from '../language-service'
-import { URI } from 'vscode-uri'
+import { URI, Utils } from 'vscode-uri'
 import { ContextUtil } from '../utils/context-util'
 
 export interface TSProvider {
@@ -20,7 +20,7 @@ export function createETSSymbolTreeService(service: ArkTSExtraLanguageService): 
         provideDocumentSymbols(document) {
           const sourceFile = contextUtil.decodeSourceFile(document)
           const documentUri = URI.file(sourceFile?.fileName ?? '')
-          if (documentUri.fsPath.endsWith('.json') || documentUri.fsPath.endsWith('.json5') || documentUri.fsPath.endsWith('.jsonc'))
+          if (!Utils.extname(documentUri).includes('ets'))
             return []
           const languageService = contextUtil.getLanguageService()
           if (!languageService)

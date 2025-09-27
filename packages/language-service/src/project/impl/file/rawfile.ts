@@ -1,6 +1,5 @@
 import type { URI } from 'vscode-uri'
 import type { ResourceFolder, ResourceRawFile } from '../../project'
-import fs from 'node:fs'
 import path from 'node:path'
 
 export class ResourceRawFileImpl implements ResourceRawFile {
@@ -22,7 +21,12 @@ export class ResourceRawFileImpl implements ResourceRawFile {
   async isExist(force?: boolean): Promise<boolean> {
     if (this._isExist !== null && !force)
       return this._isExist
-    this._isExist = fs.existsSync(this.uri.fsPath) && fs.statSync(this.uri.fsPath).isFile()
+    const fs = await this.getResourceFolder()
+      .getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    this._isExist = await fs.exists(this.uri.fsPath) && (await fs.stat(this.uri.fsPath)).isFile()
     return this._isExist
   }
 

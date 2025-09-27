@@ -1,5 +1,4 @@
 import type { ModuleOpenHarmonyProject, OpenHarmonyModule } from '../../project'
-import fs from 'node:fs'
 import path from 'node:path'
 import { URI } from 'vscode-uri'
 import { OpenHarmonyModuleImpl } from '../folder/module'
@@ -10,8 +9,6 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
 
   static readonly defaultResetTypes: readonly ModuleOpenHarmonyProject.ResetType[] = [
     'build-profile.json5',
-    'main',
-    'module.json5',
     'oh-package.json5',
     'src',
   ]
@@ -22,11 +19,12 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
     if (this._sourceFolderExists !== null)
       return this._sourceFolderExists
     const sourceFolderPath = path.resolve(this.getProjectRoot().fsPath, 'src')
+    const fs = await this.getProjectDetector().getFileSystem()
     this.getProjectDetector()
       .getLogger('ProjectDetector/ModuleOpenHarmonyProject/isExistSourceFolder')
       .getConsola()
       .info(`Check src folder: ${sourceFolderPath}`)
-    this._sourceFolderExists = fs.existsSync(sourceFolderPath) && fs.statSync(sourceFolderPath).isDirectory()
+    this._sourceFolderExists = await fs.exists(sourceFolderPath) && (await fs.stat(sourceFolderPath)).isDirectory()
     return this._sourceFolderExists
   }
 
@@ -40,11 +38,25 @@ export class ModuleOpenHarmonyProjectImpl extends OpenHarmonyProjectImpl impleme
       .getLogger('ProjectDetector/ModuleOpenHarmonyProject/readOpenHarmonyModules')
       .getConsola()
       .info(`Read open harmony modules: ${sourceFolderPath}`)
-    this.openHarmonyModules = fs.readdirSync(sourceFolderPath)
-      .filter(filename => fs.statSync(path.resolve(sourceFolderPath, filename)).isDirectory())
-      .filter(foldername => fs.existsSync(path.resolve(sourceFolderPath, foldername, 'module.json5')) && fs.statSync(path.resolve(sourceFolderPath, foldername, 'module.json5')).isFile())
-      .map(filename => new OpenHarmonyModuleImpl(this, URI.file(path.resolve(sourceFolderPath, filename))))
-    return this.openHarmonyModules
+    const fs = await this.getProjectDetector().getFileSystem()
+
+    const directoryFiles = await fs.readdir(sourceFolderPath)
+
+    if (directoryFiles.length > 0) {
+      if (!this.openHarmonyModules)
+        this.openHarmonyModules = []
+
+      for (const filename of directoryFiles) {
+        const filePath = path.resolve(sourceFolderPath, filename)
+        if (await fs.exists(filePath) && (await fs.stat(filePath)).isDirectory()) {
+          this.openHarmonyModules.push(new OpenHarmonyModuleImpl(this, URI.file(filePath)))
+        }
+      }
+
+      return this.openHarmonyModules
+    }
+
+    return []
   }
 
   async reset(resetTypes: readonly ModuleOpenHarmonyProject.ResetType[] = ModuleOpenHarmonyProjectImpl.defaultResetTypes): Promise<void> {

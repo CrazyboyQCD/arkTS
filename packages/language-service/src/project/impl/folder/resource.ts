@@ -1,9 +1,6 @@
 import type { ElementJsonFile, OpenHarmonyModule, ResourceFolder, ResourceMediaFile, ResourceRawFile } from '../../project'
-import fs from 'node:fs'
 import path from 'node:path'
-import fg from 'fast-glob'
 import { URI } from 'vscode-uri'
-import { toPattern } from '../../../utils/to-pattern'
 import { ElementJsonFileImpl } from '../file/element-json'
 import { ResourceMediaFileImpl } from '../file/media'
 import { ResourceRawFileImpl } from '../file/rawfile'
@@ -19,7 +16,11 @@ export class ResourceChildFolderImpl implements ResourceFolder {
   }
 
   async isExist(): Promise<boolean> {
-    return fs.existsSync(this.resourceChildFolder.fsPath) && fs.statSync(this.resourceChildFolder.fsPath).isDirectory()
+    const fs = await this.getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    return await fs.exists(this.resourceChildFolder.fsPath) && (await fs.stat(this.resourceChildFolder.fsPath)).isDirectory()
   }
 
   getUri(): URI {
@@ -75,9 +76,15 @@ export class ResourceChildFolderImpl implements ResourceFolder {
     if (this._elementFolderExists !== null && !force)
       return this._elementFolderExists
     const elementFolderPath = this.getElementFolderPath()
-    if (fs.existsSync(elementFolderPath.fsPath) && fs.statSync(elementFolderPath.fsPath).isDirectory()) {
-      this._elementFolderExists = fs.readdirSync(elementFolderPath.fsPath).map(
-        filename => new ElementJsonFileImpl(this, URI.file(path.resolve(elementFolderPath.fsPath, filename))),
+    const fs = await this.getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    if (await fs.exists(elementFolderPath.fsPath) && (await fs.stat(elementFolderPath.fsPath)).isDirectory()) {
+      this._elementFolderExists = await Promise.all(
+        (await fs.readdir(elementFolderPath.fsPath)).map(
+          filename => new ElementJsonFileImpl(this, URI.file(path.resolve(elementFolderPath.fsPath, filename))),
+        ),
       )
       this.getOpenHarmonyModule()
         .getModuleOpenHarmonyProject()
@@ -136,15 +143,21 @@ export class ResourceChildFolderImpl implements ResourceFolder {
     if (this._mediaFolderExists !== null && !force)
       return this._mediaFolderExists
     const mediaFolderPath = this.getMediaFolderPath()
-    if (fs.existsSync(mediaFolderPath.fsPath) && fs.statSync(mediaFolderPath.fsPath).isDirectory()) {
+    const fs = await this.getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    if (await fs.exists(mediaFolderPath.fsPath) && (await fs.stat(mediaFolderPath.fsPath)).isDirectory()) {
       this.getOpenHarmonyModule()
         .getModuleOpenHarmonyProject()
         .getProjectDetector()
         .getLogger('ProjectDetector/ResourceFolder/readMediaFolder')
         .getConsola()
         .info(`Read media folder: ${mediaFolderPath.toString()}`)
-      this._mediaFolderExists = fs.readdirSync(mediaFolderPath.fsPath).map(
-        filename => new ResourceMediaFileImpl(this, URI.file(path.resolve(mediaFolderPath.fsPath, filename))),
+      this._mediaFolderExists = await Promise.all(
+        (await fs.readdir(mediaFolderPath.fsPath)).map(
+          filename => new ResourceMediaFileImpl(this, URI.file(path.resolve(mediaFolderPath.fsPath, filename))),
+        ),
       )
     }
     else {
@@ -164,12 +177,21 @@ export class ResourceChildFolderImpl implements ResourceFolder {
   async readRawFile(force: boolean = false): Promise<ResourceRawFile[]> {
     if (this._filePaths !== null && !force)
       return this._filePaths
-    const pattern = toPattern(path.resolve(this.resourceChildFolder.fsPath, '**', '*'))
-    this._filePaths = fg.sync(pattern, {
-      onlyFiles: true,
-      onlyDirectories: false,
-      absolute: true,
-    }).map(filePath => new ResourceRawFileImpl(this, URI.file(filePath)))
+    const pattern = path.resolve(this.resourceChildFolder.fsPath, '**', '*')
+    const fs = await this.getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    this._filePaths = await Promise.all(
+      (await fs.glob(pattern, {
+        onlyFiles: true,
+        onlyDirectories: false,
+        absolute: true,
+        ignore: [],
+      })).map(
+        filePath => new ResourceRawFileImpl(this, URI.file(filePath)),
+      ),
+    )
     this.getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
