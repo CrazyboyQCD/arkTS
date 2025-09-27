@@ -158,7 +158,7 @@ export function createModuleJson5Service(service: ArkTSExtraLanguageService, det
 
             const [kindWithDollar, name] = text.split(':')
             const kind = kindWithDollar.replace(/^\$/, '')
-            if (!ElementJsonFile.ElementKind.is(kind) && kind !== 'media' && kind !== 'profile') {
+            if (!ElementJsonFile.ElementKind.is(kind) && ResourceFolder.ResourceKind.is(kind)) {
               diagnostics.push({
                 range: Range.create(
                   document.positionAt(node.getStart(moduleJson5SourceFile)),

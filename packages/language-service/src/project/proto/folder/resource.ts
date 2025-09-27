@@ -91,7 +91,9 @@ export namespace ResourceFolder {
     Profile = 'profile',
   }
 
-  export function isResourceKind(value: unknown): value is ResourceKind {
-    return Object.values(ResourceKind).includes(value as ResourceKind)
+  export namespace ResourceKind {
+    export function is(value: unknown): value is ResourceKind {
+      return Object.values(ResourceKind).includes(value as ResourceKind)
+    }
   }
 }

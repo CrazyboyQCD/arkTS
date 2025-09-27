@@ -59,11 +59,13 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
     if (this._isImage !== null && !force)
       return this._isImage
     const imageType = await import('image-type')
-    const fs = await this.getResourceFolder()
+
+    const projectDetector = this.getResourceFolder()
       .getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
-      .getFileSystem()
+
+    const fs = await projectDetector.getFileSystem()
     try {
       const buffer = await fs.readFileAsBuffer(this.elementMediaFile.fsPath)
       const result = await imageType.default(new Uint8Array(buffer))
@@ -71,11 +73,7 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
     }
     catch (error) {
       this._isImage = false
-      this.getResourceFolder()
-        .getOpenHarmonyModule()
-        .getModuleOpenHarmonyProject()
-        .getProjectDetector()
-        .getLogger('ProjectDetector/ResourceMediaFile/isImage')
+      projectDetector.getLogger('ProjectDetector/ResourceMediaFile/isImage')
         .getConsola()
         .error(`Error checking image file: ${this.elementMediaFile.toString()}`, error)
     }
