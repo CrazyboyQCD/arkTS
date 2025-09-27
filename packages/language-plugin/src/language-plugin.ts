@@ -41,7 +41,7 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
   const isTSPluginMode = !isETSServerMode
 
   // full feature virtual code
-  const getFullVitrualCode = (snapshot: ts.IScriptSnapshot, languageId: string): VirtualCode => (
+  const getFullVirtualCode = (snapshot: ts.IScriptSnapshot, languageId: string): VirtualCode => (
     createVirtualCode(snapshot, languageId, {
       completion: true,
       format: true,
