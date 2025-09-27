@@ -13,6 +13,7 @@ import { logger } from './logger'
 const connection = createConnection()
 const server = createServer(connection)
 const lspConfiguration = new LanguageServerConfigManager(logger)
+type SealizableTextDocument = Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string }
 
 logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`)
 
@@ -70,7 +71,6 @@ connection.onInitialize(async (params) => {
       workspaceDetector.updateFile(URI.parse(change.uri))
   })
 
-  type SealizableTextDocument = Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string }
   connection.onRequest('ets/onDidChangeTextDocument', (params: { textDocument: SealizableTextDocument }) => {
     workspaceDetector.updateTextDocument(
       TextDocument.create(
