@@ -36,8 +36,6 @@ export interface OpenHarmonyProject extends Resetable {
 }
 
 export namespace OpenHarmonyProject {
-  export type ResetType = 'oh-package.json5' | 'build-profile.json5' | (string & {})
-
   export function is(value: unknown): value is OpenHarmonyProject {
     return value instanceof OpenHarmonyProjectImpl
   }
@@ -57,4 +55,8 @@ export namespace OpenHarmonyProject {
     }
     return workspaceProject
   }
+}
+
+export namespace OpenHarmonyProject {
+  export type ResetType = 'oh-package.json5' | 'build-profile.json5' | (string & {})
 }

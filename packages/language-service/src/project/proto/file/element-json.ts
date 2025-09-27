@@ -50,6 +50,7 @@ export namespace ElementJsonFile {
     StrArray = 'strarray',
     Theme = 'theme',
   }
+
   export namespace ElementKind {
     export function is(value: unknown): value is ElementKind {
       return Object.values(ElementKind).includes(value as ElementKind)

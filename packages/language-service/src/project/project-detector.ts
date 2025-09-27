@@ -1,16 +1,20 @@
 import type { LanguageServerLogger } from '@arkts/shared'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { URI } from 'vscode-uri'
 import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
+import type { FileSystemAdapter, FileSystemUpdater } from './proto/fs'
 import { OpenHarmonyProjectDetectorImpl } from './impl/project-detector'
 
-export interface OpenHarmonyProjectDetector {
+export interface OpenHarmonyProjectDetector extends FileSystemUpdater {
   /**
    * Get the logger.
    *
    * @param prefix - The prefix of the logger.
    */
   getLogger(prefix?: string): LanguageServerLogger
+  /**
+   * Get the file system adapter.
+   */
+  getFileSystem(): Promise<FileSystemAdapter>
   /**
    * Get the workspace folder.
    */
@@ -75,10 +79,15 @@ export interface OpenHarmonyProjectDetector {
 
   setForce(force: boolean): void
   getForce(): boolean
-  updateFile(uri: URI): Promise<void>
-  updateTextDocument(textDocument: TextDocument): Promise<void>
 }
 
-export function createOpenHarmonyProjectDetector(workspaceFolder: URI): OpenHarmonyProjectDetector {
-  return new OpenHarmonyProjectDetectorImpl(workspaceFolder)
+export interface ProjectDetectorOptions {
+  /**
+   * The file system adapter for the project detector.
+   */
+  fs?: FileSystemAdapter
+}
+
+export function createOpenHarmonyProjectDetector(workspaceFolder: URI, options?: ProjectDetectorOptions): OpenHarmonyProjectDetector {
+  return new OpenHarmonyProjectDetectorImpl(workspaceFolder, options)
 }

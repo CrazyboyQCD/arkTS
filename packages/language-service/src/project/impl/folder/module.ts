@@ -1,7 +1,6 @@
 import type { ModuleJson5 } from '../../../types/module-json5'
 import type { DeepPartial } from '../../../types/util'
 import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyModule, ResourceFolder } from '../../project'
-import fs from 'node:fs'
 import path from 'node:path'
 import json5 from 'json5'
 import { URI, Utils } from 'vscode-uri'
@@ -28,19 +27,30 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
   private _moduleJson5: string | null = null
 
   async readModuleJson5Text(force: boolean = false): Promise<string | null> {
+    const projectDetector = this.getModuleOpenHarmonyProject().getProjectDetector()
+
+    // check if the text document is updated, if so, return the text document
+    const foundTextDocument = await projectDetector.findUpdatedTextDocument(this.getModuleJson5Path())
+    if (foundTextDocument)
+      return foundTextDocument.getText()
+
+    // if the text document is not updated, return the cached text if not force
     if (this._moduleJson5 !== null && !force)
       return this._moduleJson5
     const moduleJson5Path = this.getModuleJson5Path().fsPath
 
+    // If not found cached text, read the text from the file system
+    const fs = await projectDetector.getFileSystem()
+
     try {
-      if (!fs.existsSync(moduleJson5Path) || !fs.statSync(moduleJson5Path).isFile())
+      if (!await fs.exists(moduleJson5Path) || !(await fs.stat(moduleJson5Path)).isFile())
         return null
       this.getModuleOpenHarmonyProject()
         .getProjectDetector()
         .getLogger('ProjectDetector/OpenHarmonyModule/readModuleJson5')
         .getConsola()
         .info(`Read module.json5: ${moduleJson5Path}`)
-      this._moduleJson5 = fs.readFileSync(moduleJson5Path, 'utf-8')
+      this._moduleJson5 = await fs.readFile(moduleJson5Path, 'utf-8')
       return this._moduleJson5
     }
     catch (error) {
@@ -52,12 +62,26 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
   private _moduleJson5Parsed: DeepPartial<ModuleJson5> | null = null
 
   async safeParseModuleJson5(force: boolean = false): Promise<DeepPartial<ModuleJson5> | null> {
+    // check if the text document is updated, if so, return the text document
+    const projectDetector = this.getModuleOpenHarmonyProject().getProjectDetector()
+    const foundTextDocument = await projectDetector.findUpdatedTextDocument(this.getModuleJson5Path())
+    // try to parse the module.json5 from the text document, if success, return the parsed value; if failed, skip.
+    if (foundTextDocument) {
+      try {
+        this._moduleJson5Parsed = json5.parse(foundTextDocument.getText())
+        return this._moduleJson5Parsed
+      }
+      catch { /** skip, the text document is not valid. */ }
+    }
+
+    // if the module.json5 is already parsed, return the cached value if not force
     if (this._moduleJson5Parsed !== null && !force)
       return this._moduleJson5Parsed
     const moduleJson5 = await this.readModuleJson5Text(force)
     if (moduleJson5 === null)
       return null
 
+    // If not found cached parsed value, parse the module.json5
     try {
       this._moduleJson5Parsed = json5.parse(moduleJson5)
       return this._moduleJson5Parsed
@@ -75,9 +99,22 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
   private _moduleJson5SourceFile: import('ohos-typescript').JsonSourceFile | null = null
 
   async readModuleJson5SourceFile(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<import('ohos-typescript').JsonSourceFile | null> {
+    // check if the text document is updated, if so, return the text document
+    const projectDetector = this.getModuleOpenHarmonyProject().getProjectDetector()
+    const foundTextDocument = await projectDetector.findUpdatedTextDocument(this.getModuleJson5Path())
+    if (foundTextDocument) {
+      try {
+        this._moduleJson5SourceFile = ets.parseJsonText(this.getModuleJson5Path().fsPath, foundTextDocument.getText())
+        return this._moduleJson5SourceFile
+      }
+      catch { /** skip, the text document is not valid. */ }
+    }
+
+    // if the module.json5 source file is already read, return the cached value if not force
     if (this._moduleJson5SourceFile !== null && !force)
       return this._moduleJson5SourceFile
     const moduleJson5 = await this.readModuleJson5Text(force)
+    // if the module.json5 is not found, return null
     if (moduleJson5 === null)
       return null
     this._moduleJson5SourceFile = ets.parseJsonText(this.getModuleJson5Path().fsPath, moduleJson5)
@@ -96,17 +133,36 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
     if (this.resourceFolders !== null && !force)
       return this.resourceFolders
     const resourceFolderPath = this.getResourceFolderPath()
-    if (!fs.existsSync(resourceFolderPath.fsPath) || !fs.statSync(resourceFolderPath.fsPath).isDirectory())
+    const fs = await this.getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+
+    if (!await fs.exists(resourceFolderPath.fsPath) || !(await fs.stat(resourceFolderPath.fsPath)).isDirectory())
       return false
+
     this.getModuleOpenHarmonyProject()
       .getProjectDetector()
       .getLogger('ProjectDetector/OpenHarmonyModule/readResourceFolder')
       .getConsola()
       .info(`Readed resource folder: ${resourceFolderPath.fsPath}`)
-    this.resourceFolders = fs.readdirSync(resourceFolderPath.fsPath)
-      .filter(filename => fs.existsSync(path.resolve(resourceFolderPath.fsPath, filename)) && fs.statSync(path.resolve(resourceFolderPath.fsPath, filename)).isDirectory())
-      .map(filename => new ResourceChildFolderImpl(URI.file(path.resolve(resourceFolderPath.fsPath, filename)), this))
-    return this.resourceFolders
+
+    const directoryFiles = await fs.readdir(resourceFolderPath.fsPath)
+
+    if (!this.resourceFolders && directoryFiles.length > 0) {
+      this.resourceFolders = []
+
+      for (const filename of directoryFiles) {
+        const filePath = path.resolve(resourceFolderPath.fsPath, filename)
+
+        if (await fs.exists(filePath) && ((await fs.stat(filePath)).isDirectory())) {
+          this.resourceFolders.push(new ResourceChildFolderImpl(URI.file(filePath), this))
+        }
+      }
+
+      return this.resourceFolders
+    }
+
+    return false
   }
 
   async groupByResourceReference(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {

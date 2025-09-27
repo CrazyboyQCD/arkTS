@@ -1,6 +1,5 @@
 import type { URI } from 'vscode-uri'
 import type { ResourceFolder, ResourceMediaFile } from '../../project'
-import fs from 'node:fs'
 
 export class ResourceMediaFileImpl implements ResourceMediaFile {
   constructor(
@@ -21,7 +20,12 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
   async isExist(force?: boolean): Promise<boolean> {
     if (this._isExist !== null && !force)
       return this._isExist
-    this._isExist = fs.existsSync(this.elementMediaFile.fsPath) && fs.statSync(this.elementMediaFile.fsPath).isFile()
+    const fs = await this.getResourceFolder()
+      .getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+      .getFileSystem()
+    this._isExist = await fs.exists(this.elementMediaFile.fsPath) && (await fs.stat(this.elementMediaFile.fsPath)).isFile()
     this.getResourceFolder()
       .getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()

@@ -1,16 +1,28 @@
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ElementJsonFile } from '../project'
-import type { OpenHarmonyProjectDetector } from '../project-detector'
-import fs from 'node:fs'
+import type { OpenHarmonyProjectDetector, ProjectDetectorOptions } from '../project-detector'
+import type { FileSystemAdapter } from '../proto/fs'
 import path from 'node:path'
 import { LanguageServerLogger } from '@arkts/shared'
-import fg from 'fast-glob'
 import { URI } from 'vscode-uri'
-import { toPattern } from '../../utils/to-pattern'
-import { ModuleOpenHarmonyProject, OpenHarmonyProject } from '../project'
+import { AbstractFileSystem } from '../common'
+import { OpenHarmonyProject } from '../proto/project/abstract-project'
+import { ModuleOpenHarmonyProject } from '../proto/project/module-project'
+import { FileSystemWrapper } from './file-system-wrapper'
+import { createNodeFileSystemAdapter } from './node-file-system'
 
-export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetector {
-  constructor(private readonly workspaceFolder: URI) {}
+export class OpenHarmonyProjectDetectorImpl extends AbstractFileSystem implements OpenHarmonyProjectDetector, AbstractFileSystem {
+  constructor(
+    private readonly workspaceFolder: URI,
+    private readonly options: ProjectDetectorOptions = {},
+  ) { super() }
+
+  private _fileSystem: FileSystemAdapter | null = null
+
+  async getFileSystem(): Promise<FileSystemAdapter> {
+    if (!this._fileSystem)
+      this._fileSystem = new FileSystemWrapper(this.options.fs ?? await createNodeFileSystemAdapter(), this)
+    return this._fileSystem
+  }
 
   getWorkspaceFolder(): URI {
     return this.workspaceFolder
@@ -40,10 +52,12 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
     if (!force && this._projects)
       return this._projects
     const workspaceFolder = this.getWorkspaceFolder().fsPath
-    if (!fs.existsSync(workspaceFolder) || !fs.statSync(workspaceFolder).isDirectory())
+    const fs = await this.getFileSystem()
+
+    if (!(await fs.exists(workspaceFolder)) || !(await fs.stat(workspaceFolder)).isDirectory())
       return []
-    const pattern = toPattern(path.resolve(workspaceFolder, '**', 'oh-package.json5'))
-    const ohPackageJson5Files = fg.sync(pattern, {
+    const pattern = path.resolve(workspaceFolder, '**', 'oh-package.json5')
+    const ohPackageJson5Files = await fs.glob(pattern, {
       onlyFiles: true,
       onlyDirectories: false,
       absolute: true,
@@ -179,68 +193,5 @@ export class OpenHarmonyProjectDetectorImpl implements OpenHarmonyProjectDetecto
 
   getForce(): boolean {
     return this._force
-  }
-
-  private readonly _updatedTextDocuments: TextDocument[] = []
-
-  async updateTextDocument(textDocument: TextDocument): Promise<void> {
-    const foundIndex = this._updatedTextDocuments.findIndex(updatedTextDocument => updatedTextDocument.uri === textDocument.uri)
-    if (foundIndex === -1)
-      this._updatedTextDocuments.push(textDocument)
-    else
-      this._updatedTextDocuments[foundIndex] = textDocument
-  }
-
-  async getUpdatedTextDocuments(): Promise<TextDocument[]> {
-    return this._updatedTextDocuments
-  }
-
-  async updateFile(uri: URI): Promise<void> {
-    const foundIndex = this._updatedTextDocuments.findIndex(updatedTextDocument => updatedTextDocument.uri === uri.toString()
-      || updatedTextDocument.uri === uri.fsPath
-      || updatedTextDocument.uri === uri.path)
-    if (foundIndex !== -1)
-      this._updatedTextDocuments.splice(foundIndex, 1)
-
-    const projects = await this.findProjects()
-
-    for (const project of projects) {
-      if (uri.toString() === project.getProjectRoot().toString()) {
-        await project.reset()
-        continue
-      }
-
-      if (ModuleOpenHarmonyProject.is(project)) {
-        const openHarmonyModules = await project.readOpenHarmonyModules()
-
-        for (const openHarmonyModule of openHarmonyModules) {
-          if (uri.toString() === openHarmonyModule.getModulePath().toString()) {
-            await openHarmonyModule.reset()
-            continue
-          }
-
-          const resourceFolders = await openHarmonyModule.readResourceFolder()
-          if (!resourceFolders)
-            continue
-          for (const resourceFolder of resourceFolders) {
-            if (uri.toString() === resourceFolder.getUri().toString()) {
-              await resourceFolder.reset()
-              continue
-            }
-
-            const elementFolder = await resourceFolder.readElementFolder()
-            if (!elementFolder)
-              continue
-
-            for (const elementFile of elementFolder) {
-              if (uri.toString() === elementFile.getUri().toString()) {
-                await elementFile.reset()
-                continue
-              }
-            }
-          }
-        }
-      }
-    }
   }
 }

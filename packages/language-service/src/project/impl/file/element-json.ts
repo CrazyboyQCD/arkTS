@@ -2,7 +2,6 @@ import type { URI } from 'vscode-uri'
 import type { ResourceElementFile } from '../../../types/resource-element-file'
 import type { DeepPartial } from '../../../types/util'
 import type { ResourceFolder } from '../../project'
-import fs from 'node:fs'
 import { TextDocument } from '@volar/language-server'
 import { ElementJsonFile } from '../../project'
 
@@ -23,11 +22,25 @@ export class ElementJsonFileImpl implements ElementJsonFile {
   private _jsonText: string | null = null
 
   async readJsonText(force: boolean = false): Promise<string | null> {
+    // check if the text document is updated, if so, return the text document
+    const projectDetector = this.getResourceFolder()
+      .getOpenHarmonyModule()
+      .getModuleOpenHarmonyProject()
+      .getProjectDetector()
+
+    const foundTextDocument = await projectDetector.findUpdatedTextDocument(this.elementJsonFile)
+    if (foundTextDocument)
+      return foundTextDocument.getText()
+
+    // if the text document is not updated, return the cached text if not force
     if (this._jsonText !== null && !force)
       return this._jsonText
-    if (!fs.existsSync(this.elementJsonFile.fsPath) || !fs.statSync(this.elementJsonFile.fsPath).isFile())
+
+    // If not found cached text, read the text from the file system
+    const fs = await projectDetector.getFileSystem()
+    if (!await fs.exists(this.elementJsonFile.fsPath) || !(await fs.stat(this.elementJsonFile.fsPath)).isFile())
       return null
-    this._jsonText = fs.readFileSync(this.elementJsonFile.fsPath, 'utf-8')
+    this._jsonText = await fs.readFile(this.elementJsonFile.fsPath, 'utf-8')
     return this._jsonText
   }
 

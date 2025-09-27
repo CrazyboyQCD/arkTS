@@ -152,6 +152,22 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     return this._client
   }
 
+  private languageServerSubscriptions: Disposable[] = []
+
+  async handleDidChangeTextDocumentRequest(): Promise<void> {
+    this.languageServerSubscriptions.push(
+      vscode.workspace.onDidChangeTextDocument((textDocumentChangeEvent) => {
+        const textDocument: Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string } = {
+          uri: textDocumentChangeEvent.document.uri.toString(),
+          languageId: textDocumentChangeEvent.document.languageId,
+          version: textDocumentChangeEvent.document.version,
+          text: textDocumentChangeEvent.document.getText(),
+        }
+        this._client?.sendRequest('ets/onDidChangeTextDocument', { textDocument })
+      }),
+    )
+  }
+
   /**
    * Start the ETS Language Server.
    *
@@ -169,6 +185,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     const start = (type: 'restarted' | 'started'): [undefined, LanguageClientOptions] => {
       this._client?.start()
       this._client?.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
+      this.handleDidChangeTextDocumentRequest()
       // support for auto close tag
       if (this._client)
         activateAutoInsertion('ets', this._client)
@@ -205,6 +222,8 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
   async stop(): Promise<void> {
     if (this._client) {
       await this._client.stop()
+      await Promise.all(this.languageServerSubscriptions.map(async subscription => await subscription.dispose()))
+      this.languageServerSubscriptions = []
       this.getConsola().info('ETS Language Server stopped!')
       vscode.window.setStatusBarMessage('ETS Language Server stopped!', 1000)
     }
