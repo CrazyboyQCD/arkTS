@@ -1,9 +1,16 @@
 import type { Position } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { OpenHarmonyProjectDetector } from '../project'
-import type { ElementJsonFile } from '../project/project'
+import type { ElementJsonFile, OpenHarmonyModule } from '../project/project'
 import type { ContextUtil } from './context-util'
 import { URI } from 'vscode-uri'
+
+export interface ResourceReferenceError {
+  name: string
+  kind: ElementJsonFile.ElementKind
+  start: Position
+  end: Position
+}
 
 export class ResourceUtil {
   constructor(
@@ -12,7 +19,7 @@ export class ResourceUtil {
     private readonly ets: typeof import('ohos-typescript'),
   ) {}
 
-  async getResourceReference(document: TextDocument): Promise<ElementJsonFile.NameRangeReference[]> {
+  async getResourceReference(document: TextDocument): Promise<OpenHarmonyModule.GroupByResourceReference[]> {
     const sourceFile = this.contextUtil.decodeSourceFile(document)
     if (!sourceFile)
       return []
@@ -27,6 +34,6 @@ export class ResourceUtil {
     if (!elementJsonFile)
       return null
     const nameRanges = await elementJsonFile.getNameRange(this.ets, this.detector.getForce())
-    return nameRanges.find(nameRange => nameRange.start.line === position.line && nameRange.start.character <= position.character && nameRange.end.character >= position.character) ?? null
+    return nameRanges.find(nameRange => nameRange.getStart().line === position.line && nameRange.getStart().character <= position.character && nameRange.getEnd().character >= position.character) ?? null
   }
 }

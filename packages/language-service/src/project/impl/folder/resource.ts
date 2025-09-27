@@ -1,6 +1,7 @@
-import type { ElementJsonFile, OpenHarmonyModule, ResourceFolder, ResourceMediaFile, ResourceRawFile } from '../../project'
+import type { ElementJsonFile, OpenHarmonyModule, ResourceMediaFile, ResourceRawFile } from '../../project'
 import path from 'node:path'
 import { URI } from 'vscode-uri'
+import { ResourceFolder } from '../../project'
 import { ElementJsonFileImpl } from '../file/element-json'
 import { ResourceMediaFileImpl } from '../file/media'
 import { ResourceRawFileImpl } from '../file/rawfile'
@@ -41,11 +42,6 @@ export class ResourceChildFolderImpl implements ResourceFolder {
 
   isResfile(): boolean {
     return path.basename(this.resourceChildFolder.fsPath) === 'resfile'
-  }
-
-  isElementFolder(): boolean {
-    // rawfile文件夹和resfile文件夹内部不可以有element文件夹（就算有也不处理）
-    return !this.isRawfile() && !this.isResfile()
   }
 
   getElementFolderPath(): URI {
@@ -120,11 +116,13 @@ export class ResourceChildFolderImpl implements ResourceFolder {
       const nameRanges = await element.getNameRange(ets, force)
 
       for (const nameRange of nameRanges) {
-        const foundIndex = references.findIndex(reference => reference.name === nameRange.text)
+        const foundIndex = references.findIndex(reference => reference.getName() === nameRange.getText())
         if (foundIndex === -1) {
           references.push({
-            name: nameRange.text,
+            kind: ResourceFolder.ResourceKind.Element,
+            getName: () => nameRange.getText(),
             references: [nameRange],
+            getReferencePath: () => `app.${nameRange.kind}.${nameRange.getText()}`,
           })
         }
         else {
@@ -143,15 +141,12 @@ export class ResourceChildFolderImpl implements ResourceFolder {
     if (this._mediaFolderExists !== null && !force)
       return this._mediaFolderExists
     const mediaFolderPath = this.getMediaFolderPath()
-    const fs = await this.getOpenHarmonyModule()
+    const projectDetector = this.getOpenHarmonyModule()
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
-      .getFileSystem()
+    const fs = await projectDetector.getFileSystem()
     if (await fs.exists(mediaFolderPath.fsPath) && (await fs.stat(mediaFolderPath.fsPath)).isDirectory()) {
-      this.getOpenHarmonyModule()
-        .getModuleOpenHarmonyProject()
-        .getProjectDetector()
-        .getLogger('ProjectDetector/ResourceFolder/readMediaFolder')
+      projectDetector.getLogger('ProjectDetector/ResourceFolder/readMediaFolder')
         .getConsola()
         .info(`Read media folder: ${mediaFolderPath.toString()}`)
       this._mediaFolderExists = await Promise.all(

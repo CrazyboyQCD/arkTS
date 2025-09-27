@@ -117,7 +117,7 @@ describe('project-detector', (it) => {
     const elementNameRangeReference = await baseFolder?.getElementNameRangeReference(ets)
     expect(elementNameRangeReference).toBeDefined()
     expect(elementNameRangeReference?.length).toBeGreaterThanOrEqual(1)
-    const primaryColor = elementNameRangeReference?.find(reference => reference.name === 'primary_color')
+    const primaryColor = elementNameRangeReference?.find(reference => reference.getName() === 'primary_color')
     expect(primaryColor).toBeDefined()
     expect(primaryColor?.references?.length).toBeGreaterThanOrEqual(1)
   })

@@ -145,12 +145,6 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
     })
   }
 
-  static readonly moduleJson5ResourceReferenceStartSymbols: readonly string[] = [
-    '$profile',
-    '$color',
-    '$string',
-  ]
-
   getModuleJson5ResourceReferences(sourceFile: ets.SourceFile, document: TextDocument): ModuleJson5ResourceReference[] {
     const ranges: ModuleJson5ResourceReference[] = []
     const ets = this.getETS()
@@ -162,7 +156,7 @@ export class ArkTSExtraLanguageServiceImpl implements ArkTSExtraLanguageService 
         return
 
       const fullText = node.getText(sourceFile).replace(/["'`]/g, '').trim()
-      if (!ArkTSExtraLanguageServiceImpl.moduleJson5ResourceReferenceStartSymbols.some(symbol => fullText.startsWith(symbol)))
+      if (!fullText.startsWith('$'))
         return
 
       const [kind, name] = fullText.split(':')

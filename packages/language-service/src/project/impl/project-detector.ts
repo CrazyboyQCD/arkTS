@@ -1,4 +1,4 @@
-import type { ElementJsonFile } from '../project'
+import type { ElementJsonFile, OpenHarmonyModule } from '../project'
 import type { OpenHarmonyProjectDetector, ProjectDetectorOptions } from '../project-detector'
 import type { FileSystemAdapter } from '../proto/fs'
 import path from 'node:path'
@@ -119,9 +119,9 @@ export class OpenHarmonyProjectDetectorImpl extends AbstractFileSystem implement
     return null
   }
 
-  async searchResourceElementRange(elementKind: ElementJsonFile.ElementKind, name: string, ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRange[] | null> {
+  async searchResource(resourcePath: string, ets: typeof import('ohos-typescript'), force?: boolean): Promise<OpenHarmonyModule.GroupByResourceReference[]> {
     const projects = await this.findProjects(force)
-    const nameRanges: ElementJsonFile.NameRange[] = []
+    const references: OpenHarmonyModule.GroupByResourceReference[] = []
 
     for (const project of projects) {
       if (!ModuleOpenHarmonyProject.is(project))
@@ -134,24 +134,16 @@ export class OpenHarmonyProjectDetectorImpl extends AbstractFileSystem implement
         if (!resourceFolders)
           continue
 
-        for (const resourceFolder of resourceFolders) {
-          const elementFolder = await resourceFolder.readElementFolder(force)
-          if (!elementFolder)
-            continue
+        const resourceReferences = await openHarmonyModule.groupByResourceReference(ets, force)
 
-          for (const elementFile of elementFolder) {
-            const elementNameRanges = await elementFile.getNameRange(ets, force)
-
-            for (const elementNameRange of elementNameRanges) {
-              if (elementNameRange.text === name && elementNameRange.kind === elementKind)
-                nameRanges.push(elementNameRange)
-            }
-          }
+        for (const resourceReference of resourceReferences) {
+          if (resourceReference.getReferencePath() === resourcePath)
+            references.push(resourceReference)
         }
       }
     }
 
-    return nameRanges
+    return references
   }
 
   async searchProjectByModuleJson5<T = ModuleOpenHarmonyProject>(filePath: URI, ets: typeof import('ohos-typescript'), force: boolean = false): Promise<T | null> {
@@ -174,7 +166,7 @@ export class OpenHarmonyProjectDetectorImpl extends AbstractFileSystem implement
     return null
   }
 
-  async getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {
+  async getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force: boolean = false): Promise<OpenHarmonyModule.GroupByResourceReference[]> {
     const project: ModuleOpenHarmonyProject | null = await this.searchProject(URI.file(filePath.fsPath), 'module', force)
     if (!project)
       return []

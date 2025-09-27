@@ -1,11 +1,12 @@
 import type { LanguageServicePlugin } from '@volar/language-server'
-import type { CompletionList, Diagnostic, LocationLink, Position } from 'vscode-languageserver-protocol'
+import type { CompletionList, Diagnostic, LocationLink } from 'vscode-languageserver-protocol'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import type { ArkTSExtraLanguageService } from '../language-service'
 import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
 import type { OpenHarmonyProjectDetector } from '../project'
 import { typeAssert } from '@arkts/shared'
-import { DiagnosticSeverity, Range } from 'vscode-languageserver-protocol'
+import { DiagnosticSeverity, Position, Range } from 'vscode-languageserver-protocol'
+import { ElementJsonFile } from '../project'
 import { ContextUtil } from '../utils/context-util'
 
 export function createETSResourceService(service: ArkTSExtraLanguageService, detector: OpenHarmonyProjectDetector): LanguageServicePlugin {
@@ -49,16 +50,14 @@ export function createETSResourceService(service: ArkTSExtraLanguageService, det
             if (resourceScope !== 'app')
               continue
 
-            const nameRanges = (resourceReference?.find(reference => reference.name === resourceName)?.references ?? []).filter((reference) => {
-              return reference.kind === resourceType
-            })
-            if (!nameRanges.length) {
+            const matchedReference = resourceReference.find(reference => reference.getReferencePath() === $rCallExpression.text)
+            if (!matchedReference) {
               diagnostics.push({
                 range: Range.create(
                   $rCallExpression.start,
                   $rCallExpression.end,
                 ),
-                message: `Resource ${resourceName} not found.`,
+                message: `Resource ${$rCallExpression.text} not found.`,
                 severity: DiagnosticSeverity.Error,
                 source: 'arkts-resource',
                 code: 'ARKTS_RESOURCE_NOT_FOUND',
@@ -95,31 +94,47 @@ export function createETSResourceService(service: ArkTSExtraLanguageService, det
             if (resourceScope !== 'app')
               continue
 
-            const nameRanges = (resourceReference?.find(reference => reference.name === resourceName)?.references ?? []).filter((reference) => {
-              return reference.kind === resourceType
-            })
-            if (!nameRanges.length)
+            const matchedReferences = resourceReference.filter(reference => reference.getReferencePath() === $rCallExpression.text)
+            if (!matchedReferences.length)
               continue
 
-            locationLinks.push(
-              ...nameRanges.map((nameRange) => {
-                return {
-                  targetUri: nameRange.getElementJsonFile().getUri().toString(),
-                  targetRange: Range.create(
-                    nameRange.start,
-                    nameRange.end,
-                  ),
-                  targetSelectionRange: Range.create(
-                    nameRange.start,
-                    nameRange.end,
-                  ),
+            for (const matchedReference of matchedReferences) {
+              if (ElementJsonFile.isNameRangeReference(matchedReference)) {
+                for (const reference of matchedReference.references) {
+                  locationLinks.push({
+                    targetUri: reference.getElementJsonFile().getUri().toString(),
+                    targetRange: Range.create(
+                      reference.getStart(),
+                      reference.getEnd(),
+                    ),
+                    targetSelectionRange: Range.create(
+                      reference.getStart(),
+                      reference.getEnd(),
+                    ),
+                    originSelectionRange: Range.create(
+                      $rCallExpression.stringStart,
+                      $rCallExpression.stringEnd,
+                    ),
+                  })
+                }
+              }
+              else {
+                const targetRange = Range.create(
+                  Position.create(0, 0),
+                  Position.create(0, 0),
+                )
+
+                locationLinks.push({
+                  targetUri: matchedReference.getUri().toString(),
+                  targetRange,
+                  targetSelectionRange: targetRange,
                   originSelectionRange: Range.create(
                     $rCallExpression.stringStart,
                     $rCallExpression.stringEnd,
                   ),
-                }
-              }),
-            )
+                })
+              }
+            }
           }
 
           return locationLinks

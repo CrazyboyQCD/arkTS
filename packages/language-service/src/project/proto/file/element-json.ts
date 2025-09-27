@@ -1,8 +1,8 @@
 import type { Position } from '@volar/language-server'
 import type { ResourceElementFile } from '../../../types/resource-element-file'
 import type { DeepPartial } from '../../../types/util'
-import type { FileOrFolder, Resetable } from '../common'
-import type { ResourceFolder } from '../folder/resource'
+import type { ETSReferenceable, FileOrFolder, Resetable } from '../common'
+import { ResourceFolder } from '../folder/resource'
 
 export interface ElementJsonFile extends Resetable, FileOrFolder {
   /**
@@ -59,14 +59,42 @@ export namespace ElementJsonFile {
 
   export interface NameRange {
     kind: ElementKind
-    start: Position
-    end: Position
-    text: string
     getElementJsonFile(): ElementJsonFile
+    getText(): string
+    getStart(): Position
+    getEnd(): Position
   }
 
-  export interface NameRangeReference {
-    name: string
+  export function isNameRange(value: unknown): value is NameRange {
+    return typeof value === 'object'
+      && value !== null
+      && 'kind' in value
+      && ElementKind.is(value.kind)
+      && 'getElementJsonFile' in value
+      && typeof value.getElementJsonFile === 'function'
+      && 'getText' in value
+      && typeof value.getText === 'function'
+      && 'getStart' in value
+      && typeof value.getStart === 'function'
+      && 'getEnd' in value
+      && typeof value.getEnd === 'function'
+  }
+
+  export interface NameRangeReference extends ETSReferenceable {
+    kind: ResourceFolder.ResourceKind.Element
+    getName(): string
     references: NameRange[]
+  }
+
+  export function isNameRangeReference(value: unknown): value is NameRangeReference {
+    return typeof value === 'object'
+      && value !== null
+      && 'kind' in value
+      && value.kind === ResourceFolder.ResourceKind.Element
+      && 'getName' in value
+      && typeof value.getName === 'function'
+      && 'references' in value
+      && Array.isArray(value.references)
+      && value.references.every(item => isNameRange(item))
   }
 }

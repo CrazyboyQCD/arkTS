@@ -1,6 +1,6 @@
 import type { LanguageServerLogger } from '@arkts/shared'
 import type { URI } from 'vscode-uri'
-import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
+import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyModule, OpenHarmonyProject, WorkspaceOpenHarmonyProject } from './project'
 import type { FileSystemAdapter, FileSystemUpdater } from './proto/fs'
 import { OpenHarmonyProjectDetectorImpl } from './impl/project-detector'
 
@@ -49,12 +49,11 @@ export interface OpenHarmonyProjectDetector extends FileSystemUpdater {
   /**
    * Search the related element json files by the element kind and name.
    *
-   * @param elementKind - The element kind.
-   * @param name - The name of the element.
+   * @param resourcePath - The resource path.
    * @param ets - The ohos typescript instance.
    * @param force - If true, the name or id ranges will be read again. If not provided, the cached value will be returned.
    */
-  searchResourceElementRange(elementKind: ElementJsonFile.ElementKind, name: string, ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRange[] | null>
+  searchResource(resourcePath: string, ets: typeof import('ohos-typescript'), force?: boolean): Promise<OpenHarmonyModule.GroupByResourceReference[]>
   /**
    * Search the project by the module.json5 file path.
    *
@@ -75,7 +74,7 @@ export interface OpenHarmonyProjectDetector extends FileSystemUpdater {
    * @param ets - The ohos typescript instance.
    * @param force - If true, the resource reference will be read again. If not provided, the cached value will be returned.
    */
-  getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRangeReference[]>
+  getResourceReferenceByFilePath(filePath: URI, ets: typeof import('ohos-typescript'), force?: boolean): Promise<OpenHarmonyModule.GroupByResourceReference[]>
 
   setForce(force: boolean): void
   getForce(): boolean

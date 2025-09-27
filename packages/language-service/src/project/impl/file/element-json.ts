@@ -97,10 +97,10 @@ export class ElementJsonFileImpl implements ElementJsonFile {
 
           nameRanges.push({
             kind,
-            start: textDocument.positionAt(nameProperty.initializer.getStart(ast)),
-            end: textDocument.positionAt(nameProperty.initializer.getEnd()),
-            text: nameProperty.initializer.getText(ast).replace(/["'`]/g, ''),
             getElementJsonFile: () => this,
+            getText: () => nameProperty.initializer.getText(ast).replace(/["'`]/g, ''),
+            getStart: () => textDocument.positionAt(nameProperty.initializer.getStart(ast)),
+            getEnd: () => textDocument.positionAt(nameProperty.initializer.getEnd()),
           })
         }
       }

@@ -1,6 +1,6 @@
 import type { URI } from 'vscode-uri'
 import type { Resetable } from '../common'
-import type { ElementJsonFile } from '../file'
+import type { ElementJsonFile, ResourceMediaFile } from '../file'
 import type { ModuleOpenHarmonyProject } from '../project'
 import type { ResourceFolder } from './resource'
 
@@ -58,10 +58,14 @@ export interface OpenHarmonyModule extends Resetable {
    */
   readResourceFolder(force?: boolean): Promise<ResourceFolder[] | false>
   /**
-   * Group the resource reference by the element kind and name.
+   * Group the resource reference by the resource kind、element kind and element name.
    *
    * @param ets - The ohos typescript instance.
    * @param force - If true, the resource reference will be read again. If not provided, the cached value will be returned.
    */
-  groupByResourceReference(ets: typeof import('ohos-typescript'), force?: boolean): Promise<ElementJsonFile.NameRangeReference[]>
+  groupByResourceReference(ets: typeof import('ohos-typescript'), force?: boolean): Promise<OpenHarmonyModule.GroupByResourceReference[]>
+}
+
+export namespace OpenHarmonyModule {
+  export type GroupByResourceReference = ElementJsonFile.NameRangeReference | ResourceMediaFile
 }

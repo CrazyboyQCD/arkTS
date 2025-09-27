@@ -1,9 +1,14 @@
 import type { FileSystemAdapter } from '../proto/fs'
 
 class NodeFileSystemAdapter implements FileSystemAdapter {
-  async readFile(filePath: string, encoding?: FileSystemAdapter.BufferEncodingWithString): Promise<string> {
+  async readFile(filePath: string, encoding: FileSystemAdapter.BufferEncodingWithString = 'utf-8'): Promise<string> {
     const fs = await import('node:fs/promises')
     return fs.readFile(filePath, encoding as FileSystemAdapter.BufferEncoding)
+  }
+
+  async readFileAsBuffer(filePath: string): Promise<ArrayBuffer | SharedArrayBuffer> {
+    const fs = await import('node:fs/promises')
+    return fs.readFile(filePath).then(buffer => buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength))
   }
 
   async glob(pattern: string): Promise<string[]> {

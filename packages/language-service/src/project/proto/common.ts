@@ -13,3 +13,14 @@ export interface FileOrFolder {
    */
   getUri(): URI
 }
+
+export interface ETSReferenceable {
+  /**
+   * Get the reference path like:
+   *
+   * `app.media.icon`
+   * `app.string.hello`
+   * `app.color.primary`
+   */
+  getReferencePath(): string
+}

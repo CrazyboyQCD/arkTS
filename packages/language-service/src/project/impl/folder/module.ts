@@ -1,9 +1,11 @@
 import type { ModuleJson5 } from '../../../types/module-json5'
 import type { DeepPartial } from '../../../types/util'
-import type { ElementJsonFile, ModuleOpenHarmonyProject, OpenHarmonyModule, ResourceFolder } from '../../project'
+import type { ModuleOpenHarmonyProject, OpenHarmonyModule, ResourceFolder } from '../../project'
 import path from 'node:path'
 import json5 from 'json5'
 import { URI, Utils } from 'vscode-uri'
+import { ElementJsonFile } from '../../project'
+import { ResourceMediaFile } from '../../proto/file/media'
 import { ResourceChildFolderImpl } from './resource'
 
 export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
@@ -165,42 +167,48 @@ export class OpenHarmonyModuleImpl implements OpenHarmonyModule {
     return false
   }
 
-  async groupByResourceReference(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<ElementJsonFile.NameRangeReference[]> {
-    const resourceFolder = await this.readResourceFolder(force)
-    if (resourceFolder === false)
+  async groupByResourceReference(ets: typeof import('ohos-typescript'), force: boolean = false): Promise<OpenHarmonyModule.GroupByResourceReference[]> {
+    const resourceFolders = await this.readResourceFolder(force)
+    if (resourceFolders === false)
       return []
-    return Promise.all(
-      resourceFolder
-        .filter(folder => folder.isElementFolder())
-        .map(folder => folder.getElementNameRangeReference(ets, force)),
-    )
-      .then(references => references.flat())
-      .then((references) => {
-        const result: ElementJsonFile.NameRangeReference[] = []
 
-        for (const reference of references) {
-          const existingIndex = result.findIndex(item => item.name === reference.name)
+    const references: OpenHarmonyModule.GroupByResourceReference[] = []
 
-          if (existingIndex === -1) {
-            result.push(reference)
-            continue
-          }
-
-          for (const newRef of reference.references) {
-            const isDuplicate = result[existingIndex].references.some(existingRef =>
-              existingRef.start.line === newRef.start.line
-              && existingRef.start.character === newRef.start.character
-              && existingRef.end.line === newRef.end.line
-              && existingRef.end.character === newRef.end.character
-              && existingRef.getElementJsonFile().getUri().toString() === newRef.getElementJsonFile().getUri().toString(),
-            )
-            if (!isDuplicate)
-              result[existingIndex].references.push(newRef)
-          }
+    for (const resourceFolder of resourceFolders) {
+      const elementNameRanges = await resourceFolder.getElementNameRangeReference(ets, force)
+      for (const elementNameRange of elementNameRanges) {
+        const existingIndex = references.findIndex(item => ElementJsonFile.isNameRangeReference(item) && item.getName() === elementNameRange.getName())
+        if (existingIndex === -1) {
+          references.push(elementNameRange)
+          continue
         }
 
-        return result
-      })
+        for (const newRef of elementNameRange.references) {
+          const isDuplicate = (references[existingIndex] as ElementJsonFile.NameRangeReference).references.some(existingRef =>
+            existingRef.kind === newRef.kind
+            && existingRef.getStart().line === newRef.getStart().line
+            && existingRef.getStart().character === newRef.getStart().character
+            && existingRef.getEnd().line === newRef.getEnd().line
+            && existingRef.getEnd().character === newRef.getEnd().character
+            && existingRef.getElementJsonFile().getUri().toString() === newRef.getElementJsonFile().getUri().toString(),
+          )
+          if (!isDuplicate)
+            (references[existingIndex] as ElementJsonFile.NameRangeReference).references.push(newRef)
+        }
+      }
+
+      const resourceMediaFiles = await resourceFolder.readMediaFolder(force)
+      for (const resourceMediaFile of resourceMediaFiles || []) {
+        const existingIndex = references.findIndex(item => ResourceMediaFile.is(item) && item.getFileName() === resourceMediaFile.getFileName())
+        if (existingIndex === -1) {
+          references.push(resourceMediaFile)
+          continue
+        }
+        references.push(resourceMediaFile)
+      }
+    }
+
+    return references
   }
 
   async reset(): Promise<void> {

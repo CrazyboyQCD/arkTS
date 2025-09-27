@@ -24,6 +24,10 @@ export class FileSystemWrapper implements FileSystemAdapter {
     return this.fs.readFile(filePath, encoding)
   }
 
+  readFileAsBuffer(filePath: string): Promise<ArrayBuffer | SharedArrayBuffer> {
+    return this.fs.readFileAsBuffer(filePath)
+  }
+
   glob(pattern: string): Promise<string[]> {
     return this.fs.glob(pattern)
   }

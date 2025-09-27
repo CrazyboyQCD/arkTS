@@ -64,7 +64,12 @@ connection.onInitialize(async (params) => {
   logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
   const workspaceDetector = createOpenHarmonyProjectDetector(URI.file(projectRoot))
   const arktsServices = await createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
-  const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'))
+  const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'), {
+    isValidationEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isSuggestionsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isAutoClosingTagsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isFormattingEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+  })
 
   connection.onDidChangeWatchedFiles((params) => {
     for (const change of params.changes)

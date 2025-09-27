@@ -4,6 +4,7 @@ import type { ArkTSExtraLanguageServiceImpl } from '../language-service-impl'
 import type { OpenHarmonyProjectDetector } from '../project'
 import { typeAssert } from '@arkts/shared'
 import { Range } from '@volar/language-server'
+import { ElementJsonFile } from '../project'
 import { ContextUtil } from '../utils/context-util'
 
 export function createETSElementJsonService(service: ArkTSExtraLanguageService, detector: OpenHarmonyProjectDetector): LanguageServicePlugin {
@@ -28,24 +29,26 @@ export function createETSElementJsonService(service: ArkTSExtraLanguageService, 
           if (!matchedNameRange)
             return []
 
-          const resourceReference = resourceReferences.find(reference => reference.name === matchedNameRange?.text)?.references ?? []
+          const matchedElementReference = resourceReferences.find(reference => ElementJsonFile.isNameRangeReference(reference) && reference.getName() === matchedNameRange?.getText()) as ElementJsonFile.NameRangeReference | undefined
+          if (!matchedElementReference)
+            return []
           const locationLinks: LocationLink[] = []
 
-          for (const reference of resourceReference) {
+          for (const reference of matchedElementReference.references) {
             const elementJsonFile = reference.getElementJsonFile()
             locationLinks.push({
               targetUri: elementJsonFile.getUri().toString(),
               targetRange: Range.create(
-                reference.start,
-                reference.end,
+                reference.getStart(),
+                reference.getEnd(),
               ),
               targetSelectionRange: Range.create(
-                reference.start,
-                reference.end,
+                reference.getStart(),
+                reference.getEnd(),
               ),
               originSelectionRange: Range.create(
-                matchedNameRange.start,
-                matchedNameRange.end,
+                matchedNameRange.getStart(),
+                matchedNameRange.getEnd(),
               ),
             })
           }

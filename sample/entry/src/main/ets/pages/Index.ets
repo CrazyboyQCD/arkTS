@@ -31,7 +31,7 @@ struct Index {
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)
-          .fontColor($r('app.color.start_window_background'))
+          .fontColor($r('app.color.primary_color'))
 
         Text($r('app.string.welcome_message'))
           .fontSize(20)

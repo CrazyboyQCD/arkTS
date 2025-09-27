@@ -5,7 +5,7 @@ import { beforeAll, describe, expect } from 'vitest'
 import { URI } from 'vscode-uri'
 import { createArkTSExtraLanguageService } from '../src/language-service'
 
-const files = {
+const files: Record<string, { text: string }> = {
   'get-symbol-tree.ts': {
     text: 'export class Test {}',
   },

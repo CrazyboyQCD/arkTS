@@ -124,7 +124,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
         { language: 'ets' },
         { language: 'typescript' },
         { language: 'json' },
-        { pattern: '**/*.json5', scheme: 'file' },
+        { pattern: '**/*.json5' },
       ],
       outputChannel: this.getOutputChannel(),
       initializationOptions: {
@@ -157,6 +157,9 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
   async handleDidChangeTextDocumentRequest(): Promise<void> {
     this.languageServerSubscriptions.push(
       vscode.workspace.onDidChangeTextDocument((textDocumentChangeEvent) => {
+        // ⚠️ Performance: only send file:// scheme text documents
+        if (textDocumentChangeEvent.document.uri.scheme !== 'file')
+          return
         const textDocument: Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string } = {
           uri: textDocumentChangeEvent.document.uri.toString(),
           languageId: textDocumentChangeEvent.document.languageId,

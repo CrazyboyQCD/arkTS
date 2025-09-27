@@ -29,9 +29,9 @@ export interface ResourceFolder extends Resetable, FileOrFolder {
    */
   isResfile(): boolean
   /**
-   * Check if the resource child folder is the element folder.
+   * Get the element folder path in the resource child folder.
    */
-  isElementFolder(): boolean
+  getElementFolderPath(): URI
   /**
    * Check if the element folder exists in the resource child folder.
    *
@@ -81,8 +81,17 @@ export interface ResourceFolder extends Resetable, FileOrFolder {
    * @param force - If true, the file paths will be read again. If not provided, the cached value will be returned.
    */
   readRawFile(force?: boolean): Promise<ResourceRawFile[]>
-  /**
-   * Get the element folder path in the resource child folder.
-   */
-  getElementFolderPath(): URI
+}
+
+export namespace ResourceFolder {
+  export enum ResourceKind {
+    Element = 'element',
+    Media = 'media',
+    Rawfile = 'rawfile',
+    Profile = 'profile',
+  }
+
+  export function isResourceKind(value: unknown): value is ResourceKind {
+    return Object.values(ResourceKind).includes(value as ResourceKind)
+  }
 }

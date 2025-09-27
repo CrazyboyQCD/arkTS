@@ -16,6 +16,12 @@ export interface FileSystemAdapter {
    */
   readFile(filePath: string, encoding?: FileSystemAdapter.BufferEncodingWithString): Promise<string>
   /**
+   * Read the file content as buffer.
+   *
+   * @param filePath - The file path.
+   */
+  readFileAsBuffer(filePath: string): Promise<ArrayBuffer | SharedArrayBuffer>
+  /**
    * Glob the file paths.
    *
    * @param pattern - The glob pattern.
