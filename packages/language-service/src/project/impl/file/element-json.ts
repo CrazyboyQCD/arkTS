@@ -3,7 +3,7 @@ import type { ResourceElementFile } from '../../../types/resource-element-file'
 import type { DeepPartial } from '../../../types/util'
 import type { ResourceFolder } from '../../project'
 import { TextDocument } from '@volar/language-server'
-import { ElementJsonFile } from '../../project'
+import { ElementJsonFile } from '../../proto/file/element-json'
 
 export class ElementJsonFileImpl implements ElementJsonFile {
   constructor(

@@ -1,8 +1,8 @@
 import type { ImageTypeResult } from 'image-type'
 import type { URI } from 'vscode-uri'
-import type { ResourceMediaFile } from '../../project'
+import type { ResourceMediaFile } from '../../proto/file/media'
 import { Utils } from 'vscode-uri'
-import { ResourceFolder } from '../../project'
+import { ResourceFolder } from '../../proto/folder/resource'
 
 export class ResourceMediaFileImpl implements ResourceMediaFile {
   constructor(
