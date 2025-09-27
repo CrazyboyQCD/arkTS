@@ -64,9 +64,21 @@ export class ResourceMediaFileImpl implements ResourceMediaFile {
       .getModuleOpenHarmonyProject()
       .getProjectDetector()
       .getFileSystem()
-    const buffer = await fs.readFileAsBuffer(this.elementMediaFile.fsPath)
-    const result = await imageType.default(new Uint8Array(buffer))
-    this._isImage = result ?? false
+    try {
+      const buffer = await fs.readFileAsBuffer(this.elementMediaFile.fsPath)
+      const result = await imageType.default(new Uint8Array(buffer))
+      this._isImage = result ?? false
+    }
+    catch (error) {
+      this._isImage = false
+      this.getResourceFolder()
+        .getOpenHarmonyModule()
+        .getModuleOpenHarmonyProject()
+        .getProjectDetector()
+        .getLogger('ProjectDetector/ResourceMediaFile/isImage')
+        .getConsola()
+        .error(`Error checking image file: ${this.elementMediaFile.toString()}`, error)
+    }
     return this._isImage
   }
 }
