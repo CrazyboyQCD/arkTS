@@ -1,4 +1,3 @@
-import type { ResourceElementFile } from 'packages/types/out'
 import type { URI } from 'vscode-uri'
 import type { DeepPartial } from '../../../types/util'
 import type { Element } from '../../interfaces/directory/element'
@@ -6,6 +5,7 @@ import type { FileSystemAdapter } from '../../interfaces/file-system/file-system
 import type { ElementJsonFile } from '../../interfaces/file/element-json'
 import type { TextDocumentUpdater } from '../../interfaces/project-detector'
 import type { ElementJsonNameReference } from '../../interfaces/reference/element-json-name'
+import { ResourceElementFile } from '@arkts/types'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Range } from 'vscode-languageserver-types'
 import { LEADING_TRAILING_QUOTE_REGEX } from '../../../utils/regex'
@@ -55,6 +55,7 @@ export class ElementJsonFileImpl extends JsonLikeFileImpl<DeepPartial<ResourceEl
           if (!ets.isArrayLiteralExpression(property.initializer)) continue
 
           const kind = property.name.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')
+          if (!ResourceElementFile.Kind.is(kind)) continue
 
           for (const element of property.initializer.elements) {
             if (!ets.isObjectLiteralExpression(element)) continue

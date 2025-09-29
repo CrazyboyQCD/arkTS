@@ -27,6 +27,66 @@ export interface ResourceElementFile {
 
 export namespace ResourceElementFile {
   /**
+   * Resource element file kind.
+   */
+  export enum Kind {
+    /**
+     * Color resource.
+     */
+    Color = 'color',
+    /**
+     * String resource.
+     */
+    String = 'string',
+    /**
+     * Float resource.
+     */
+    Float = 'float',
+    /**
+     * Boolean resource.
+     */
+    Boolean = 'boolean',
+    /**
+     * Integer resource.
+     */
+    Integer = 'integer',
+    /**
+     * Media resource.
+     */
+    Media = 'media',
+    /**
+     * Profile resource.
+     */
+    Profile = 'profile',
+    /**
+     * Symbol resource.
+     */
+    Symbol = 'symbol',
+    /**
+     * Plural resource.
+     */
+    Plural = 'plural',
+    /**
+     * Pattern resource.
+     */
+    Pattern = 'pattern',
+    /**
+     * String array resource.
+     */
+    StrArray = 'strarray',
+    /**
+     * Theme resource.
+     */
+    Theme = 'theme',
+  }
+
+  export namespace Kind {
+    export function is(kind: unknown): kind is Kind {
+      return typeof kind === 'string' && Object.values(Kind).includes(kind as Kind)
+    }
+  }
+
+  /**
    * Color resource item
    */
   export interface ColorItem {

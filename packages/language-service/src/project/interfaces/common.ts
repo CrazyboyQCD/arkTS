@@ -66,9 +66,8 @@ export interface Reference {
  * {@linkcode FullableReference} 代表一个可获取完整范围和文本的引用。
  *
  * 比如`json`文件中的引用，当实现下列方法时则表示原本的{@linkcode getText}和
- * {@linkcode getRange}方法返回的是一个不包含前后引号的部分，而
- * {@linkcode getFullText}和{@linkcode getFullRange}
- * 方法返回的是一个包含前后引号的部分。
+ * {@linkcode getRange}方法返回的是一个不包含前后引号的部分，而{@linkcode getFullText}
+ * 和{@linkcode getFullRange}方法返回的是一个包含前后引号的部分。
  */
 export interface FullableReference extends Reference {
   /**
@@ -83,4 +82,20 @@ export interface FullableReference extends Reference {
    * @returns The full text of the name reference.
    */
   getFullText(): string
+}
+
+export interface PathableReference extends Reference {
+  /**
+   * Get `.ets` format path of the reference, like: `app.media.icon`.
+   */
+  getEtsPath(): PathableReference.EtsPath
+  /**
+   * Get `.json5` format path of the reference, like: `$media:icon`.
+   */
+  getJson5Path(): PathableReference.Json5Path
+}
+
+export namespace PathableReference {
+  export type EtsPath = `${string}.${string}.${string}`
+  export type Json5Path = `$${string}:${string}`
 }

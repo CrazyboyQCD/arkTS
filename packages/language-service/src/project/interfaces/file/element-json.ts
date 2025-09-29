@@ -1,5 +1,6 @@
 import type { ResourceElementFile } from '@arkts/types'
 import type { DeepPartial } from '../../../types/util'
+import type { Element } from '../directory/element'
 import type { ElementJsonNameReference } from '../reference/element-json-name'
 import type { JsonLikeFile } from './json-like-file'
 

@@ -1,7 +1,8 @@
-import type { FullableReference } from '../common'
+import type { ResourceElementFile } from 'packages/types/out'
+import type { FullableReference, PathableReference } from '../common'
 import type { ElementJsonFile } from '../file/element-json'
 
-export interface ElementJsonNameReference extends FullableReference {
+export interface ElementJsonNameReference extends FullableReference, PathableReference {
   /**
    * Get the element json file of the name reference.
    *
@@ -13,5 +14,5 @@ export interface ElementJsonNameReference extends FullableReference {
    *
    * @returns The kind of the name reference.
    */
-  getKind(): string
+  getKind(): ResourceElementFile.Kind
 }
