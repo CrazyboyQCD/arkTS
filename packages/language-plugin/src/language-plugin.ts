@@ -79,12 +79,9 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
   return {
     getLanguageId(uri) {
       const filePath = typeof uri === 'string' ? uri : uri.fsPath
-      if (filePath.endsWith('.ets'))
-        return 'ets'
-      if (filePath.endsWith('.ts'))
-        return 'typescript'
-      if (filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc'))
-        return 'json'
+      if (filePath.endsWith('.ets')) return 'ets'
+      if (filePath.endsWith('.ts')) return 'typescript'
+      if (filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc')) return 'json'
       return undefined
     },
     createVirtualCode(uri, languageId, snapshot) {
@@ -95,8 +92,7 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
       const isDETS = filePath.endsWith('.d.ets')
 
       // json5、json files, directly using full feature virtual code
-      if (filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc') || languageId === 'json' || languageId === 'jsonc')
-        return getFullVitrualCode(snapshot, languageId)
+      if (filePath.endsWith('.json') || filePath.endsWith('.json5') || filePath.endsWith('.jsonc') || languageId === 'json' || languageId === 'jsonc') return getFullVirtualCode(snapshot, languageId)
 
       // ets files, using ts-macro to generate the virtual code
       if (languageId === 'ets') {
@@ -108,15 +104,13 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
         )
       }
       // ETS Server mode
-      if (isETSServerMode && !(isDTS || isDETS) && !isInExcludePath)
-        return getDisabledVirtualCode(snapshot, languageId)
+      if (isETSServerMode && !(isDTS || isDETS) && !isInExcludePath) return getDisabledVirtualCode(snapshot, languageId)
       // TS Plugin mode
       if (isTSPluginMode && (isDTS || isDETS) && isInExcludePath) {
         return getFullDisabledVirtualCode(snapshot, languageId)
       }
       // Proxy ts internal lib files, such as `lib.d.ts`, `lib.es2020.d.ts`, etc.
-      if (isETSServerMode && (isDTS || isDETS) && isInTsdkPath)
-        return getDisabledVirtualCode(snapshot, languageId)
+      if (isETSServerMode && (isDTS || isDETS) && isInTsdkPath) return getDisabledVirtualCode(snapshot, languageId)
     },
     typescript: {
       // eslint-disable-next-line ts/ban-ts-comment

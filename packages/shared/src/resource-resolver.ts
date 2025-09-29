@@ -149,8 +149,7 @@ export class ResourceResolver {
    * 递归查找模块
    */
   private async findModulesRecursive(currentPath: string, relativePath: string, modules: string[], maxDepth: number): Promise<void> {
-    if (maxDepth <= 0)
-      return
+    if (maxDepth <= 0) return
 
     try {
       const entries = fs.readdirSync(currentPath, { withFileTypes: true })

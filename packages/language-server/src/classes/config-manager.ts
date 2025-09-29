@@ -49,8 +49,7 @@ export class LanguageServerConfigManager {
   private tsdk: ReturnType<typeof loadTsdkByPath> | undefined
 
   getTypeScriptTsdk(force: boolean = false): ReturnType<typeof loadTsdkByPath> {
-    if (this.tsdk && !force)
-      return this.tsdk
+    if (this.tsdk && !force) return this.tsdk
     this.tsdk = loadTsdkByPath(this.config.typescript.tsdk, this.getLocale())
     return this.tsdk
   }
@@ -108,11 +107,9 @@ export class LanguageServerConfigManager {
   private prevEtsLoaderConfigPath: string = ''
   private cachedEtsLoaderConfigCompilerOptions: ets.CompilerOptions = {}
   getEtsLoaderConfigCompilerOptions(): ets.CompilerOptions {
-    if (!this.config.ohos.etsLoaderConfigPath)
-      return {}
+    if (!this.config.ohos.etsLoaderConfigPath) return {}
 
-    if (this.prevEtsLoaderConfigPath === this.config.ohos.etsLoaderConfigPath)
-      return this.cachedEtsLoaderConfigCompilerOptions
+    if (this.prevEtsLoaderConfigPath === this.config.ohos.etsLoaderConfigPath) return this.cachedEtsLoaderConfigCompilerOptions
 
     const etsLoaderConfig = fs.readFileSync(this.config.ohos.etsLoaderConfigPath, 'utf-8')
     const parsedConfigFile = ets.parseConfigFileTextToJson(this.config.ohos.etsLoaderConfigPath, etsLoaderConfig)
@@ -128,8 +125,7 @@ export class LanguageServerConfigManager {
     }
     else {
       this.logger.getConsola().info(`ETS loader config parsed successfully, path: ${this.config.ohos.etsLoaderConfigPath}`)
-      if (this.logger.getDebug())
-        this.logger.getConsola().debug(`ETS loader config parsed successfully: ${JSON.stringify(options, null, 2)}`)
+      if (this.logger.getDebug()) this.logger.getConsola().debug(`ETS loader config parsed successfully: ${JSON.stringify(options, null, 2)}`)
     }
 
     this.prevEtsLoaderConfigPath = this.config.ohos.etsLoaderConfigPath
@@ -208,28 +204,17 @@ export class LanguageServerConfigManager {
   }
 
   setConfiguration(config: Partial<EtsServerClientOptions> = {}): this {
-    if (config.ohos?.baseUrl)
-      this.setBaseUrl(config.ohos.baseUrl)
-    if (config.ohos?.etsComponentPath)
-      this.setEtsComponentPath(config.ohos.etsComponentPath)
-    if (config.ohos?.etsLoaderConfigPath)
-      this.setEtsLoaderConfigPath(config.ohos.etsLoaderConfigPath)
-    if (config.ohos?.etsLoaderPath)
-      this.setEtsLoaderPath(config.ohos.etsLoaderPath)
-    if (config.ohos?.lib)
-      this.setLib(config.ohos.lib)
-    if (config.ohos?.paths)
-      this.setPaths(config.ohos.paths)
-    if (config.ohos?.relativeWithConfigFilePaths)
-      this.setRelativeWithConfigFilePaths(config.ohos.relativeWithConfigFilePaths)
-    if (config.ohos?.sdkPath)
-      this.setSdkPath(config.ohos.sdkPath)
-    if (config.ohos?.typeRoots)
-      this.setTypeRoots(config.ohos.typeRoots)
-    if (config.typescript?.tsdk)
-      this.setTypeScriptTsdk(config.typescript.tsdk)
-    if (config.debug !== undefined)
-      this.setDebug(config.debug)
+    if (config.ohos?.baseUrl) this.setBaseUrl(config.ohos.baseUrl)
+    if (config.ohos?.etsComponentPath) this.setEtsComponentPath(config.ohos.etsComponentPath)
+    if (config.ohos?.etsLoaderConfigPath) this.setEtsLoaderConfigPath(config.ohos.etsLoaderConfigPath)
+    if (config.ohos?.etsLoaderPath) this.setEtsLoaderPath(config.ohos.etsLoaderPath)
+    if (config.ohos?.lib) this.setLib(config.ohos.lib)
+    if (config.ohos?.paths) this.setPaths(config.ohos.paths)
+    if (config.ohos?.relativeWithConfigFilePaths) this.setRelativeWithConfigFilePaths(config.ohos.relativeWithConfigFilePaths)
+    if (config.ohos?.sdkPath) this.setSdkPath(config.ohos.sdkPath)
+    if (config.ohos?.typeRoots) this.setTypeRoots(config.ohos.typeRoots)
+    if (config.typescript?.tsdk) this.setTypeScriptTsdk(config.typescript.tsdk)
+    if (config.debug !== undefined) this.setDebug(config.debug)
     return this
   }
 
@@ -239,8 +224,7 @@ export class LanguageServerConfigManager {
       const baseUrl = this.getBaseUrl()
 
       for (const mappingPath in compilerOptions.paths || {}) {
-        if (!Array.isArray(compilerOptions.paths?.[mappingPath]))
-          continue
+        if (!Array.isArray(compilerOptions.paths?.[mappingPath])) continue
 
         compilerOptions.paths[mappingPath] = compilerOptions.paths[mappingPath].map((p) => {
           return path.isAbsolute(p) ? p : path.relative(baseUrl, path.resolve(configFilePathDir, p))
@@ -256,8 +240,7 @@ export class LanguageServerConfigManager {
    */
   private fixTsConfig(finalCompilerOptions: ets.CompilerOptions): ets.CompilerOptions {
     // 如果没有ets配置则不进行处理
-    if (!finalCompilerOptions.ets || typeof finalCompilerOptions.ets !== 'object')
-      return finalCompilerOptions
+    if (!finalCompilerOptions.ets || typeof finalCompilerOptions.ets !== 'object') return finalCompilerOptions
     // 修复ets.syntaxComponents不存在的问题（可能会在`API10`等API版本中出现）
     // 因为插件同步的是最新版的`ohos-typescript`，而`ets.syntaxComponents`在API10这些老API版本里是不存在的 因此应当补齐一下相关配置
     if (!finalCompilerOptions.ets.syntaxComponents || typeof finalCompilerOptions.ets.syntaxComponents !== 'object') {

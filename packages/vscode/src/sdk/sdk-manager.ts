@@ -40,8 +40,7 @@ export class SdkManager extends Environment {
       if (fs.existsSync(localPropertiesPath)) {
         const localProperties = fs.readFileSync(localPropertiesPath, 'utf-8')
         const sdkDir = localProperties.split('sdk.dir=')[1]?.trim()
-        if (sdkDir && typeof sdkDir === 'string' && fs.existsSync(sdkDir) && fs.statSync(sdkDir).isDirectory())
-          return sdkDir
+        if (sdkDir && typeof sdkDir === 'string' && fs.existsSync(sdkDir) && fs.statSync(sdkDir).isDirectory()) return sdkDir
       }
     }
     const baseSdkPath = vscode.workspace.getConfiguration('ets').get(
@@ -71,8 +70,7 @@ export class SdkManager extends Environment {
   async isInstalled(version: IsInstalledVersion | (string & {})): Promise<boolean | 'incomplete'> {
     const sdkPath = path.join(await this.getOhosSdkBasePath(), version)
     const haveFolder = fs.existsSync(sdkPath) && fs.statSync(sdkPath).isDirectory()
-    if (!haveFolder)
-      return false
+    if (!haveFolder) return false
 
     const dirs = fs.readdirSync(sdkPath)
     if (
@@ -92,12 +90,10 @@ export class SdkManager extends Environment {
   protected async getOhosSdkPathFromLocalProperties(): Promise<string | undefined> {
     try {
       const workspaceDir = this.getCurrentWorkspaceDir()
-      if (!workspaceDir)
-        return undefined
+      if (!workspaceDir) return undefined
       const localPropPath = vscode.Uri.joinPath(workspaceDir, 'local.properties')
       const stat = await vscode.workspace.fs.stat(localPropPath)
-      if (stat.type !== vscode.FileType.File)
-        return
+      if (stat.type !== vscode.FileType.File) return
 
       const content = await vscode.workspace.fs.readFile(localPropPath)
       const lines = content.toString().split('\n')
@@ -112,15 +108,13 @@ export class SdkManager extends Environment {
 
   public async getAnalyzedHmsSdkPath(): Promise<vscode.Uri | undefined> {
     const hmsSdkPath = vscode.workspace.getConfiguration('ets').get('hmsPath')
-    if (!hmsSdkPath || typeof hmsSdkPath !== 'string')
-      return undefined
+    if (!hmsSdkPath || typeof hmsSdkPath !== 'string') return undefined
     return vscode.Uri.file(hmsSdkPath)
   }
 
   /** Get the path of the Ohos SDK from `local.properties` file or configuration. */
   public async getAnalyzedSdkPath(force: boolean = false): Promise<string | undefined> {
-    if (!force && this._analyzedSdkPath)
-      return this._analyzedSdkPath
+    if (!force && this._analyzedSdkPath) return this._analyzedSdkPath
 
     // Check the local.properties file first
     const localSdkPath = await this.getOhosSdkPathFromLocalProperties()
@@ -173,8 +167,7 @@ export class SdkManager extends Environment {
   }
 
   public async getAnalyzedSdkAnalyzer(force: boolean = false): Promise<SdkAnalyzer<SdkAnalyzerMetadata> | undefined> {
-    if (!force && this._analyzerSdkAnalyzer)
-      return this._analyzerSdkAnalyzer
+    if (!force && this._analyzerSdkAnalyzer) return this._analyzerSdkAnalyzer
     await this.getAnalyzedSdkPath(force)
     return this._analyzerSdkAnalyzer
   }

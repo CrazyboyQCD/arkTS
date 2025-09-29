@@ -53,8 +53,7 @@ class ResourceCompletionAnalyzer {
 
       // 查找包含当前光标位置的 $r 调用
       const currentCall = globalRCalls.find(call => offset >= call.resourceStart && offset <= call.resourceEnd)
-      if (!currentCall)
-        return null
+      if (!currentCall) return null
 
       // 计算光标在资源字符串中的相对位置
       const cursorPositionInResource = offset - currentCall.resourceStart
@@ -339,8 +338,7 @@ export function createETSResourceCompletionService(projectRoot: string, lspConfi
       return {
         async provideCompletionItems(document: TextDocument, position: Position): Promise<CompletionList | null> {
           const sourceFile = new ContextUtil(context).decodeSourceFile(document)
-          if (!sourceFile)
-            return null
+          if (!sourceFile) return null
 
           try {
             logger.getConsola().info('[resource-completion] provideCompletionItems called for:', document.uri, 'at position:', position)

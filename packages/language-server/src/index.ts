@@ -42,8 +42,7 @@ connection.onDidChangeConfiguration((params) => {
 ResourceWatcher.from(connection)
 
 connection.onInitialize(async (params) => {
-  if (params.locale)
-    lspConfiguration.setLocale(params.locale)
+  if (params.locale) lspConfiguration.setLocale(params.locale)
   lspConfiguration.setConfiguration({ typescript: params.initializationOptions?.typescript })
 
   // 初始化配置
@@ -98,8 +97,7 @@ connection.onInitialize(async (params) => {
           }),
         ],
         setup(options) {
-          if (!options.project || !options.project.typescript || !options.project.typescript.languageServiceHost)
-            return
+          if (!options.project || !options.project.typescript || !options.project.typescript.languageServiceHost) return
 
           const originalSettings = options.project.typescript.languageServiceHost.getCompilationSettings() || {}
           logger.getConsola().debug(`Settings: ${JSON.stringify(lspConfiguration.getTsConfig(originalSettings as ets.CompilerOptions), null, 2)}`)

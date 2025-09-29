@@ -22,12 +22,9 @@ const ms = new MagicString(content, {
 
 parseAndWalk(content, distFilePath, {
   enter: (node) => {
-    if (node.type !== 'VariableDeclarator')
-      return
-    if (node.id.type !== 'Identifier')
-      return
-    if (node.id.name !== 'require_Reflect')
-      return
+    if (node.type !== 'VariableDeclarator') return
+    if (node.id.type !== 'Identifier') return
+    if (node.id.name !== 'require_Reflect') return
 
     ms.appendRight(node.end, `\n;require_chunk.__toESM(require_Reflect());`)
   },

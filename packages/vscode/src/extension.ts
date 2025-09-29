@@ -40,8 +40,7 @@ class ArkTSExtension extends VSCodeBootstrap<Promise<LabsInfo | undefined>> {
       methodName: 'run',
       arguments: [],
     })
-    if (runResult?.type === 'result')
-      return await runResult.value
+    if (runResult?.type === 'result') return await runResult.value
   }
 }
 

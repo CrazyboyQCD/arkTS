@@ -33,8 +33,7 @@ function tryParseEnv(): Record<string, any> {
  */
 const plugin: ts.server.PluginModuleFactory = createLanguageServicePlugin((ts, info) => {
   const env = tryParseEnv()
-  if (env?.lspOptions?.ohos?.sdkPath)
-    info.config = env
+  if (env?.lspOptions?.ohos?.sdkPath) info.config = env
   const sdkPath = info.config?.lspOptions?.ohos?.sdkPath
   const hmsSdkPath = info.config?.lspOptions?.ohos?.hmsSdkPath
 

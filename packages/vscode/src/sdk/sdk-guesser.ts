@@ -27,8 +27,7 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
   async guessOhosSdkVersion(): Promise<keyof typeof SdkVersion | undefined> {
     const guessedOhosSdkVersion = this.getGuessedOhosSdkVersion()
     this.getConsola().info(`Guessed OpenHarmony SDK version: ${guessedOhosSdkVersion}`)
-    if (!guessedOhosSdkVersion)
-      return
+    if (!guessedOhosSdkVersion) return
     const [sdkStringVersion, sdkNumberVersion] = guessedOhosSdkVersion
     const currentSdkPath = await this.sdkManager.getAnalyzedSdkPath()
     const currentSdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer()
@@ -39,8 +38,7 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
       if (fs.existsSync(ohUniPackageJsonPath)) {
         const ohUniPackageJson = JSON.parse(fs.readFileSync(ohUniPackageJsonPath, 'utf-8'))
         const compileSdkVersion: string = ohUniPackageJson?.apiVersion || ''
-        if (compileSdkVersion === String(sdkNumberVersion))
-          return
+        if (compileSdkVersion === String(sdkNumberVersion)) return
       }
     }
 
@@ -70,25 +68,21 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
       choiceYes,
       choiceNo,
     )
-    if (choiceResult === choiceYes)
-      await this.sdkInstaller.installSdk(sdkStringVersion)
+    if (choiceResult === choiceYes) await this.sdkInstaller.installSdk(sdkStringVersion)
   }
 
   /** Guess the OpenHarmony SDK version from the current workspace's build-profile.json5 file. */
   getGuessedOhosSdkVersion(): [keyof typeof SdkVersion, number] | undefined {
     const currentWorkspaceDir = this.getCurrentWorkspaceDir()
-    if (!currentWorkspaceDir)
-      return
+    if (!currentWorkspaceDir) return
 
     const buildProfileJson5 = this.readBuildProfileJson5()
-    if (!buildProfileJson5)
-      return
+    if (!buildProfileJson5) return
     const [buildProfileFilePath, buildProfile] = buildProfileJson5 || []
 
     try {
       const compileSdkVersion: string | number | undefined = buildProfile?.app?.products?.[0]?.compileSdkVersion
-      if (!compileSdkVersion)
-        return
+      if (!compileSdkVersion) return
 
       let sdkVersion: number
 
@@ -112,25 +106,16 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
         return
       }
 
-      if (!sdkVersion || Number.isNaN(sdkVersion))
-        return
+      if (!sdkVersion || Number.isNaN(sdkVersion)) return
 
-      if (sdkVersion === 10)
-        return ['API10', 10]
-      else if (sdkVersion === 11)
-        return ['API11', 11]
-      else if (sdkVersion === 12)
-        return ['API12', 12]
-      else if (sdkVersion === 13)
-        return ['API13', 13]
-      else if (sdkVersion === 14)
-        return ['API14', 14]
-      else if (sdkVersion === 15)
-        return ['API15', 15]
-      else if (sdkVersion === 18)
-        return ['API18', 18]
-      else if (sdkVersion === 20)
-        return ['API20', 20]
+      if (sdkVersion === 10) return ['API10', 10]
+      else if (sdkVersion === 11) return ['API11', 11]
+      else if (sdkVersion === 12) return ['API12', 12]
+      else if (sdkVersion === 13) return ['API13', 13]
+      else if (sdkVersion === 14) return ['API14', 14]
+      else if (sdkVersion === 15) return ['API15', 15]
+      else if (sdkVersion === 18) return ['API18', 18]
+      else if (sdkVersion === 20) return ['API20', 20]
     }
     catch (error) {
       this.getConsola().error(error)

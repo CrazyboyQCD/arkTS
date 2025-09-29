@@ -47,8 +47,7 @@ export class SdkInstaller extends Environment implements Command {
       placeHolder: this.translator.t('sdk.install.placeHolder'),
     })
 
-    if (!versionChoice || !versionChoice.label)
-      return
+    if (!versionChoice || !versionChoice.label) return
 
     if (versionChoice.installStatus === false) {
       await this.installSdk(versionChoice.version)
@@ -75,8 +74,7 @@ export class SdkInstaller extends Environment implements Command {
       title: this.translator.t('sdk.install.switchOrReinstall.title'),
     })
 
-    if (!choice || !choice.label)
-      return
+    if (!choice || !choice.label) return
 
     if (choice?.label === choiceSwitch) {
       await this.sdkManager.setOhosSdkPath(path.join(await this.sdkManager.getOhosSdkBasePath(), versionChoice.version.split('API')[1]))
@@ -97,8 +95,7 @@ export class SdkInstaller extends Environment implements Command {
   async installSdk(version: keyof typeof SdkVersionEnum): Promise<void> {
     const baseSdkPath = await this.sdkManager.getOhosSdkBasePath()
     const url = getSdkUrl(SdkVersionEnum[version], this.getArch(), this.getOS())
-    if (!url)
-      throw new Error('Current SDK version is not supported by the current platform.')
+    if (!url) throw new Error('Current SDK version is not supported by the current platform.')
     const apiNumberVersion = version.toString().split('API')[1]
 
     const downloader = await createDownloader({
@@ -114,8 +111,7 @@ export class SdkInstaller extends Environment implements Command {
       title: this.translator.t('sdk.install.installing', { args: [version] }),
       cancellable: true,
     }, async (progress, token) => {
-      if (token.isCancellationRequested)
-        return
+      if (token.isCancellationRequested) return
 
       try {
         const abortController = new AbortController()
@@ -134,8 +130,7 @@ export class SdkInstaller extends Environment implements Command {
         await downloader.startDownload({ signal: abortController.signal })
       }
       catch (error) {
-        if (error instanceof Error && error.name === 'AbortError')
-          return console.warn(`ArkTS SDK download has been canceled!`)
+        if (error instanceof Error && error.name === 'AbortError') return console.warn(`ArkTS SDK download has been canceled!`)
         if (error instanceof DownloadError) {
           vscode.window.showErrorMessage(`下载错误: ${error.code} ${error.message}`)
         }
@@ -154,8 +149,7 @@ export class SdkInstaller extends Environment implements Command {
       title: this.translator.t('sdk.install.checkingSha256', { args: [version] }),
       cancellable: true,
     }, async (_progress, token) => {
-      if (token.isCancellationRequested)
-        return
+      if (token.isCancellationRequested) return
       await downloader.checkSha256()
     })
 
@@ -165,8 +159,7 @@ export class SdkInstaller extends Environment implements Command {
       title: this.translator.t('sdk.install.extractingTar', { args: [version] }),
       cancellable: false,
     }, async (progress, token) => {
-      if (token.isCancellationRequested)
-        return
+      if (token.isCancellationRequested) return
 
       downloader.on('tar-extracted', (e) => {
         progress.report({
@@ -189,8 +182,7 @@ export class SdkInstaller extends Environment implements Command {
       title: this.translator.t('sdk.install.extractingZip', { args: [version] }),
       cancellable: false,
     }, async (progress, token) => {
-      if (token.isCancellationRequested)
-        return
+      if (token.isCancellationRequested) return
       downloader.on('zip-extracted', (e) => {
         progress.report({
           message: this.translator.t('sdk.install.extractingZip', { args: [e.path] }),

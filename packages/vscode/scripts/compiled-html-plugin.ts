@@ -19,22 +19,18 @@ export function InternalTransformHtmlPlugin(): Plugin {
 
 function transformHtml(_html: string, ast: INode[], ms: MagicString): string {
   function transformScriptSrc(node: INode): void {
-    if (node.type !== SyntaxKind.Tag || node.name !== 'script')
-      return
+    if (node.type !== SyntaxKind.Tag || node.name !== 'script') return
     for (const attr of node.attributes) {
-      if (attr.name.value !== 'src' || !attr.value)
-        continue
+      if (attr.name.value !== 'src' || !attr.value) continue
       const src = attr.value.value
       ms.overwrite(attr.value.start + 1, attr.value.end - 1, `{{${src}}}`)
     }
   }
 
   function transformLinkStylesheetHref(node: INode): void {
-    if (node.type !== SyntaxKind.Tag || node.name !== 'link' || !node.attributes)
-      return
+    if (node.type !== SyntaxKind.Tag || node.name !== 'link' || !node.attributes) return
     for (const attr of node.attributes) {
-      if (attr.name.value !== 'href' || !attr.value)
-        continue
+      if (attr.name.value !== 'href' || !attr.value) continue
       const href = attr.value.value
       ms.overwrite(attr.value.start + 1, attr.value.end - 1, `{{${href}}}`)
     }
@@ -44,8 +40,7 @@ function transformHtml(_html: string, ast: INode[], ms: MagicString): string {
     for (const child of node) {
       transformScriptSrc(child)
       transformLinkStylesheetHref(child)
-      if (child.type === SyntaxKind.Tag && child.body)
-        walk(child.body)
+      if (child.type === SyntaxKind.Tag && child.body) walk(child.body)
     }
   }
   walk(ast)

@@ -159,8 +159,7 @@ export function createETSResourceDiagnosticService(lspConfiguration: LanguageSer
       return {
         async provideDiagnostics(document: TextDocument): Promise<Diagnostic[]> {
           const sourceFile = new ContextUtil(context).decodeSourceFile(document)
-          if (!sourceFile)
-            return []
+          if (!sourceFile) return []
 
           try {
             // 获取诊断级别

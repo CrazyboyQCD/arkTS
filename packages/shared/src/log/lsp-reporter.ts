@@ -15,16 +15,13 @@ export class LspReporter implements ConsolaReporter {
   }
 
   private toString(logObj: LogObject): string {
-    if (logObj.message)
-      return logObj.message
-    if (logObj.args.length === 0)
-      return this.safeStringify(logObj)
+    if (logObj.message) return logObj.message
+    if (logObj.args.length === 0) return this.safeStringify(logObj)
     return logObj.args.join(' ')
   }
 
   private getPrefix(): string {
-    if (this.prefix)
-      return `<${this.prefix}>`
+    if (this.prefix) return `<${this.prefix}>`
     return ''
   }
 
@@ -52,8 +49,7 @@ export class LspReporter implements ConsolaReporter {
       case 'debug':
       case 'verbose':
       case 'trace':
-        if (!this.debug)
-          return
+        if (!this.debug) return
         console.log(kleur.gray(`[${logObj.type.toUpperCase()}] 🐛:${logObj.tag} ${this.getPrefix()} ${kleur.dim(logObj.date.toLocaleString())} ${this.toString(logObj)}`))
         break
       case 'box':

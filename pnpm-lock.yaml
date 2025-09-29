@@ -152,6 +152,9 @@ catalogs:
     vscode-languageserver-textdocument:
       specifier: ^1.0.12
       version: 1.0.12
+    vscode-languageserver-types:
+      specifier: ^3.17.5
+      version: 3.17.5
     vscode-nls:
       specifier: ^5.2.0
       version: 5.2.0
@@ -535,6 +538,9 @@ importers:
       '@arkts/shared':
         specifier: workspace:*
         version: link:../shared
+      '@arkts/types':
+        specifier: workspace:*
+        version: link:../types
       '@types/vscode':
         specifier: catalog:dev
         version: 1.104.0
@@ -556,6 +562,12 @@ importers:
       ts-macro:
         specifier: ^0.3.4
         version: 0.3.6
+      vscode-languageserver-textdocument:
+        specifier: catalog:prod
+        version: 1.0.12
+      vscode-languageserver-types:
+        specifier: catalog:prod
+        version: 3.17.5
       vscode-uri:
         specifier: catalog:prod
         version: 3.1.0
@@ -578,6 +590,8 @@ importers:
       '@types/vscode':
         specifier: ^1.104.0
         version: 1.104.0
+
+  packages/types: {}
 
   packages/typescript-plugin:
     devDependencies:

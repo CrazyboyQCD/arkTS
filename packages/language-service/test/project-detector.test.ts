@@ -1,124 +1,125 @@
-import type { OpenHarmonyProjectDetector } from '../src/index'
-import type { ElementJsonFile, ResourceFolder, ResourceMediaFile } from '../src/project/project'
+import type { RawFile } from '../src/project/interfaces/directory/rawfile'
+import type { ResFile } from '../src/project/interfaces/directory/resfile'
+import type { ResourceGroup } from '../src/project/interfaces/directory/resource-group'
+import type { Module } from '../src/project/interfaces/module'
+import type { Product } from '../src/project/interfaces/product'
+import type { ProjectDetector } from '../src/project/interfaces/project-detector'
+import type { ElementJsonNameReference } from '../src/project/interfaces/reference/element-json-name'
+import type { Resource } from '../src/project/interfaces/resource'
+import type { Workspace } from '../src/project/interfaces/workspace'
 import path from 'node:path'
-import { typeAssert } from '@arkts/shared'
+import MagicString from 'magic-string'
 import * as ets from 'ohos-typescript'
 import { describe, expect } from 'vitest'
-import { URI, Utils } from 'vscode-uri'
-import { createOpenHarmonyProjectDetector, ModuleOpenHarmonyProject, WorkspaceOpenHarmonyProject } from '../src/index'
+import { createProjectDetector } from '../src'
+import { ResourceDirectory } from '../src/project/interfaces/directory/resource-directory'
 
-describe('project-detector', (it) => {
-  let openHarmonyProjectDetector: OpenHarmonyProjectDetector
-  const workspaceFolder = URI.file(path.resolve(__dirname, 'mock', 'workspace'))
-  const workspaceFolderProject1 = Utils.joinPath(workspaceFolder, 'harmony-project-1')
-  const testingRawfile = 'nest-folder/foo.txt'
+describe.sequential('project detector', (it) => {
+  let projectDetector: ProjectDetector
+  const workspaceFolder = path.resolve(__dirname, 'mock')
 
-  it.sequential('should create', () => {
-    openHarmonyProjectDetector = createOpenHarmonyProjectDetector(workspaceFolder)
-    expect(openHarmonyProjectDetector).toBeDefined()
+  it.sequential('should create project detector', () => {
+    projectDetector = createProjectDetector(workspaceFolder)
+    expect(projectDetector).toBeDefined()
+    expect(projectDetector.getWorkspaceFolder().fsPath).toBe(workspaceFolder)
   })
 
-  it.sequential('should find projects & resources completely', async () => {
-    const projects = await openHarmonyProjectDetector.findProjects()
-    const workspaceProjectCount = projects.filter(project => WorkspaceOpenHarmonyProject.is(project)).length
-    const moduleProjectCount = projects.filter(project => ModuleOpenHarmonyProject.is(project)).length
-    expect(workspaceProjectCount).toBe(2)
-    expect(moduleProjectCount).toBe(2)
-    expect(projects.length).toBe(workspaceProjectCount + moduleProjectCount)
+  let workspace: Workspace
 
-    // check workspace project
-    const workspaceProject1 = projects.find(project => WorkspaceOpenHarmonyProject.is(project) && project.getProjectRoot().fsPath === workspaceFolderProject1.fsPath) as WorkspaceOpenHarmonyProject | undefined
-    expect(workspaceProject1).toBeDefined()
-    expect(workspaceProject1?.projectType).toBe('workspace')
+  it.sequential('should get workspace, parse build profile json5 & module.json5', async () => {
+    const workspaces = await projectDetector.findWorkspaces()
+    expect(workspaces.length).toBeGreaterThanOrEqual(2)
+    workspace = workspaces[0]
+    const buildProfile = await workspace.getWorkspaceBuildProfile()
+    const modulePaths = await buildProfile.getSourceFile(ets)
+    expect(modulePaths).toBeDefined()
+    expect(modulePaths.getText()).toBe(await buildProfile.readToString())
 
-    // check module project
-    // check children projects
-    const childrenProjects = await workspaceProject1?.getChildrenProjects()
-    expect(childrenProjects).toHaveLength(1)
+    const ohPackage = await workspace.getWorkspaceOhPackage()
+    const ohPackageSourceFile = await ohPackage.getSourceFile(ets)
+    expect(ohPackageSourceFile).toBeDefined()
+    expect(ohPackageSourceFile.getText()).toBe(await ohPackage.readToString())
+  })
 
-    // check resource folder exists
-    expect(childrenProjects?.[0]?.projectType).toBe('module')
-    const openharmonyModules = await childrenProjects?.[0].readOpenHarmonyModules()
-    expect(openharmonyModules?.length).toBeGreaterThanOrEqual(1)
-    const openharmonyModule = openharmonyModules?.[0]
-    expect(openharmonyModule).toBeDefined()
-    const moduleJson5Text = await openharmonyModule?.readModuleJson5Text()
-    const moduleJson5SourceFile = await openharmonyModule?.readModuleJson5SourceFile(ets)
-    expect(moduleJson5Text).toEqual(moduleJson5SourceFile?.getText())
+  let ohosModule: Module
 
-    // check resource child folder exists
-    const resourceChildFolders = await openharmonyModule?.readResourceFolder()
-    expect(resourceChildFolders).not.toBe(false)
-    typeAssert<ResourceFolder[]>(resourceChildFolders)
-    expect(resourceChildFolders.length).toBeGreaterThanOrEqual(1)
+  it.sequential('should get modules and resource directories', async () => {
+    const modules = await workspace.findModules()
+    expect(modules.length).toBeGreaterThanOrEqual(1)
+    ohosModule = modules[0]
+    const projectBuildProfile = await ohosModule.getProjectBuildProfile()
+    const resourceDirectories = await projectBuildProfile.getResourceDirectoriesByTargetName('default')
+    expect(resourceDirectories).toBeDefined()
+    expect(resourceDirectories?.length).toBeGreaterThanOrEqual(1)
+  })
 
-    // find base folder and check it
-    const baseFolder = resourceChildFolders.find(folder => path.basename(folder.getUri().fsPath) === 'base')
-    expect(baseFolder).toBeDefined()
-    expect(await baseFolder?.isExist()).toBe(true)
-    expect(baseFolder?.isBase()).toBe(true)
-    expect(baseFolder?.isDark()).toBe(false)
-    expect(baseFolder?.isResfile()).toBe(false)
-    expect(baseFolder?.isRawfile()).toBe(false)
+  let product: Product
 
-    // check base/element folder exists
-    const elementFolder = await baseFolder?.readElementFolder()
-    expect(elementFolder).not.toBe(false)
-    typeAssert<ElementJsonFile[]>(elementFolder)
-    expect(elementFolder.length).toBeGreaterThanOrEqual(1)
+  it.sequential('should get products and parse module.json5', async () => {
+    const products = await ohosModule.findProducts()
+    expect(products.length).toBeGreaterThanOrEqual(2)
+    product = products[0]
+    const moduleConfig = await product.getModuleJson()
+    const sourceFile = await moduleConfig.getSourceFile(ets)
+    expect(sourceFile).toBeDefined()
+    expect(sourceFile.getText()).toBe(await moduleConfig.readToString())
+  })
 
-    // pick the first element folder and check it
-    const firstElementFolder = elementFolder[0]
-    expect(firstElementFolder).toBeDefined()
-    const jsonText = await firstElementFolder.readJsonText()
-    expect(jsonText).toBeDefined()
-    const jsonSourceFile = await firstElementFolder.readJsonSourceFile(ets)
-    expect(jsonSourceFile).toBeDefined()
-    expect(jsonSourceFile.getText()).toEqual(jsonText)
-    const nameRanges = await firstElementFolder.getNameRange(ets)
-    expect(nameRanges.length).toBeGreaterThanOrEqual(1)
+  let resource: Resource
+  let rawFile: RawFile
+  let resourceGroup: ResourceGroup
+  let resFile: ResFile
 
-    // check media folder
-    const mediaFolder = await resourceChildFolders?.[0].readMediaFolder()
-    expect(mediaFolder).not.toBe(false)
-    typeAssert<ResourceMediaFile[]>(mediaFolder)
-    expect(mediaFolder.length).toBeGreaterThanOrEqual(1)
-    const barTxt = mediaFolder.find(file => path.basename(file.getUri().fsPath) === 'bar.txt')
-    expect(barTxt).toBeDefined()
-    expect(await barTxt?.isExist()).toBe(true)
+  it.sequential('should get product resources', async () => {
+    const resources = await product.getResources()
+    expect(resources.length).toBeGreaterThanOrEqual(1)
+    resource = resources[0]
+    const resourceDirectories = await resource.getResourceDirectories()
 
-    // check rawfile folder exists
-    const rawfileFolder = resourceChildFolders.find(folder => path.basename(folder.getUri().fsPath) === 'rawfile')
-    expect(rawfileFolder).toBeDefined()
-    expect(rawfileFolder?.isRawfile()).toBe(true)
-    expect(await rawfileFolder?.isExist()).toBe(true)
-    const rawFiles = await rawfileFolder?.readRawFile()
-    expect(rawFiles?.length).toBeGreaterThanOrEqual(1)
-    const fooTxt = rawFiles?.find(file => path.basename(file.getUri().fsPath) === 'foo.txt')
-    expect(fooTxt).toBeDefined()
-    expect(await fooTxt?.isExist()).toBe(true)
-    expect(fooTxt?.getRelativePath()).toBe(testingRawfile)
+    for (const resourceDirectory of resourceDirectories) {
+      switch (resourceDirectory.resourceDirectoryKind) {
+        case ResourceDirectory.Kind.RawFile:
+          rawFile = resourceDirectory
+          break
+        case ResourceDirectory.Kind.ResourceGroup:
+          resourceGroup = resourceDirectory
+          break
+        case ResourceDirectory.Kind.ResFile:
+          resFile = resourceDirectory
+          break
+        default:
+          throw new Error(`Unknown resource directory kind: ${resourceDirectory}`)
+      }
+    }
 
-    // completion text test
-    // empty input, will return the first path segment
-    expect(fooTxt?.getCompletionText('')).toMatchInlineSnapshot(`"nest-folder"`)
-    // no complete, will return the completion text
-    expect(fooTxt?.getCompletionText('nest-fo')).toMatchInlineSnapshot(`"lder"`)
-    // complete, will return the current input
-    expect(fooTxt?.getCompletionText('nest-folder')).toMatchInlineSnapshot(`"nest-folder"`)
-    // when with trailing slash will return the completion text
-    expect(fooTxt?.getCompletionText('nest-folder/')).toMatchInlineSnapshot(`"foo.txt"`)
-    // no complete, will return the completion text
-    expect(fooTxt?.getCompletionText('nest-folder/foo.t')).toMatchInlineSnapshot(`"xt"`)
-    // complete, will return the current input
-    expect(fooTxt?.getCompletionText('nest-folder/foo.txt')).toMatchInlineSnapshot(`"nest-folder/foo.txt"`)
+    expect(rawFile).toBeDefined()
+    expect(resourceGroup).toBeDefined()
+    expect(resFile).toBe(undefined)
+  })
 
-    // check element name range reference
-    const elementNameRangeReference = await baseFolder?.getElementNameRangeReference(ets)
-    expect(elementNameRangeReference).toBeDefined()
-    expect(elementNameRangeReference?.length).toBeGreaterThanOrEqual(1)
-    const primaryColor = elementNameRangeReference?.find(reference => reference.getName() === 'primary_color')
-    expect(primaryColor).toBeDefined()
-    expect(primaryColor?.references?.length).toBeGreaterThanOrEqual(1)
+  let elementJsonNameReference: ElementJsonNameReference
+
+  it.sequential('should get element json files', async () => {
+    const elementDirectory = await resourceGroup.getElement()
+    const elementJsonFiles = await elementDirectory.getElementJsonFiles()
+    expect(elementJsonFiles).toBeDefined()
+    expect(elementJsonFiles.length).toBeGreaterThanOrEqual(1)
+    for (const elementJsonFile of elementJsonFiles) {
+      const sourceFile = await elementJsonFile.getSourceFile(ets)
+      expect(sourceFile).toBeDefined()
+      expect(sourceFile.getText()).toBe(await elementJsonFile.readToString())
+      const references = await elementJsonFile.getNameReferences(ets)
+      elementJsonNameReference = references[0]
+    }
+  })
+
+  it.sequential('should get element json name reference', async () => {
+    expect(elementJsonNameReference).toBeDefined()
+    expect(elementJsonNameReference.getKind()).toBeTypeOf('string')
+    const fullRange = elementJsonNameReference.getFullRange()
+    const textDocument = elementJsonNameReference.getTextDocument()
+    const ms = new MagicString(await elementJsonNameReference.getFile().readToString())
+    const slicedText = ms.slice(textDocument.offsetAt(fullRange.start), textDocument.offsetAt(fullRange.end))
+    expect(slicedText).toBe(elementJsonNameReference.getFullText())
   })
 })

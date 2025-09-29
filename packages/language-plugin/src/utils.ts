@@ -15,8 +15,7 @@ export function createLazyGetter<T>(fn: () => T): () => T {
   let value: T | typeof SYMBOL_UNINITIALIZED = SYMBOL_UNINITIALIZED
 
   return () => {
-    if (value === SYMBOL_UNINITIALIZED)
-      value = fn()
+    if (value === SYMBOL_UNINITIALIZED) value = fn()
     return value
   }
 }

@@ -56,6 +56,7 @@ export default defineConfig({
     '@arkts/language-plugin': path.join(process.cwd(), '../language-plugin/src/index.ts'),
     '@arkts/sdk-downloader': path.join(process.cwd(), 'node_modules/@arkts/sdk-downloader/dist/index.js'),
     '@arkts/language-service': path.join(process.cwd(), '../language-service/src/index.ts'),
+    '@arkts/types': path.join(process.cwd(), '../types/src/index.ts'),
   },
   watch: isDev
     ? [

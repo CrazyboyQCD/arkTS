@@ -158,8 +158,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
     this.languageServerSubscriptions.push(
       vscode.workspace.onDidChangeTextDocument((textDocumentChangeEvent) => {
         // ⚠️ Performance: only send file:// scheme text documents
-        if (textDocumentChangeEvent.document.uri.scheme !== 'file')
-          return
+        if (textDocumentChangeEvent.document.uri.scheme !== 'file') return
         const textDocument: Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string } = {
           uri: textDocumentChangeEvent.document.uri.toString(),
           languageId: textDocumentChangeEvent.document.languageId,
@@ -190,16 +189,14 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       this._client?.sendRequest('ets/waitForEtsConfigurationChangedRequested', clientOptions.initializationOptions)
       this.handleDidChangeTextDocumentRequest()
       // support for auto close tag
-      if (this._client)
-        activateAutoInsertion('ets', this._client)
+      if (this._client) activateAutoInsertion('ets', this._client)
       this.getConsola().info('ETS Language Server restarted!')
       vscode.window.setStatusBarMessage(`ETS Language Server ${type}!`, 1000)
       return [undefined, clientOptions]
     }
 
     // If the lsp is already created, just restart the lsp
-    if (this._client)
-      return start('restarted')
+    if (this._client) return start('restarted')
 
     // If the lsp is not created, create a new one
     this._client = new LanguageClient(
