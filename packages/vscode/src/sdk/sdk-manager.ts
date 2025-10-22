@@ -120,35 +120,35 @@ export class SdkManager extends Environment {
     const localSdkPath = await this.getOhosSdkPathFromLocalProperties()
     const localSdkAnalyzer = localSdkPath
       ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-        vscode.Uri.file(localSdkPath),
-        await this.getAnalyzedHmsSdkPath(),
-        this,
-        this.translator,
-        { type: 'local' },
-      )
+          vscode.Uri.file(localSdkPath),
+          await this.getAnalyzedHmsSdkPath(),
+          this,
+          this.translator,
+          { type: 'local' },
+        )
       : undefined
 
     // Check the workspace folder configuration
     const inspectedConfiguration = vscode.workspace.getConfiguration('ets').inspect<string>('sdkPath') || {} as ReturnType<ReturnType<typeof vscode.workspace.getConfiguration>['inspect']>
     const workspaceFolderAnalyzer = inspectedConfiguration?.workspaceValue && typeof inspectedConfiguration.workspaceValue === 'string'
       ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-        vscode.Uri.file(inspectedConfiguration.workspaceValue),
-        await this.getAnalyzedHmsSdkPath(),
-        this,
-        this.translator,
-        { type: 'workspace' },
-      )
+          vscode.Uri.file(inspectedConfiguration.workspaceValue),
+          await this.getAnalyzedHmsSdkPath(),
+          this,
+          this.translator,
+          { type: 'workspace' },
+        )
       : undefined
 
     // Check the global configuration
     const globalAnalyzer = inspectedConfiguration?.globalValue && typeof inspectedConfiguration.globalValue === 'string'
       ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-        vscode.Uri.file(inspectedConfiguration.globalValue),
-        await this.getAnalyzedHmsSdkPath(),
-        this,
-        this.translator,
-        { type: 'global' },
-      )
+          vscode.Uri.file(inspectedConfiguration.globalValue),
+          await this.getAnalyzedHmsSdkPath(),
+          this,
+          this.translator,
+          { type: 'global' },
+        )
       : undefined
 
     // Choose a valid SDK path
