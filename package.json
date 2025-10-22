@@ -35,7 +35,6 @@
     "@arkts/shared": "workspace:*",
     "@changesets/changelog-github": "catalog:scripts",
     "@changesets/cli": "catalog:scripts",
-    "@release-it/bumper": "catalog:scripts",
     "@types/lodash": "catalog:prod",
     "@types/node": "catalog:dev",
     "@types/unzipper": "catalog:prod",

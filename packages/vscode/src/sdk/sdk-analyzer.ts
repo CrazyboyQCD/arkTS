@@ -84,8 +84,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the SDK path does not exist.
    */
   async getSdkUri(force: boolean = false): Promise<vscode.Uri> {
-    if (this.isSdkUriExists && !force)
-      return this.sdkUri
+    if (this.isSdkUriExists && !force) return this.sdkUri
 
     try {
       await this.fileSystem.mustBeDirectory(this.sdkUri, SdkAnalyzerException.Code.SDKPathNotFound, SdkAnalyzerException.Code.SDKPathNotDirectory)
@@ -107,8 +106,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the `ets/component` folder does not exist.
    */
   async getEtsComponentFolder(force: boolean = false): Promise<vscode.Uri> {
-    if (this._cachedEtsComponentFolder && !force)
-      return this._cachedEtsComponentFolder
+    if (this._cachedEtsComponentFolder && !force) return this._cachedEtsComponentFolder
     const etsComponentUri = vscode.Uri.joinPath(this.sdkUri, 'ets', 'component')
 
     try {
@@ -158,8 +156,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the `ets/build-tools/ets-loader/tsconfig.json` path does not exist.
    */
   async getEtsLoaderConfigPath(force: boolean = false): Promise<vscode.Uri> {
-    if (this._cachedEtsLoaderConfigPath && !force)
-      return this._cachedEtsLoaderConfigPath
+    if (this._cachedEtsLoaderConfigPath && !force) return this._cachedEtsLoaderConfigPath
     const etsLoaderConfigUri = vscode.Uri.joinPath(this.sdkUri, 'ets', 'build-tools', 'ets-loader', 'tsconfig.json')
 
     try {
@@ -177,32 +174,25 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
 
   private getRelativeWithConfigFilePaths(): Record<string, string[]> {
     const currentWorkspaceDir = this.fileSystem.getCurrentWorkspaceDir()
-    if (!currentWorkspaceDir)
-      return {}
+    if (!currentWorkspaceDir) return {}
 
     const buildProfileJson5 = this.fileSystem.readBuildProfileJson5<unknown>()
-    if (!buildProfileJson5)
-      return {}
+    if (!buildProfileJson5) return {}
 
     const [buildProfileFilePath, buildProfile] = buildProfileJson5 || []
-    if (!buildProfile || !buildProfileFilePath)
-      return {}
+    if (!buildProfile || !buildProfileFilePath) return {}
 
-    if (typeof buildProfile !== 'object' || !buildProfile || !('modules' in buildProfile) || !Array.isArray(buildProfile.modules))
-      return {}
+    if (typeof buildProfile !== 'object' || !buildProfile || !('modules' in buildProfile) || !Array.isArray(buildProfile.modules)) return {}
 
     const relativeWithConfigFilePaths: Record<string, string[]> = {}
     for (let i = 0; i < buildProfile.modules.length; i++) {
       const mod: unknown = buildProfile.modules[i]
-      if (typeof mod !== 'object' || !mod || !('srcPath' in mod) || typeof mod.srcPath !== 'string')
-        continue
+      if (typeof mod !== 'object' || !mod || !('srcPath' in mod) || typeof mod.srcPath !== 'string') continue
 
       const ohPackageJson5 = this.fileSystem.readOhPackageJson5<unknown>(vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath))
-      if (!ohPackageJson5)
-        continue
+      if (!ohPackageJson5) continue
       const [, ohPackageJson] = ohPackageJson5
-      if (typeof ohPackageJson !== 'object' || !ohPackageJson || !('name' in ohPackageJson) || typeof ohPackageJson.name !== 'string')
-        continue
+      if (typeof ohPackageJson !== 'object' || !ohPackageJson || !('name' in ohPackageJson) || typeof ohPackageJson.name !== 'string') continue
       relativeWithConfigFilePaths[ohPackageJson.name] = [
         vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath).fsPath,
       ]
@@ -222,10 +212,8 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the HMS SDK path does not exist.
    */
   async getHmsSdkUri(force: boolean = false): Promise<vscode.Uri | undefined> {
-    if (this.isHmsSdkUriExists && !force)
-      return this.hmsSdkUri
-    if (!this.hmsSdkUri)
-      return undefined
+    if (this.isHmsSdkUriExists && !force) return this.hmsSdkUri
+    if (!this.hmsSdkUri) return undefined
     try {
       await this.fileSystem.mustBeDirectory(this.hmsSdkUri, SdkAnalyzerException.Code.HmsSdkPathNotFound, SdkAnalyzerException.Code.HmsSdkPathNotDirectory)
       this.isHmsSdkUriExists = true
@@ -248,11 +236,9 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the HMS API folder does not exist.
    */
   async getHmsApiFolder(force: boolean = false): Promise<vscode.Uri | undefined> {
-    if (this._cachedHmsApiFolder && !force)
-      return this._cachedHmsApiFolder
+    if (this._cachedHmsApiFolder && !force) return this._cachedHmsApiFolder
     const hmsSdkPath = await this.getHmsSdkUri(force)
-    if (!hmsSdkPath)
-      return undefined
+    if (!hmsSdkPath) return undefined
     const hmsApiFolder = vscode.Uri.joinPath(hmsSdkPath, 'ets', 'api')
     try {
       await this.fileSystem.mustBeDirectory(hmsApiFolder, SdkAnalyzerException.Code.HmsApiPathNotFound, SdkAnalyzerException.Code.HmsApiPathNotDirectory)
@@ -276,11 +262,9 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @throws {SdkAnalyzerException} If the HMS kits folder does not exist.
    */
   async getHmsKitsFolder(force: boolean = false): Promise<vscode.Uri | undefined> {
-    if (this._cachedHmsKitsFolder && !force)
-      return this._cachedHmsKitsFolder
+    if (this._cachedHmsKitsFolder && !force) return this._cachedHmsKitsFolder
     const hmsSdkPath = await this.getHmsSdkUri(force)
-    if (!hmsSdkPath)
-      return undefined
+    if (!hmsSdkPath) return undefined
     const hmsKitsFolder = vscode.Uri.joinPath(hmsSdkPath, 'ets', 'kits')
     try {
       await this.fileSystem.mustBeDirectory(hmsKitsFolder, SdkAnalyzerException.Code.HmsKitsPathNotFound, SdkAnalyzerException.Code.HmsKitsPathNotDirectory)
@@ -306,8 +290,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
     const hmsSdkPath = await this.getHmsSdkUri(force)
     const hmsApiFolder = await this.getHmsApiFolder(force)
     const hmsKitsFolder = await this.getHmsKitsFolder(force)
-    if (!hmsSdkPath || !hmsApiFolder || !hmsKitsFolder)
-      return {}
+    if (!hmsSdkPath || !hmsApiFolder || !hmsKitsFolder) return {}
 
     const paths: import('typescript').MapLike<string[]> = {}
     const apiFiles = fs.readdirSync(hmsApiFolder.fsPath)

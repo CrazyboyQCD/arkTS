@@ -1,20 +1,13 @@
 // Only using type check.
 {
   "extends": "./tsconfig.base.json",
-  "references": [
-    {
-      "path": "./packages/language-server/tsconfig.json"
-    },
-    {
-      "path": "./packages/language-plugin/tsconfig.json"
-    },
-    {
-      "path": "./packages/shared/tsconfig.json"
-    },
-    {
-      "path": "./packages/vscode/tsconfig.json"
-    }
-  ],
-  "files": [],
-  "exclude": ["node_modules", "dist", "out", "ohos-typescript"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "out",
+    "ohos-typescript",
+    "oh_modules",
+    "samples",
+    "sample"
+  ]
 }

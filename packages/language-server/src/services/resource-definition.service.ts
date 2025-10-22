@@ -29,8 +29,7 @@ export class ResourceDefinitionService extends BaseResourceService {
 
       // 查找当前位置的 $r() 调用
       const resourceCall = await this.findResourceCallAtPosition(document, position, sourceFile)
-      if (!resourceCall)
-        return null
+      if (!resourceCall) return null
 
       this.info('Found $r() call', resourceCall)
 
@@ -121,8 +120,7 @@ export function createETSIntegratedResourceDefinitionService(projectRoot: string
       return {
         async provideDefinition(document: TextDocument, position: Position): Promise<LocationLink[] | null> {
           const sourceFile = new ContextUtil(context).decodeSourceFile(document)
-          if (!sourceFile)
-            return null
+          if (!sourceFile) return null
           return service.provideDefinition(document, position, sourceFile)
         },
       }

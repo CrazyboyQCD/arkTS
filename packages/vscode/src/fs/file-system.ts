@@ -14,8 +14,7 @@ export class FileSystem extends ExtensionLogger {
    */
   getCurrentWorkspaceDir(): vscode.Uri | undefined {
     const workspaceFolders = vscode.workspace.workspaceFolders
-    if (!workspaceFolders || workspaceFolders.length === 0)
-      return undefined
+    if (!workspaceFolders || workspaceFolders.length === 0) return undefined
 
     // 如果有活动文档，找到包含该文档的工作区
     if (vscode.window.activeTextEditor) {
@@ -41,11 +40,9 @@ export class FileSystem extends ExtensionLogger {
    * @throws {SdkAnalyzerException} If the path does not exist or is not a directory.
    */
   async mustBeDirectory(uri: vscode.Uri, notFoundCode: number | string, notDictCode: number | string): Promise<void> {
-    if (!fs.existsSync(uri.fsPath))
-      throw new FileSystemException(notFoundCode, `Path ${uri.fsPath} does not exist.`)
+    if (!fs.existsSync(uri.fsPath)) throw new FileSystemException(notFoundCode, `Path ${uri.fsPath} does not exist.`)
     const statInfo = await vscode.workspace.fs.stat(uri)
-    if (statInfo.type !== vscode.FileType.Directory)
-      throw new FileSystemException(notDictCode, `Path ${uri.fsPath} is not a directory.`)
+    if (statInfo.type !== vscode.FileType.Directory) throw new FileSystemException(notDictCode, `Path ${uri.fsPath} is not a directory.`)
   }
 
   /**
@@ -57,11 +54,9 @@ export class FileSystem extends ExtensionLogger {
    * @throws {FileSystemException} If the path does not exist or is not a file.
    */
   async mustBeFile(uri: vscode.Uri, notFoundCode: number | string, notFileCode: number | string): Promise<void> {
-    if (!fs.existsSync(uri.fsPath))
-      throw new FileSystemException(notFoundCode, `Path ${uri.fsPath} does not exist.`)
+    if (!fs.existsSync(uri.fsPath)) throw new FileSystemException(notFoundCode, `Path ${uri.fsPath} does not exist.`)
     const statInfo = await vscode.workspace.fs.stat(uri)
-    if (statInfo.type !== vscode.FileType.File)
-      throw new FileSystemException(notFileCode, `Path ${uri.fsPath} is not a file.`)
+    if (statInfo.type !== vscode.FileType.File) throw new FileSystemException(notFileCode, `Path ${uri.fsPath} is not a file.`)
   }
 
   /**
@@ -70,8 +65,7 @@ export class FileSystem extends ExtensionLogger {
    * @param folderPath - The path to the directory.
    */
   async createDirectoryIfNotExists(folderPath: string): Promise<void> {
-    if (!fs.existsSync(folderPath))
-      fs.mkdirSync(folderPath, { recursive: true })
+    if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true })
   }
 
   /**
@@ -80,12 +74,10 @@ export class FileSystem extends ExtensionLogger {
    * @param base - The base directory to read the `build-profile.json5` file from.
    */
   readBuildProfileJson5<T = any>(base: vscode.Uri | undefined = this.getCurrentWorkspaceDir()): [vscode.Uri, T] | undefined {
-    if (!base)
-      return
+    if (!base) return
 
     const buildProfileFilePath = vscode.Uri.joinPath(base, 'build-profile.json5')
-    if (!fs.existsSync(buildProfileFilePath.fsPath) || !fs.statSync(buildProfileFilePath.fsPath).isFile())
-      return
+    if (!fs.existsSync(buildProfileFilePath.fsPath) || !fs.statSync(buildProfileFilePath.fsPath).isFile()) return
 
     try {
       const content = fs.readFileSync(buildProfileFilePath.fsPath, 'utf-8')
@@ -96,12 +88,10 @@ export class FileSystem extends ExtensionLogger {
   }
 
   readOhPackageJson5<T = any>(base: vscode.Uri | undefined = this.getCurrentWorkspaceDir()): [vscode.Uri, T] | undefined {
-    if (!base)
-      return
+    if (!base) return
 
     const ohPackageFilePath = vscode.Uri.joinPath(base, 'oh-package.json5')
-    if (!fs.existsSync(ohPackageFilePath.fsPath) || !fs.statSync(ohPackageFilePath.fsPath).isFile())
-      return
+    if (!fs.existsSync(ohPackageFilePath.fsPath) || !fs.statSync(ohPackageFilePath.fsPath).isFile()) return
 
     try {
       const content = fs.readFileSync(ohPackageFilePath.fsPath, 'utf-8')

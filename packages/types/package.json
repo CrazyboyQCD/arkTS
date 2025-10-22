@@ -1,0 +1,82 @@
+{
+  "name": "@arkts/types",
+  "version": "1.1.0",
+  "description": "Common typings for OpenHarmony/HarmonyOS projects.",
+  "author": "Naily Zero <zero@naily.cc>",
+  "license": "MIT",
+  "homepage": "https://github.com/ohosvscode/arkTS/tree/next/packages/types",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ohosvscode/arkTS",
+    "directory": "packages/types"
+  },
+  "bugs": {
+    "url": "https://github.com/ohosvscode/arkTS/issues",
+    "email": "zero@naily.cc"
+  },
+  "keywords": [
+    "types",
+    "typings",
+    "harmonyos",
+    "openharmony",
+    "arkts",
+    "ets",
+    "json5"
+  ],
+  "exports": {
+    ".": {
+      "types": "./out/index.d.ts",
+      "import": "./out/index.mjs",
+      "default": "./out/index.js"
+    },
+    "./build-profile": {
+      "types": "./out/build-profile.d.ts",
+      "import": "./out/build-profile.mjs",
+      "default": "./out/build-profile.js"
+    },
+    "./module-json": {
+      "types": "./out/module-json.d.ts",
+      "import": "./out/module-json.mjs",
+      "default": "./out/module-json.js"
+    },
+    "./oh-package": {
+      "types": "./out/oh-package.d.ts",
+      "import": "./out/oh-package.mjs",
+      "default": "./out/oh-package.js"
+    },
+    "./resource-element-file": {
+      "types": "./out/resource-element-file.d.ts",
+      "import": "./out/resource-element-file.mjs",
+      "default": "./out/resource-element-file.js"
+    },
+    "./workspace-build-profile": {
+      "types": "./out/workspace-build-profile.d.ts",
+      "import": "./out/workspace-build-profile.mjs",
+      "default": "./out/workspace-build-profile.js"
+    },
+    "./workspace-oh-package": {
+      "types": "./out/workspace-oh-package.d.ts",
+      "import": "./out/workspace-oh-package.mjs",
+      "default": "./out/workspace-oh-package.js"
+    },
+    "./dist/*": "./dist/*"
+  },
+  "main": "out/index.js",
+  "files": [
+    "bin",
+    "out",
+    "src"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown --tsconfig ./tsconfig.build.json",
+    "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
+    "release": "pnpm publish"
+  },
+  "dependencies": {}
+}

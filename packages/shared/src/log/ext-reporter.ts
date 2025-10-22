@@ -15,10 +15,8 @@ export class OutputChannelReporter implements ConsolaReporter {
   }
 
   private toString(logObj: LogObject): string {
-    if (logObj.message)
-      return logObj.message
-    if (logObj.args.length === 0)
-      return this.safeStringify(logObj)
+    if (logObj.message) return logObj.message
+    if (logObj.args.length === 0) return this.safeStringify(logObj)
     return logObj.args.join(' ')
   }
 

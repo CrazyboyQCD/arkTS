@@ -265,17 +265,30 @@
   "scripts": {
     "build": "tsdown",
     "watch": "cross-env NODE_ENV=development tsdown",
-    "pack": "pnpm run build && vsce package",
+    "pack": "pnpm run build && tsx scripts/pre-publish.ts && vsce package",
     "release": "pnpm run build && vsce publish && ovsx publish",
     "update": "vscode-ext-gen --output src/generated/meta.ts",
     "ovsx": "ovsx",
     "vsce": "vsce"
   },
+  "dependencies": {
+    "@arkts/project-detector": "^1.1.3-alpha.14",
+    "@arkts/project-detector-darwin-arm64": "^1.1.3-alpha.14",
+    "@arkts/project-detector-darwin-x64": "^1.1.3-alpha.14",
+    "@arkts/project-detector-linux-arm-gnueabihf": "^1.1.3-alpha.14",
+    "@arkts/project-detector-linux-arm64-gnu": "^1.1.3-alpha.14",
+    "@arkts/project-detector-linux-arm64-musl": "^1.1.3-alpha.14",
+    "@arkts/project-detector-linux-x64-gnu": "^1.1.3-alpha.14",
+    "@arkts/project-detector-linux-x64-musl": "^1.1.3-alpha.14",
+    "@arkts/project-detector-win32-arm64-msvc": "^1.1.3-alpha.14",
+    "@arkts/project-detector-win32-ia32-msvc": "^1.1.3-alpha.14",
+    "@arkts/project-detector-win32-x64-msvc": "^1.1.3-alpha.14"
+  },
   "devDependencies": {
     "@arkts/headless-jsonrpc": "catalog:prod",
     "@arkts/language-server": "workspace:*",
     "@arkts/sdk-downloader": "catalog:prod",
-    "@types/vscode": "^1.104.0",
+    "@types/vscode": "^1.22.0",
     "@volar/language-server": "catalog:prod",
     "@volar/vscode": "catalog:prod",
     "@vscode/l10n": "catalog:prod",

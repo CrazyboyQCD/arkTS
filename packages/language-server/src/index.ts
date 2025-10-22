@@ -1,8 +1,7 @@
 import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
-import { createArkTServices, createOpenHarmonyProjectDetector } from '@arkts/language-service'
-import { createConnection, createServer, createTypeScriptProject, TextDocument } from '@volar/language-server/node'
+import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { URI } from 'vscode-uri'
@@ -13,7 +12,7 @@ import { logger } from './logger'
 const connection = createConnection()
 const server = createServer(connection)
 const lspConfiguration = new LanguageServerConfigManager(logger)
-type SealizableTextDocument = Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string }
+export type SealizableTextDocument = Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string }
 
 logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`)
 
@@ -42,8 +41,7 @@ connection.onDidChangeConfiguration((params) => {
 ResourceWatcher.from(connection)
 
 connection.onInitialize(async (params) => {
-  if (params.locale)
-    lspConfiguration.setLocale(params.locale)
+  if (params.locale) lspConfiguration.setLocale(params.locale)
   lspConfiguration.setConfiguration({ typescript: params.initializationOptions?.typescript })
 
   // 初始化配置
@@ -62,25 +60,17 @@ connection.onInitialize(async (params) => {
   logger.getConsola().info('Server initialization - Project root:', projectRoot)
   logger.getConsola().info('Server initialization - SDK path:', sdkPath)
   logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
-  const workspaceDetector = createOpenHarmonyProjectDetector(URI.file(projectRoot))
-  const arktsServices = await createArkTServices({ ets, locale: params.locale ?? '' }, workspaceDetector)
-  const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'))
-
-  connection.onDidChangeWatchedFiles((params) => {
-    for (const change of params.changes)
-      workspaceDetector.updateFile(URI.parse(change.uri))
+  const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'), {
+    isValidationEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isSuggestionsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isAutoClosingTagsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    isFormattingEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
   })
 
-  connection.onRequest('ets/onDidChangeTextDocument', (params: { textDocument: SealizableTextDocument }) => {
-    workspaceDetector.updateTextDocument(
-      TextDocument.create(
-        params.textDocument.uri,
-        params.textDocument.languageId,
-        params.textDocument.version,
-        params.textDocument.text,
-      ),
-    )
-  })
+  // connection.onDidChangeWatchedFiles((params) => {
+  //   for (const change of params.changes)
+  //     workspaceDetector.updateFile(URI.parse(change.uri))
+  // })
 
   return server.initialize(
     params,
@@ -93,8 +83,7 @@ connection.onInitialize(async (params) => {
           }),
         ],
         setup(options) {
-          if (!options.project || !options.project.typescript || !options.project.typescript.languageServiceHost)
-            return
+          if (!options.project || !options.project.typescript || !options.project.typescript.languageServiceHost) return
 
           const originalSettings = options.project.typescript.languageServiceHost.getCompilationSettings() || {}
           logger.getConsola().debug(`Settings: ${JSON.stringify(lspConfiguration.getTsConfig(originalSettings as ets.CompilerOptions), null, 2)}`)
@@ -106,7 +95,6 @@ connection.onInitialize(async (params) => {
     }),
     [
       ...typescriptServices,
-      ...arktsServices,
     ],
   )
 })

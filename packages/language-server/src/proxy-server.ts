@@ -10,8 +10,7 @@ const cp = child_process.fork(path.join(__dirname, 'server.js'), ['--node-ipc'],
   stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
 })
 
-if (cp.stdin)
-  process.stdin.pipe(cp.stdin)
+if (cp.stdin) process.stdin.pipe(cp.stdin)
 cp.stdout?.pipe(process.stdout)
 cp.stderr?.pipe(process.stderr)
 cp.on('message', (message) => {

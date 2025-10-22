@@ -36,8 +36,7 @@ describe('sdk 路径动态获取（概念验证）', () => {
     private config = { ohos: { sdkPath: '' } }
     getSdkPath() { return this.config.ohos.sdkPath }
     setConfiguration(cfg: any) {
-      if (cfg.ohos?.sdkPath)
-        this.config.ohos.sdkPath = cfg.ohos.sdkPath
+      if (cfg.ohos?.sdkPath) this.config.ohos.sdkPath = cfg.ohos.sdkPath
     }
   }
 

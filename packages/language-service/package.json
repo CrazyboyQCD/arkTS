@@ -48,12 +48,16 @@
   },
   "dependencies": {
     "@arkts/shared": "workspace:*",
+    "@arkts/types": "workspace:*",
     "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",
     "@volar/language-server": "catalog:prod",
     "fast-glob": "catalog:dev",
+    "image-type": "^6.0.0",
     "json5": "catalog:prod",
     "ts-macro": "^0.3.4",
+    "vscode-languageserver-textdocument": "catalog:prod",
+    "vscode-languageserver-types": "catalog:prod",
     "vscode-uri": "catalog:prod"
   }
 }

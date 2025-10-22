@@ -34,8 +34,7 @@ export abstract class LanguageServerContext extends AbstractWatcher implements I
   }
 
   protected errorToString(error: unknown): string {
-    if (error instanceof Error || (error && typeof error === 'object' && 'message' in error))
-      return this.translator.t('sdk.error.languageServerError', { args: [`${error.message} ${'code' in error ? `[${error.code}]` : ''}`] })
+    if (error instanceof Error || (error && typeof error === 'object' && 'message' in error)) return this.translator.t('sdk.error.languageServerError', { args: [`${error.message} ${'code' in error ? `[${error.code}]` : ''}`] })
     return this.translator.t('sdk.error.languageServerError', { args: [typeof error === 'string' || typeof error === 'number' || typeof error === 'boolean' ? error : JSON.stringify(error)] })
   }
 
@@ -87,8 +86,7 @@ export abstract class LanguageServerContext extends AbstractWatcher implements I
       return
     }
     const basename = path.basename(uri.fsPath)
-    if (basename !== 'local.properties' && basename !== 'build-profile.json5')
-      return
+    if (basename !== 'local.properties' && basename !== 'build-profile.json5') return
     this.getConsola().warn(`${uri.fsPath} is ${event.toUpperCase()}, restarting ETS Language Server...`)
     this.restart()
   }
@@ -97,12 +95,10 @@ export abstract class LanguageServerContext extends AbstractWatcher implements I
   protected async getOhosSdkPathFromLocalProperties(): Promise<string | undefined> {
     try {
       const workspaceDir = this.getCurrentWorkspaceDir()
-      if (!workspaceDir)
-        return undefined
+      if (!workspaceDir) return undefined
       const localPropPath = vscode.Uri.joinPath(workspaceDir, 'local.properties')
       const stat = await vscode.workspace.fs.stat(localPropPath)
-      if (stat.type !== vscode.FileType.File)
-        return
+      if (stat.type !== vscode.FileType.File) return
 
       const content = await vscode.workspace.fs.readFile(localPropPath)
       const lines = content.toString().split('\n')
@@ -114,8 +110,7 @@ export abstract class LanguageServerContext extends AbstractWatcher implements I
 
   public async getAnalyzedHmsSdkPath(): Promise<vscode.Uri | undefined> {
     const hmsSdkPath = vscode.workspace.getConfiguration('ets').get('hmsPath')
-    if (!hmsSdkPath || typeof hmsSdkPath !== 'string')
-      return undefined
+    if (!hmsSdkPath || typeof hmsSdkPath !== 'string') return undefined
     return vscode.Uri.file(hmsSdkPath)
   }
 

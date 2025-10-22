@@ -6,10 +6,8 @@ export abstract class Environment extends AbstractWatcher {
   getArch(): SdkArchEnum {
     const arch = process.arch
 
-    if (arch === 'arm' || arch === 'arm64')
-      return SdkArchEnum.ARM
-    else if (arch === 'x64')
-      return SdkArchEnum.X86
+    if (arch === 'arm' || arch === 'arm64') return SdkArchEnum.ARM
+    else if (arch === 'x64') return SdkArchEnum.X86
     else
       throw new Error(`Unsupported arch: ${arch}.`)
   }
@@ -17,12 +15,9 @@ export abstract class Environment extends AbstractWatcher {
   getOS(): SdkOSEnum {
     const os = process.platform
 
-    if (os === 'darwin')
-      return SdkOSEnum.MacOS
-    else if (os === 'win32')
-      return SdkOSEnum.Windows
-    else if (os === 'linux')
-      return SdkOSEnum.Linux
+    if (os === 'darwin') return SdkOSEnum.MacOS
+    else if (os === 'win32') return SdkOSEnum.Windows
+    else if (os === 'linux') return SdkOSEnum.Linux
     else
       throw new Error(`Unsupported os: ${os}.`)
   }

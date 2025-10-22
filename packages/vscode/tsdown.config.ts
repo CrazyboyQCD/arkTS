@@ -18,7 +18,7 @@ export default defineConfig({
   },
   format: 'cjs',
   sourcemap: isDev,
-  external: ['vscode', '@aws-sdk/client-s3'],
+  external: ['vscode', '@aws-sdk/client-s3', '@arkts/project-detector'],
   tsconfig: './tsconfig.json',
   platform: 'node',
   clean: false,
@@ -49,13 +49,13 @@ export default defineConfig({
   outputOptions: {
     chunkFileNames: `dist/[name].js`,
   },
-  onSuccess: 'tsx ./scripts/reflect-fixer.mts',
   alias: {
     '@arkts/shared': path.join(process.cwd(), '../shared/src/index.ts'),
     '@arkts/shared/vscode': path.join(process.cwd(), '../shared/src/vscode.ts'),
     '@arkts/language-plugin': path.join(process.cwd(), '../language-plugin/src/index.ts'),
-    '@arkts/sdk-downloader': path.join(process.cwd(), 'node_modules/@arkts/sdk-downloader/dist/index.js'),
+    '@arkts/sdk-downloader': path.join(process.cwd(), '../../node_modules/@arkts/sdk-downloader/dist/index.js'),
     '@arkts/language-service': path.join(process.cwd(), '../language-service/src/index.ts'),
+    '@arkts/types': path.join(process.cwd(), '../types/src/index.ts'),
   },
   watch: isDev
     ? [

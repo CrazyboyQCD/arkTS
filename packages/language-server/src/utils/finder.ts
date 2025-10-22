@@ -19,8 +19,7 @@ export class ContextUtil {
    */
   getLanguageService(): ets.LanguageService | null {
     const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
-    if (!languageService)
-      return null
+    if (!languageService) return null
     return languageService
   }
 
@@ -32,18 +31,14 @@ export class ContextUtil {
    */
   decodeSourceFile(document: TextDocument): ets.SourceFile | null {
     const decoded = this.context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
-    if (!decoded)
-      return null
+    if (!decoded) return null
     const [decodedUri] = decoded
     const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
-    if (!languageService)
-      return null
+    if (!languageService) return null
     const program = languageService.getProgram()
-    if (!program)
-      return null
+    if (!program) return null
     const sourceFile = program.getSourceFile(decodedUri.fsPath)
-    if (!sourceFile)
-      return null
+    if (!sourceFile) return null
     return sourceFile
   }
 }
