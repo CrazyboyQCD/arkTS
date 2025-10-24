@@ -233,7 +233,7 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
     name: 'arkts-resource',
     capabilities: {
       completionProvider: {
-        triggerCharacters: ['.', '\'', '"', '`'],
+        triggerCharacters: ['.', '\'', '"', '`', ':', '$'],
         resolveProvider: false,
       },
       diagnosticProvider: {
@@ -304,9 +304,57 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
           return diagnostics
         },
 
-        provideCompletionItems(document, position) {
+        async provideCompletionItems(document, position, { triggerCharacter }) {
           const decodedUri = contextUtil.decodeTextDocumentUri(document)
           if (!decodedUri) return null
+
+          if (document.languageId === 'jsonc') {
+            const products = projectDetectorManager.findByUri(decodedUri.toString())
+              ?.findByUri(decodedUri.toString())
+              ?.findByUri(decodedUri.toString())
+              ?.findAll() ?? []
+            const currentProduct = products.find(product => product.getUnderlyingProduct().getModuleJson5Path().toString() === decodedUri.toString())
+            const moduleJson5Path = currentProduct?.getUnderlyingProduct().getModuleJson5Path()
+            if (!currentProduct || !moduleJson5Path) return null
+            const sourceFile = ets.parseJsonText(moduleJson5Path.toString(), document.getText())
+            const stringLiterals: ets.StringLiteral[] = []
+            sourceFile.forEachChild(function walk(node: ets.Node): void {
+              if (!ets.isStringLiteral(node)) return node.forEachChild(walk)
+              stringLiterals.push(node)
+              return node.forEachChild(walk)
+            })
+            const currentStringLiteral = stringLiterals.find((stringLiteral) => {
+              const startPosition = document.positionAt(stringLiteral.getStart(sourceFile))
+              const endPosition = document.positionAt(stringLiteral.getEnd())
+              return startPosition.line <= position.line && endPosition.line >= position.line
+                && startPosition.character <= position.character && endPosition.character >= position.character
+            })
+            if (!currentStringLiteral) return null
+            const stringLiteralText = currentStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')
+            if (!stringLiteralText) return null
+            const items: CompletionItem[] = []
+            const jsonFormats = [...new Set(currentProduct.findElementReference().map(reference => reference.getUnderlyingElementJsonFileReference().toJsonFormat()))]
+
+            for (const jsonFormat of jsonFormats) {
+              if (jsonFormat.startsWith('$color')) continue
+              if (!jsonFormat.startsWith(stringLiteralText)) continue
+              const spilted = jsonFormat.split(stringLiteralText)
+
+              items.push({
+                label: jsonFormat,
+                kind: CompletionItemKind.Value,
+                detail: jsonFormat,
+                insertText: stringLiteralText ? spilted[1] : jsonFormat,
+              })
+            }
+
+            return {
+              items,
+              isIncomplete: false,
+            }
+          }
+
+          if (triggerCharacter === ':' || triggerCharacter === '$') return null
           const sourceFile = contextUtil.decodeSourceFile(document)
           if (!sourceFile) return null
           const resourceCallExpressions = globalCallFinder.findGlobalCallExpression(sourceFile, '$r')
