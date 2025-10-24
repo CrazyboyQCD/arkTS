@@ -48,4 +48,23 @@ export class ContextUtil {
     if (!sourceFile) return null
     return sourceFile
   }
+
+  /**
+   * 解码`TextDocument`并获取`TS源文件AST`。
+   *
+   * 该方法获取到的是开始解析时的原始TS源文件AST (Powered by `ts-macro`)
+   *
+   * @param document 当前 `TextDocument` 对象
+   * @param ets 如果不传则不完整校验获取到的到底是否是一个正确的 {@linkcode ets.SourceFile} 对象
+   * @returns 如果获取失败则返回 `null`
+   */
+  getOriginalSourceFile(document: TextDocument, ets?: typeof import('ohos-typescript')): ets.SourceFile | null {
+    const decoded = this.context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
+    if (!decoded) return null
+    const [decodedUri, embeddedCodeId] = decoded
+    const virtualCode = this.context.language.scripts.get(decodedUri)?.generated?.embeddedCodes.get(embeddedCodeId)
+    if (!virtualCode || !('ast' in virtualCode) || typeof virtualCode.ast !== 'object' || virtualCode.ast === null) return null
+    if (ets && !ets.isSourceFile(virtualCode.ast as ets.Node)) return null
+    return virtualCode.ast as ets.SourceFile
+  }
 }

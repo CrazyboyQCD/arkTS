@@ -4,6 +4,7 @@ import type * as ts from 'typescript'
 import type { URI } from 'vscode-uri'
 import path from 'node:path'
 import { $$thisFixerPlugin } from './$$this-fixer-plugin'
+import { ESObjectPlugin } from './es-object-plugin'
 import { createEmptyVirtualCode, createVirtualCode, ETSVirtualCode } from './ets-code'
 
 function isEts(tsOrEts: typeof ets | typeof ts): tsOrEts is typeof ets {
@@ -100,7 +101,7 @@ export function ETSLanguagePlugin(tsOrEts: typeof ets | typeof ts, { excludePath
           filePath,
           tsOrEts.createSourceFile(filePath, snapshot.getText(0, snapshot.getLength()), 99 as any) as ts.SourceFile,
           'typescript',
-          [$$thisFixerPlugin()] as any,
+          [$$thisFixerPlugin(), ESObjectPlugin()] as any,
         )
       }
       // ETS Server mode

@@ -6,7 +6,7 @@ import { GlobalCallExpressionFinder } from '../classes/global-call-finder'
 import { SysResource } from '../interfaces/sys-resource'
 import { ContextUtil } from '../utils/context-util'
 
-export async function createArkTSResource(projectDetectorManager: ProjectDetectorManager, ets: typeof import('ohos-typescript'), config: LanguageServerConfigurator): Promise<LanguageServicePlugin> {
+export function createArkTSResource(projectDetectorManager: ProjectDetectorManager, ets: typeof import('ohos-typescript'), config: LanguageServerConfigurator): LanguageServicePlugin {
   return {
     name: 'arkts-resource',
     capabilities: {
@@ -135,6 +135,10 @@ export async function createArkTSResource(projectDetectorManager: ProjectDetecto
         },
 
         provideDefinition(document, position) {
+          if (document.languageId === 'json') {
+            return []
+          }
+
           const decodedUri = contextUtil.decodeTextDocumentUri(document)
           if (!decodedUri) return null
           const sourceFile = contextUtil.decodeSourceFile(document)

@@ -17,7 +17,7 @@ export namespace ProjectDetector {
     private readonly projectDetector: RustProjectDetector
     private readonly findAllSignal: DisposableSignal<RustProject[]>
     constructor(
-      private readonly projctDetectorManager: ProjectDetectorManager,
+      private readonly projectDetectorManager: ProjectDetectorManager,
       private readonly workspaceFolder: string,
     ) {
       this.projectDetector = RustProjectDetector.create(this.workspaceFolder)
@@ -25,7 +25,7 @@ export namespace ProjectDetector {
     }
 
     getProjectDetectorManager(): ProjectDetectorManager {
-      return this.projctDetectorManager
+      return this.projectDetectorManager
     }
 
     getUnderlyingProjectDetector(): RustProjectDetector {
@@ -45,7 +45,7 @@ export namespace ProjectDetector {
     }
   }
 
-  export function create(projctDetectorManager: ProjectDetectorManager, workspaceFolder: string): ProjectDetector {
-    return new ProjectDetectorImpl(projctDetectorManager, workspaceFolder)
+  export function create(projectDetectorManager: ProjectDetectorManager, workspaceFolder: string): ProjectDetector {
+    return new ProjectDetectorImpl(projectDetectorManager, workspaceFolder)
   }
 }

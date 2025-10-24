@@ -13,7 +13,7 @@ import { globalLogger } from 'tsdown'
  */
 async function main() {
   globalLogger.info('Cleaning node_modules...')
-  fs.rmSync(path.resolve('node_modules'), { recursive: true })
+  fs.rmSync(path.resolve('node_modules'), { recursive: true, force: true })
   globalLogger.info('Removing package-lock.json...')
   if (fs.existsSync(path.resolve('package-lock.json'))) fs.rmSync(path.resolve('package-lock.json'))
   else globalLogger.warn('package-lock.json not found, skipping deletion')
