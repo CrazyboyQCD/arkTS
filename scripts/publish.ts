@@ -57,6 +57,8 @@ function publishToOvsce() {
 
 ;(async () => {
   publishNpmPackages()
+  execSync(`pnpm tsx scripts/pre-process.ts`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
   publishToVsce()
   publishToOvsce()
+  execSync(`pnpm tsx scripts/clean-process.ts`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
 })()
