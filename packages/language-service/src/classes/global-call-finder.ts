@@ -74,7 +74,7 @@ export class GlobalCallExpressionFinder {
     return this.ets.forEachChild(node, child => this.hasLocalDeclaration(child, identifier))
   }
 
-  getFirstArgumentText(callExpression: import('ohos-typescript').CallExpression, sourceFile: ets.SourceFile): string | undefined {
+  getFirstArgumentText(callExpression: import('ohos-typescript').CallExpression, sourceFile: ets.SourceFile = callExpression.getSourceFile()): string | undefined {
     if (!callExpression.arguments || callExpression.arguments.length === 0 || !callExpression.arguments[0]) return undefined
     if (!this.ets.isStringLiteral(callExpression.arguments[0])) return undefined
     return callExpression.arguments[0].getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')

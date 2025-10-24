@@ -78,56 +78,56 @@ catalogs:
       version: 0.2.2
   prod:
     '@arkts/project-detector':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-android-arm-eabi':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-android-arm64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-darwin-arm64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-darwin-x64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-freebsd-x64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-linux-arm-gnueabihf':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-linux-arm64-gnu':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-linux-arm64-musl':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-linux-x64-gnu':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-linux-x64-musl':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-openharmony-arm64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-openharmony-x64':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-wasm32-wasi':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-win32-arm64-msvc':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-win32-ia32-msvc':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/project-detector-win32-x64-msvc':
-      specifier: ^1.1.3-alpha.22
-      version: 1.1.3-alpha.22
+      specifier: ^1.1.3-alpha.25
+      version: 1.1.3-alpha.25
     '@arkts/sdk-downloader':
       specifier: ^0.1.29
       version: 0.1.30
@@ -315,55 +315,55 @@ importers:
         version: 0.1.0
       '@arkts/project-detector':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-android-arm-eabi':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-android-arm64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-darwin-arm64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-darwin-x64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-freebsd-x64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-linux-arm-gnueabihf':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-linux-arm64-gnu':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-linux-arm64-musl':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-linux-x64-gnu':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-linux-x64-musl':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-openharmony-arm64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-openharmony-x64':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-wasm32-wasi':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-win32-arm64-msvc':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-win32-ia32-msvc':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/project-detector-win32-x64-msvc':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/sdk-downloader':
         specifier: catalog:prod
         version: 0.1.30
@@ -663,7 +663,7 @@ importers:
         version: link:../language-service
       '@arkts/project-detector':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
     devDependencies:
       '@arkts/language-plugin':
         specifier: workspace:*
@@ -712,7 +712,7 @@ importers:
     dependencies:
       '@arkts/project-detector':
         specifier: catalog:prod
-        version: 1.1.3-alpha.22
+        version: 1.1.3-alpha.25
       '@arkts/shared':
         specifier: workspace:*
         version: link:../shared
@@ -904,103 +904,107 @@ packages:
   '@antfu/utils@9.3.0':
     resolution: {integrity: sha512-9hFT4RauhcUzqOE4f1+frMKLZrgNog5b06I7VmZQV1BkvwvqrbC8EBZf3L1eEL2AKb6rNKjER0sEvJiSP1FXEA==}
 
-  '@arkts/project-detector-android-arm-eabi@1.1.3-alpha.22':
-    resolution: {integrity: sha512-N+drAie7pPf/ZzYEia3Nc8nWXvDVFZtQLneMDuOTk1PRKN0ldytLr77a62Feyf7OzvKsGITS078e/tFC/nyOxw==}
+  '@arkts/project-detector-android-arm-eabi@1.1.3-alpha.25':
+    resolution: {integrity: sha512-FNknG5fWaIZxcLlwd+M5hmhhgBrqUHn50OEyQyO+u7OudYv895sE+xci+lbG0jYArMiVEtaT1kRyoerhRdkidA==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [android]
 
-  '@arkts/project-detector-android-arm64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-Fz4NrnrNG05zCfRkDJ/VjgOiaDGKdnhAHSgn05MV+JPo3mQmAENeEVVIbdHCUWvMInvXU0vSuY3BHX1YLCutmg==}
+  '@arkts/project-detector-android-arm64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-vUxlCzMBeaOYJfImJDXTvuFBBkeghbr0+kEPlV6QOIe+96KCRKsDiE7augkX2C5clmYKw+lKl9e4Qd2ol6dV3Q==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [android]
 
-  '@arkts/project-detector-darwin-arm64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-Ie5sAah3UBtYfB0jlG2mO+/2yomqxRE0pb8nN+5GiBA1XMmyheirOQMj817XLvMlWNO3C3NLIsEDnSvdp4kr0w==}
+  '@arkts/project-detector-darwin-arm64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-qW1Op+PolDiog7T9eT5rY/5CHPVG0xbpxBsyMNEZOX+4WlYdGUxu69OJ2eN++pMcM07bxLi1E/RAQGrSMtus+g==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@arkts/project-detector-darwin-x64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-93W/Zy46WUwvYJEn0oDelosy6eWECJHc/SJ6ikgPvjzltvm5nC3K9iaT8Hmbr332dRywAI4S5ZC4nA4Skas8ow==}
+  '@arkts/project-detector-darwin-x64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-GjEMEXm765e1FVRTFdLjKMcR12gJ+JdUUIXT1aoAH6iwOHk+buA0lfYQqR9chXZ2suXLcWyrSSv94jugPTP0Lg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@arkts/project-detector-freebsd-x64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-1Jk5ankXbpirWgY4ZOfheCje4zGSg/YRnYcqK00KduicnS7RV4Ym+TiPPfkEcWnJh7XOS+SX9evF0EXIc5NwuA==}
+  '@arkts/project-detector-freebsd-x64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-dYeCRows8ByroSiO2D8JXUDA4Udx5haebB5UeKVjRdv59FXEK/5dzEBjCUXzQEOiWNqlT/V+jJNCJQAbLIKgsg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [freebsd]
 
-  '@arkts/project-detector-linux-arm-gnueabihf@1.1.3-alpha.22':
-    resolution: {integrity: sha512-wMsjsDkD8zD1/fDcJXvO+QGBRb679K7eV3xge6HRQvn10DwAC7WFky+bq1b+tVtsr7jsj1Jgdm22FaIsVXVSkw==}
+  '@arkts/project-detector-linux-arm-gnueabihf@1.1.3-alpha.25':
+    resolution: {integrity: sha512-T4Ixw/Gf1cY5P0p6VUjbYKyOEpLPE4eBHJHd37VMpHwsueULqDU7g63Mpel7hwcGCkA5OxgGkbIHL8HY/9c+cg==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
 
-  '@arkts/project-detector-linux-arm64-gnu@1.1.3-alpha.22':
-    resolution: {integrity: sha512-oBz9G3bt0P4hHuOe83cmtr0e03VpgO6MCKNgd29hxWjESSJAlO79eh1vF2wx/bq2DdSP4NycKW/9phKTUb5gKg==}
+  '@arkts/project-detector-linux-arm64-gnu@1.1.3-alpha.25':
+    resolution: {integrity: sha512-QrmyGKLVOzK34bUg/2nMtyYeiZG2ggtvjviUeNPoUWRD7ZRwsDL9uRZ/R7sqsqseoajC6lOc1cLH+2jxWyMlJw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
-  '@arkts/project-detector-linux-arm64-musl@1.1.3-alpha.22':
-    resolution: {integrity: sha512-NJFml5Tprd2hxWBmcPR3GeAlf0ZkTpXNFnLgQZThVTuFo+g1z6QdWFxEF5uv0igK9AZjAPDb5ocebPXqXjrh1Q==}
+  '@arkts/project-detector-linux-arm64-musl@1.1.3-alpha.25':
+    resolution: {integrity: sha512-Y4VGbDlHUzBykCJKH8Iqvc5Z/Tq2dDH7z75hBXPUckIJZBhL5flKg791afLUh2srIyJg9gb9TvCMQmPGlE8WOQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
-  '@arkts/project-detector-linux-x64-gnu@1.1.3-alpha.22':
-    resolution: {integrity: sha512-FNSsz2PXL9LbK6hNOOZhUibn6jVJRuxQv4j/DpyVFP0H5em+PLJcL1bZG/jIAAhaf9WRmyNc5lNLmjxxG2Bzcw==}
+  '@arkts/project-detector-linux-x64-gnu@1.1.3-alpha.25':
+    resolution: {integrity: sha512-qaZ+dweVGTUJHmyDcLEdQjyKjAWCiIqu80APMXvE6zPdHGy2QrGEVFRjXdbD7HrT2G+w6LKfDs/Qrl5KZNrmhQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
-  '@arkts/project-detector-linux-x64-musl@1.1.3-alpha.22':
-    resolution: {integrity: sha512-bHvpkThfs4KjXU4dJ8hoQV42DhRM9vgoSr/SXw792HBAMBsB8TFZPZDgKR+VLBhDCnW1Ui09QQWn0yfouNXL3Q==}
+  '@arkts/project-detector-linux-x64-musl@1.1.3-alpha.25':
+    resolution: {integrity: sha512-w1S4E6FkgXvrwYzCQSuG06Vk5rl8/6bvrtwbdbbd9PHXWgp2rg1LVcNmk8AxHwsgCj9eLoyc1leYOYBAvy17Rg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
-  '@arkts/project-detector-openharmony-arm64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-53fNaFvNVKIaLrc/ye8df7cFkDynE5PzdJXY81WJOJAiiQdJkfHfNK5aV8v02f/0Dclidl6/jLD1SGguz5hTWw==}
+  '@arkts/project-detector-openharmony-arm64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-NlfDtT9KpUbaGpINOj0gtKtSRJn/jMu1De43e1gy4gdTqoNb2+f8JycL3IUEpDItHRdm5Ouf4pv6WEMKItGwcA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [openharmony]
 
-  '@arkts/project-detector-openharmony-x64@1.1.3-alpha.22':
-    resolution: {integrity: sha512-TveG/zEQJGlPRu8IGmC8Ak/8zlv0trSXWoEu4wd9LJdCeTGXCt4mLjc2JGJWGBKWJ7ttaKsJMFe+ukoZcmw+OQ==}
+  '@arkts/project-detector-openharmony-x64@1.1.3-alpha.25':
+    resolution: {integrity: sha512-vBsy2o/mfB3fzgYwf50fmreXCU4Fortq6IV2aRSMPfnH0kXCxckQEnPVLqAzKnD03x6+IgYS7hqa9jHULv1XHw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [openharmony]
 
-  '@arkts/project-detector-wasm32-wasi@1.1.3-alpha.22':
-    resolution: {integrity: sha512-Octcb4OI7OPz9w9TZMNQvLMfavNx/CdY0T75SW2dxO9kLfJ0R9TGosnvdJOLZReKTmUalG76BPWL35XdIb0ptg==}
+  '@arkts/project-detector-wasm32-wasi@1.1.3-alpha.25':
+    resolution: {integrity: sha512-9IFUly4Hs5MLw16avNKxyJC7BhvEq7x/adm2z7thyapB3x+w7LuYUKC5nN3dphAn0FKaDOpyG4JB9MLT8OMDAA==}
     engines: {node: '>=14.0.0'}
     cpu: [wasm32]
 
-  '@arkts/project-detector-win32-arm64-msvc@1.1.3-alpha.22':
-    resolution: {integrity: sha512-RTcOZ96MBUqgQ2mnTLMOe6jqQzRu+oNDHdJ/SxoFuEKVLP2Wv5x9eqv+tFNg7oqdu/7vqVKh8phXxxjgpnm6HA==}
+  '@arkts/project-detector-win32-arm64-msvc@1.1.3-alpha.25':
+    resolution: {integrity: sha512-I140nKegyEHnhOKljyDYgk9abFRfFeSA+yXzWYu88SSIlFJUmBAQILZ1LmbsQ6lsc9Y785jtu7+cELqXucqu6w==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@arkts/project-detector-win32-ia32-msvc@1.1.3-alpha.22':
-    resolution: {integrity: sha512-+MxXyLX5NvKs9/x9Q7mfNoyhYAJiuS9aVY/rtcQD1QiMxfeC6v6kjdYSceMghF/CfUGn0D3VRjTS210uT3cDUg==}
+  '@arkts/project-detector-win32-ia32-msvc@1.1.3-alpha.25':
+    resolution: {integrity: sha512-iQbPBGgw/7LUcVtfGOqvrJr1TpUHrGGDxJPpE/zL7WpyCmhc14E4+PlvgsoSayaixozTN8BhlLsI0DX/gcq/PQ==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
 
-  '@arkts/project-detector-win32-x64-msvc@1.1.3-alpha.22':
-    resolution: {integrity: sha512-mrg1K3awl7rHqV3Jra+GWwcI8jtP29RWF+q16O7PDPjmJJpCKWSji4+zj6JgxR7Vyv7brM/Tld1/69BdVNOHKw==}
+  '@arkts/project-detector-win32-x64-msvc@1.1.3-alpha.25':
+    resolution: {integrity: sha512-+SqUaXoBjVTH9EDm+C9KGucKpn2zvvx0ZqPDieg1jqKrdGhSGs/hWWT6YjVF89MU6YyGUCga1GkdvQmzxfzYyA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@arkts/project-detector@1.1.3-alpha.22':
-    resolution: {integrity: sha512-aIHnWhMMSdGiyZnd6czup6tR+1YLvCTLDyokmZAGi/lOsIcSTk+hFfTWdj7quCmeBg439wl/8tmSmdFBGiQSsw==}
+  '@arkts/project-detector@1.1.3-alpha.25':
+    resolution: {integrity: sha512-2qCslfa54Jm0vs8CCPbrjJ6oxUgaWvXXJKYy7TDkgwOnVxQC2Ky4zWsV0s0HTUHMEModqDPCn/7DlSufd+Eg7w==}
     engines: {node: '>= 10'}
 
   '@arkts/sdk-downloader@0.1.30':
@@ -7340,62 +7344,62 @@ snapshots:
 
   '@antfu/utils@9.3.0': {}
 
-  '@arkts/project-detector-android-arm-eabi@1.1.3-alpha.22': {}
+  '@arkts/project-detector-android-arm-eabi@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-android-arm64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-android-arm64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-darwin-arm64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-darwin-arm64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-darwin-x64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-darwin-x64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-freebsd-x64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-freebsd-x64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-linux-arm-gnueabihf@1.1.3-alpha.22': {}
+  '@arkts/project-detector-linux-arm-gnueabihf@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-linux-arm64-gnu@1.1.3-alpha.22': {}
+  '@arkts/project-detector-linux-arm64-gnu@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-linux-arm64-musl@1.1.3-alpha.22': {}
+  '@arkts/project-detector-linux-arm64-musl@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-linux-x64-gnu@1.1.3-alpha.22': {}
+  '@arkts/project-detector-linux-x64-gnu@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-linux-x64-musl@1.1.3-alpha.22': {}
+  '@arkts/project-detector-linux-x64-musl@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-openharmony-arm64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-openharmony-arm64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-openharmony-x64@1.1.3-alpha.22': {}
+  '@arkts/project-detector-openharmony-x64@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-wasm32-wasi@1.1.3-alpha.22':
+  '@arkts/project-detector-wasm32-wasi@1.1.3-alpha.25':
     dependencies:
       '@napi-rs/wasm-runtime': 1.0.7
 
-  '@arkts/project-detector-win32-arm64-msvc@1.1.3-alpha.22': {}
+  '@arkts/project-detector-win32-arm64-msvc@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-win32-ia32-msvc@1.1.3-alpha.22': {}
+  '@arkts/project-detector-win32-ia32-msvc@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector-win32-x64-msvc@1.1.3-alpha.22': {}
+  '@arkts/project-detector-win32-x64-msvc@1.1.3-alpha.25': {}
 
-  '@arkts/project-detector@1.1.3-alpha.22':
+  '@arkts/project-detector@1.1.3-alpha.25':
     dependencies:
       alien-signals: 3.0.3
       chokidar: 4.0.3
       mitt: 3.0.1
     optionalDependencies:
-      '@arkts/project-detector-android-arm-eabi': 1.1.3-alpha.22
-      '@arkts/project-detector-android-arm64': 1.1.3-alpha.22
-      '@arkts/project-detector-darwin-arm64': 1.1.3-alpha.22
-      '@arkts/project-detector-darwin-x64': 1.1.3-alpha.22
-      '@arkts/project-detector-freebsd-x64': 1.1.3-alpha.22
-      '@arkts/project-detector-linux-arm-gnueabihf': 1.1.3-alpha.22
-      '@arkts/project-detector-linux-arm64-gnu': 1.1.3-alpha.22
-      '@arkts/project-detector-linux-arm64-musl': 1.1.3-alpha.22
-      '@arkts/project-detector-linux-x64-gnu': 1.1.3-alpha.22
-      '@arkts/project-detector-linux-x64-musl': 1.1.3-alpha.22
-      '@arkts/project-detector-openharmony-arm64': 1.1.3-alpha.22
-      '@arkts/project-detector-openharmony-x64': 1.1.3-alpha.22
-      '@arkts/project-detector-wasm32-wasi': 1.1.3-alpha.22
-      '@arkts/project-detector-win32-arm64-msvc': 1.1.3-alpha.22
-      '@arkts/project-detector-win32-ia32-msvc': 1.1.3-alpha.22
-      '@arkts/project-detector-win32-x64-msvc': 1.1.3-alpha.22
+      '@arkts/project-detector-android-arm-eabi': 1.1.3-alpha.25
+      '@arkts/project-detector-android-arm64': 1.1.3-alpha.25
+      '@arkts/project-detector-darwin-arm64': 1.1.3-alpha.25
+      '@arkts/project-detector-darwin-x64': 1.1.3-alpha.25
+      '@arkts/project-detector-freebsd-x64': 1.1.3-alpha.25
+      '@arkts/project-detector-linux-arm-gnueabihf': 1.1.3-alpha.25
+      '@arkts/project-detector-linux-arm64-gnu': 1.1.3-alpha.25
+      '@arkts/project-detector-linux-arm64-musl': 1.1.3-alpha.25
+      '@arkts/project-detector-linux-x64-gnu': 1.1.3-alpha.25
+      '@arkts/project-detector-linux-x64-musl': 1.1.3-alpha.25
+      '@arkts/project-detector-openharmony-arm64': 1.1.3-alpha.25
+      '@arkts/project-detector-openharmony-x64': 1.1.3-alpha.25
+      '@arkts/project-detector-wasm32-wasi': 1.1.3-alpha.25
+      '@arkts/project-detector-win32-arm64-msvc': 1.1.3-alpha.25
+      '@arkts/project-detector-win32-ia32-msvc': 1.1.3-alpha.25
+      '@arkts/project-detector-win32-x64-msvc': 1.1.3-alpha.25
 
   '@arkts/sdk-downloader@0.1.30':
     dependencies:
