@@ -49,9 +49,12 @@
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish"
   },
+  "dependencies": {
+    "@arkts/language-service": "workspace:*",
+    "@arkts/project-detector": "catalog:prod"
+  },
   "devDependencies": {
     "@arkts/language-plugin": "workspace:*",
-    "@arkts/language-service": "workspace:*",
     "@arkts/shared": "workspace:*",
     "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",
@@ -63,6 +66,7 @@
     "volar-service-html": "catalog:prod",
     "volar-service-typescript": "catalog:prod",
     "vscode-html-languageservice": "catalog:prod",
+    "vscode-languageserver-protocol": "catalog:prod",
     "vscode-uri": "catalog:prod"
   }
 }

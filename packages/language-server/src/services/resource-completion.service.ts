@@ -1,5 +1,5 @@
 import type { ResourceIndexItem } from '@arkts/shared'
-import type { LanguageServicePlugin } from '@volar/language-service'
+import type { LanguageServicePlugin } from '@volar/language-server'
 import type * as ets from 'ohos-typescript'
 import type { CompletionItem, CompletionList } from 'vscode-languageserver-protocol'
 import type { Position, TextDocument } from 'vscode-languageserver-textdocument'

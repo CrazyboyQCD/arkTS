@@ -18,24 +18,26 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
+
 @Entry
 @Component
 struct Index {
   @State
   message: string = 'Hello World';
+  testESObject: ESObject = 'Hello ESObject';
 
   build() {
     Row() {
       Column() {
-        Text($r('app.string.app_name'))
+        Text($r('app.string.welcome_message'))
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)
-          .fontColor($r('app.color.primary_color'))
+          .fontColor($r('app.string.EntryAbility_desc'))
 
-        Text($r('app.string.welcome_message'))
+        Text($r('app.string.EntryAbility_label'))
           .fontSize(20)
-          .fontColor($r('sys.symbol.a_3fingers_slash'))
+          .fontColor($r('app.color.primary_color'))
           .margin({ top: 10 })
 
         Text(this.message)

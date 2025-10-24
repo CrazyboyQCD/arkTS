@@ -6,7 +6,7 @@ struct Index {
   build() {
     Row() {
       Column() {
-        Text(this.message)
+        Text($r('app.string.TestAbility_label'))
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
       }

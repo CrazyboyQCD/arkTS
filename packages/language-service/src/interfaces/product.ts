@@ -1,0 +1,64 @@
+import type { DisposableSignal, Product as RustProduct } from '@arkts/project-detector'
+import type { Disposable } from 'vscode'
+import type { ElementJsonFileReference } from './element-json-file-reference'
+import type { Module } from './module'
+import { Resource as RustResource } from '@arkts/project-detector'
+import { UriUtil } from '../utils/uri-util'
+import { Resource } from './resource'
+
+export interface Product extends Disposable {
+  getModule(): Module
+  getUnderlyingProduct(): RustProduct
+  findAll(): Resource[]
+  findByUri(uri: string): Resource | undefined
+  findElementReference(): ElementJsonFileReference[]
+}
+
+export namespace Product {
+  class ProductImpl implements Product {
+    private readonly resourceFindAllSignal: DisposableSignal<RustResource[]>
+    constructor(
+      private readonly module: Module,
+      private readonly rustProduct: RustProduct,
+    ) {
+      this.resourceFindAllSignal = RustResource.findAll(this.rustProduct)
+    }
+
+    getModule(): Module {
+      return this.module
+    }
+
+    getUnderlyingProduct(): RustProduct {
+      return this.rustProduct
+    }
+
+    findAll(): Resource[] {
+      return this.resourceFindAllSignal().map(resource => Resource.create(this, resource))
+    }
+
+    findByUri(uri: string): Resource | undefined {
+      return this.findAll().find(resource => UriUtil.isContains(uri, resource.getUnderlyingResource().getUri()))
+    }
+
+    findElementReference(): ElementJsonFileReference[] {
+      return this.findAll().flatMap(
+        resource => resource.findAll()
+          .flatMap(resourceDirectory => resourceDirectory.getElementDirectory())
+          .filter(Boolean)
+          .flatMap(elementDirectory =>
+            elementDirectory!.findAll().flatMap(
+              elementJsonFile => elementJsonFile.findAll(),
+            ),
+          ),
+      )
+    }
+
+    dispose(): void {
+      this.resourceFindAllSignal.dispose()
+    }
+  }
+
+  export function create(module: Module, rustProduct: RustProduct): Product {
+    return new ProductImpl(module, rustProduct)
+  }
+}

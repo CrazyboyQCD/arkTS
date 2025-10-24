@@ -47,6 +47,7 @@
     "release": "pnpm publish"
   },
   "dependencies": {
+    "@arkts/project-detector": "catalog:prod",
     "@arkts/shared": "workspace:*",
     "@arkts/types": "workspace:*",
     "@types/vscode": "catalog:dev",
@@ -55,7 +56,9 @@
     "fast-glob": "catalog:dev",
     "image-type": "^6.0.0",
     "json5": "catalog:prod",
-    "ts-macro": "^0.3.4",
+    "mitt": "catalog:prod",
+    "ohos-typescript": "workspace:*",
+    "ts-macro": "catalog:dev",
     "vscode-languageserver-textdocument": "catalog:prod",
     "vscode-languageserver-types": "catalog:prod",
     "vscode-uri": "catalog:prod"

@@ -32,7 +32,8 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 10.17.0
-          run_install: true
+          run_install: |
+            - args: ['--force']
 
       - name: Run Lint
         run: pnpm run lint

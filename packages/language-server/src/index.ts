@@ -1,10 +1,11 @@
 import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
-import { createConnection, createServer, createTypeScriptProject } from '@volar/language-server/node'
+import { createArkTServices, ProjectDetectorManager } from '@arkts/language-service'
+import { Uri } from '@arkts/project-detector'
+import { createConnection, createServer, createTypeScriptProject, FileChangeType } from '@volar/language-server/node'
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
-import { URI } from 'vscode-uri'
 import { LanguageServerConfigManager } from './classes/config-manager'
 import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
@@ -12,7 +13,6 @@ import { logger } from './logger'
 const connection = createConnection()
 const server = createServer(connection)
 const lspConfiguration = new LanguageServerConfigManager(logger)
-export type SealizableTextDocument = Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string }
 
 logger.getConsola().info(`ETS Language Server is running: (pid: ${process.pid})`)
 
@@ -33,11 +33,6 @@ connection.onDidChangeConfiguration((params) => {
   }
 })
 
-// TODO: 监听文件变更
-// connection.onDidChangeWatchedFiles((params) => {
-//   logger.getConsola().info('Watched files changed:', JSON.stringify(params))
-// })
-
 ResourceWatcher.from(connection)
 
 connection.onInitialize(async (params) => {
@@ -52,14 +47,32 @@ connection.onInitialize(async (params) => {
 
   const tsdk = lspConfiguration.getTypeScriptTsdk()
 
-  // 获取项目根目录和 SDK 路径
-  const projectRoot = params.workspaceFolders?.[0]?.uri
-    ? URI.parse(params.workspaceFolders[0].uri).fsPath
-    : process.cwd()
-  const sdkPath = lspConfiguration.getSdkPath()
-  logger.getConsola().info('Server initialization - Project root:', projectRoot)
-  logger.getConsola().info('Server initialization - SDK path:', sdkPath)
-  logger.getConsola().info('Server initialization - Workspace folders:', params.workspaceFolders)
+  const projectDetectorManager = ProjectDetectorManager.create(params.workspaceFolders?.map(folder => folder.uri) ?? [])
+  connection.onDidChangeWatchedFiles((e) => {
+    try {
+      for (const file of e.changes) {
+        switch (file.type) {
+          case FileChangeType.Changed:
+            projectDetectorManager.emit('file-changed', Uri.file(file.uri))
+            break
+          case FileChangeType.Created:
+            projectDetectorManager.emit('file-created', Uri.file(file.uri))
+            break
+          case FileChangeType.Deleted:
+            projectDetectorManager.emit('file-deleted', Uri.file(file.uri))
+            break
+        }
+      }
+    }
+    catch (error) {
+      logger.getConsola().error('Error in change watched files handler:', error)
+      console.error(error)
+      // eslint-disable-next-line no-console
+      console.trace(error)
+    }
+  })
+
+  const arkTSServices = await createArkTServices(projectDetectorManager, ets, lspConfiguration)
   const typescriptServices = createTypeScriptServices(ets as unknown as typeof import('typescript'), {
     isValidationEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
     isSuggestionsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
@@ -67,10 +80,7 @@ connection.onInitialize(async (params) => {
     isFormattingEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
   })
 
-  // connection.onDidChangeWatchedFiles((params) => {
-  //   for (const change of params.changes)
-  //     workspaceDetector.updateFile(URI.parse(change.uri))
-  // })
+  connection.onRequest('ets/onDidChangeTextDocument', () => {})
 
   return server.initialize(
     params,
@@ -95,6 +105,7 @@ connection.onInitialize(async (params) => {
     }),
     [
       ...typescriptServices,
+      ...arkTSServices,
     ],
   )
 })
@@ -102,6 +113,3 @@ connection.onInitialize(async (params) => {
 connection.listen()
 connection.onInitialized(server.initialized)
 connection.onShutdown(server.shutdown)
-
-// 调试日志：LSP 服务已启动
-logger.getConsola().info('ETS Language Server fully initialized with resource definition support')

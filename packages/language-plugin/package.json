@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@volar/language-core": "catalog:prod",
-    "ts-macro": "^0.3.6",
+    "ts-macro": "catalog:dev",
     "vscode-uri": "catalog:prod"
   }
 }
