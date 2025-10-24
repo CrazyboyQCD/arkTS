@@ -1,4 +1,4 @@
-import type { EtsServerClientOptions } from '@arkts/shared'
+import type { EtsServerClientOptions, SealizableTextDocument } from '@arkts/shared'
 import type { LabsInfo } from '@volar/vscode'
 import type { LanguageClientOptions, ServerOptions } from '@volar/vscode/node'
 import * as serverProtocol from '@volar/language-server/protocol'
@@ -159,7 +159,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       vscode.workspace.onDidChangeTextDocument((textDocumentChangeEvent) => {
         // ⚠️ Performance: only send file:// scheme text documents
         if (textDocumentChangeEvent.document.uri.scheme !== 'file') return
-        const textDocument: Omit<import('vscode-languageserver-textdocument').TextDocument, 'getText' | 'positionAt' | 'offsetAt' | 'lineCount'> & { text: string } = {
+        const textDocument: SealizableTextDocument = {
           uri: textDocumentChangeEvent.document.uri.toString(),
           languageId: textDocumentChangeEvent.document.languageId,
           version: textDocumentChangeEvent.document.version,

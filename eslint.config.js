@@ -14,6 +14,7 @@ export default antfu({
     'ts/method-signature-style': ['error', 'method'],
     'antfu/if-newline': 'off',
     'naily/if-oneline': 'error',
+    'ts/no-redeclare': 'off',
   },
   plugins: {
     naily: {

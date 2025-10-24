@@ -18,6 +18,7 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
+
 @Entry
 @Component
 struct Index {
@@ -31,11 +32,11 @@ struct Index {
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)
-          .fontColor($r('app.color.primary_color'))
+          .fontColor($r('app.string.EntryAbility_desc'))
 
         Text($r('app.string.welcome_message'))
           .fontSize(20)
-          .fontColor($r('sys.symbol.a_3fingers_slash'))
+          .fontColor($r('app.color.primary_color'))
           .margin({ top: 10 })
 
         Text(this.message)

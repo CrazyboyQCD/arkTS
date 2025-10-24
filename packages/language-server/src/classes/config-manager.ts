@@ -1,11 +1,13 @@
-import type { EtsServerClientOptions, LanguageServerLogger } from '@arkts/shared'
+import type { EtsServerClientOptions, LanguageServerConfigurator, LanguageServerLogger } from '@arkts/shared'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
+import { SysResource } from '@arkts/shared'
 import { loadTsdkByPath } from '@volar/language-server/node'
 import defu from 'defu'
 import * as ets from 'ohos-typescript'
 
-export class LanguageServerConfigManager {
+export class LanguageServerConfigManager implements LanguageServerConfigurator {
   constructor(private readonly logger: LanguageServerLogger) {}
 
   private config: EtsServerClientOptions = {
@@ -61,6 +63,7 @@ export class LanguageServerConfigManager {
   setSdkPath(sdkPath: string): this {
     this.logger.getConsola().info(`ohos.sdkPath changed: new: ${sdkPath}, old: ${this.config.ohos.sdkPath}`)
     this.config.ohos.sdkPath = sdkPath
+    this.getSysResource(true)
     return this
   }
 
@@ -258,6 +261,29 @@ export class LanguageServerConfigManager {
       }
     }
     return finalCompilerOptions
+  }
+
+  getSysResourcePath(): string {
+    return path.resolve(this.getSdkPath(), 'ets', 'build-tools', 'ets-loader', 'sysResource.js')
+  }
+
+  private cachedSysResource: SysResource | null = null
+
+  getSysResource(force: boolean = false): SysResource | null {
+    try {
+      if (this.cachedSysResource && !force) return this.cachedSysResource
+      const sysResourcePath = this.getSysResourcePath()
+      const require = createRequire(import.meta.url)
+      const sysResource = require(sysResourcePath)
+      if (!SysResource.is(sysResource)) return null
+      this.cachedSysResource = sysResource
+      this.logger.getConsola().info(`Sys resource loaded successfully, path: ${sysResourcePath}`)
+      return this.cachedSysResource
+    }
+    catch (error) {
+      this.logger.getConsola().error(`Failed to load sys resource: ${error}`)
+      return null
+    }
   }
 
   getTsConfig(originalSettings: ets.CompilerOptions): ets.CompilerOptions {

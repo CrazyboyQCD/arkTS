@@ -4,8 +4,9 @@ export default defineConfig({
   entry: ['./src/index.ts', './src/vscode.ts'],
   outDir: './out',
   format: ['cjs', 'esm'],
-  sourcemap: true,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   clean: true,
   external: ['vscode'],
 })
