@@ -307,7 +307,7 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
           label: jsonFormat,
           kind: CompletionItemKind.Value,
           detail: jsonFormat,
-          insertText: stringLiteralText ? split[1] : jsonFormat,
+          insertText: (stringLiteralText && split.length > 1) ? split[1] : jsonFormat,
         })
       }
 
@@ -341,7 +341,7 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
             label: sysEtsFormat,
             kind: CompletionItemKind.Value,
             detail: sysEtsFormat,
-            insertText: firstArgumentText ? split[1] : sysEtsFormat,
+            insertText: (firstArgumentText && split.length > 1) ? split[1] : sysEtsFormat,
           })
         }
       }
@@ -356,7 +356,7 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
             label: etsFormat,
             kind: CompletionItemKind.Value,
             detail: etsFormat,
-            insertText: firstArgumentText ? split[1] : etsFormat,
+            insertText: (firstArgumentText && split.length > 1) ? split[1] : etsFormat,
           })
         }
       }
