@@ -82,6 +82,6 @@ export class ContextUtil {
       .filter(m => m.matchLength > 0)
       .sort((a, b) => b.matchLength - a.matchLength)
 
-    return matches[0].folder.toString()
+    return matches[0]?.folder.toString()
   }
 }
