@@ -356,7 +356,7 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
             label: etsFormat,
             kind: CompletionItemKind.Value,
             detail: etsFormat,
-            insertText: (firstArgumentText && split.length > 1) ? split[1] : etsFormat,
+            insertText: split[1] ?? etsFormat,
           })
         }
       }
