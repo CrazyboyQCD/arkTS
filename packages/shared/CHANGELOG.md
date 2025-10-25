@@ -1,5 +1,11 @@
 # @arkts/shared
 
+## 1.0.9
+
+### Patch Changes
+
+- f7e47c6: 添加媒体文件夹、profile 文件夹等相关跳转警告 (#167)
+
 ## 1.0.8
 
 ### Patch Changes

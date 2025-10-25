@@ -1,5 +1,13 @@
 # @arkts/language-server
 
+## 1.1.4
+
+### Patch Changes
+
+- f7e47c6: 添加媒体文件夹、profile 文件夹等相关跳转警告 (#167)
+- Updated dependencies [f7e47c6]
+  - @arkts/language-service@1.1.2
+
 ## 1.1.3
 
 ### Patch Changes
