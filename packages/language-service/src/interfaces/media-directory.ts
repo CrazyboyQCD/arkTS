@@ -7,7 +7,7 @@ export interface MediaDirectory {
 }
 
 export namespace MediaDirectory {
-  export class MediaDirectoryImpl implements MediaDirectory {
+  class MediaDirectoryImpl implements MediaDirectory {
     constructor(
       private readonly resourceDirectory: ResourceDirectory,
       private readonly rustMediaDirectory: RustMediaDirectory,
