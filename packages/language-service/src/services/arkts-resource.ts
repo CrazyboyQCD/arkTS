@@ -301,13 +301,13 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
       const uniqueJsonFormats = [...new Set(currentProduct.findReference().map(reference => reference.toJsonFormat()))]
       for (const jsonFormat of uniqueJsonFormats) {
         if (!jsonFormat.startsWith(stringLiteralText)) continue
-        const splitted = jsonFormat.split(stringLiteralText)
+        const split = jsonFormat.split(stringLiteralText)
 
         items.push({
           label: jsonFormat,
           kind: CompletionItemKind.Value,
           detail: jsonFormat,
-          insertText: stringLiteralText ? splitted[1] : jsonFormat,
+          insertText: stringLiteralText ? split[1] : jsonFormat,
         })
       }
 
@@ -335,13 +335,13 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
 
       if (!firstArgumentText.startsWith('app')) {
         for (const sysEtsFormat of sysEtsFormats) {
-          const splitted = sysEtsFormat.split(firstArgumentText)
-          if (splitted.length < 2) continue
+          const split = sysEtsFormat.split(firstArgumentText)
+          if (split.length < 2) continue
           items.push({
             label: sysEtsFormat,
             kind: CompletionItemKind.Value,
             detail: sysEtsFormat,
-            insertText: firstArgumentText ? splitted[1] : sysEtsFormat,
+            insertText: firstArgumentText ? split[1] : sysEtsFormat,
           })
         }
       }
@@ -349,14 +349,14 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
       if (!firstArgumentText.startsWith('sys')) {
         const uniqueEtsFormats = [...new Set(product.findReference().map(reference => reference.toEtsFormat()))]
         for (const etsFormat of uniqueEtsFormats) {
-          const splitted = etsFormat.split(firstArgumentText)
-          if (splitted.length < 2) continue
+          const split = etsFormat.split(firstArgumentText)
+          if (split.length < 2) continue
 
           items.push({
             label: etsFormat,
             kind: CompletionItemKind.Value,
             detail: etsFormat,
-            insertText: firstArgumentText ? splitted[1] : etsFormat,
+            insertText: firstArgumentText ? split[1] : etsFormat,
           })
         }
       }
