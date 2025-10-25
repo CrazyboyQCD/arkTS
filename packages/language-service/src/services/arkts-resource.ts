@@ -472,7 +472,6 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
           const elementReferences = product?.findElementReference() ?? []
           const mediaReferences = product?.findMediaReference() ?? []
           const profileReferences = product?.findProfileReference() ?? []
-          console.warn(profileReferences.map(reference => reference.toEtsFormat()), 'profileReferences')
           const etsFormats = [
             ...new Set(elementReferences.map(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat())),
             ...new Set(mediaReferences.map(reference => reference.toEtsFormat())),
