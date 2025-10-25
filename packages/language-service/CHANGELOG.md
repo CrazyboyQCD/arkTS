@@ -1,5 +1,11 @@
 # @arkts/language-service
 
+## 1.1.3
+
+### Patch Changes
+
+- 1f5690f: feat: 优化资源跳转性能，合并重复代码逻辑
+
 ## 1.1.2
 
 ### Patch Changes
