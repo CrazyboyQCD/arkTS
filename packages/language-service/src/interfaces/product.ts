@@ -16,6 +16,7 @@ export interface Product extends Disposable {
   findElementReference(): ElementJsonFileReference[]
   findMediaReference(): MediaReference[]
   findProfileReference(): ProfileReference[]
+  findReference(): (ElementJsonFileReference | MediaReference | ProfileReference)[]
 }
 
 export namespace Product {
@@ -85,6 +86,14 @@ export namespace Product {
           )
         },
       )
+    }
+
+    findReference(): (ElementJsonFileReference | MediaReference | ProfileReference)[] {
+      return [
+        ...this.findElementReference(),
+        ...this.findMediaReference(),
+        ...this.findProfileReference(),
+      ].filter(Boolean) as (ElementJsonFileReference | MediaReference | ProfileReference)[]
     }
 
     dispose(): void {

@@ -35,7 +35,7 @@
 - 📦 1.x版本开始支持安装和管理`OpenHarmony SDK`，并且支持根据当前打开的项目自动探测`API版本`，发出弹窗提示`下载`或`切换`
 - ✨ 1.x版本开始支持`.ets`文件的`代码格式化`和`大纲`展示功能
 - ✂️ 支持和`TypeScript`一样的`snippets`，并且添加了`Struct Declaration`等`ArkTS`独有的`Snippets`
-- 🆓 `$r`，`$rawfile` 补全、`hilog`日志等功能正在计划支持的路上，欢迎PR👀
+- 🥇 1.1.6+ 版本开始支持完美的 `$r` 函数补全和跳转、支持 `module.json5` 文件的补全和跳转、`resources/element/` 下所有`json`文件点击查询全局引用；由 [@arkts/project-detector](https://github.com/ohosvscode/project-detector) hvigor项目分析器提供强力支撑 ✊
 
 ## 食用方法 📖
 
