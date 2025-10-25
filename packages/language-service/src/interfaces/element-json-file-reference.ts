@@ -1,9 +1,12 @@
-import type { ElementJsonFileReference as RustElementJsonFileReference } from '@arkts/project-detector'
+import type { ElementJsonFileReference as RustElementJsonFileReference, Uri } from '@arkts/project-detector'
 import type { ElementJsonFile } from './element-json-file'
 
 export interface ElementJsonFileReference {
   getElementJsonFile(): ElementJsonFile
   getUnderlyingElementJsonFileReference(): RustElementJsonFileReference
+  toEtsFormat(): `app.${string}.${string}`
+  toJsonFormat(): `$${string}:${string}`
+  getUri(): Uri
 }
 
 export namespace ElementJsonFileReference {
@@ -19,6 +22,18 @@ export namespace ElementJsonFileReference {
 
     getUnderlyingElementJsonFileReference(): RustElementJsonFileReference {
       return this.rustElementJsonFileReference
+    }
+
+    toEtsFormat(): `app.${string}.${string}` {
+      return this.rustElementJsonFileReference.toEtsFormat()
+    }
+
+    toJsonFormat(): `$${string}:${string}` {
+      return this.rustElementJsonFileReference.toJsonFormat()
+    }
+
+    getUri(): Uri {
+      return this.rustElementJsonFileReference.getElementJsonFile().getUri()
     }
   }
 

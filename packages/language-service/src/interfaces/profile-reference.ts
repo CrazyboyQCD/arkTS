@@ -38,6 +38,10 @@ export namespace ProfileReference {
     }
   }
 
+  export function is(value: unknown): value is ProfileReference {
+    return value instanceof ProfileReferenceImpl
+  }
+
   export function create(uri: Uri, profileDirectory: ProfileDirectory): ProfileReference {
     return new ProfileReferenceImpl(uri, profileDirectory)
   }

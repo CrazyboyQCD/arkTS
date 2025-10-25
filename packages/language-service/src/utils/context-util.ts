@@ -67,4 +67,21 @@ export class ContextUtil {
     if (ets && !ets.isSourceFile(virtualCode.ast as ets.Node)) return null
     return virtualCode.ast as ets.SourceFile
   }
+
+  getWorkspaceFolderForDocument(uri: string, workspaceFolders: URI[] = this.context.env.workspaceFolders): string | undefined {
+    if (!workspaceFolders?.length) return undefined
+
+    const docUri = URI.parse(uri)
+    const matches = workspaceFolders
+      .map(folder => ({
+        folder,
+        matchLength: docUri.toString().startsWith(folder.toString())
+          ? folder.toString().length
+          : 0,
+      }))
+      .filter(m => m.matchLength > 0)
+      .sort((a, b) => b.matchLength - a.matchLength)
+
+    return matches[0].folder.toString()
+  }
 }
