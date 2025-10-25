@@ -1,5 +1,12 @@
 # @arkts/language-server
 
+## 1.1.5
+
+### Patch Changes
+
+- Updated dependencies [1f5690f]
+  - @arkts/language-service@1.1.3
+
 ## 1.1.4
 
 ### Patch Changes
