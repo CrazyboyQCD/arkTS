@@ -4,6 +4,8 @@ import type { ElementJsonFileReference } from './element-json-file-reference'
 import type { Module } from './module'
 import { Resource as RustResource } from '@arkts/project-detector'
 import { UriUtil } from '../utils/uri-util'
+import { MediaReference } from './media-reference'
+import { ProfileReference } from './profile-reference'
 import { Resource } from './resource'
 
 export interface Product extends Disposable {
@@ -12,6 +14,8 @@ export interface Product extends Disposable {
   findAll(): Resource[]
   findByUri(uri: string): Resource | undefined
   findElementReference(): ElementJsonFileReference[]
+  findMediaReference(): MediaReference[]
+  findProfileReference(): ProfileReference[]
 }
 
 export namespace Product {
@@ -50,6 +54,36 @@ export namespace Product {
               elementJsonFile => elementJsonFile.findAll(),
             ),
           ),
+      )
+    }
+
+    findMediaReference(): MediaReference[] {
+      return this.findAll().flatMap(
+        (resource) => {
+          return resource.findAll().flatMap(
+            (resourceDirectory) => {
+              const mediaDirectory = resourceDirectory.getMediaDirectory()
+              if (!mediaDirectory) return []
+              return mediaDirectory.getUnderlyingMediaDirectory()
+                .findAll()
+                .map(mediaUri => MediaReference.create(mediaUri, mediaDirectory))
+            },
+          )
+        },
+      )
+    }
+
+    findProfileReference(): ProfileReference[] {
+      return this.findAll().flatMap(
+        (resource) => {
+          return resource.findAll().flatMap(
+            (resourceDirectory) => {
+              const profileDirectory = resourceDirectory.getProfileDirectory()
+              if (!profileDirectory) return []
+              return profileDirectory.getUnderlyingProfileDirectory().findAll().map(profileUri => ProfileReference.create(profileUri, profileDirectory))
+            },
+          )
+        },
       )
     }
 

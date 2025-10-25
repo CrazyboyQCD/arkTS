@@ -18,7 +18,6 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
-
 @Entry
 @Component
 struct Index {

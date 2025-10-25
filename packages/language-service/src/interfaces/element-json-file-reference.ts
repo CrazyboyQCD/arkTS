@@ -22,6 +22,10 @@ export namespace ElementJsonFileReference {
     }
   }
 
+  export function is(value: unknown): value is ElementJsonFileReference {
+    return value instanceof ElementJsonFileReferenceImpl
+  }
+
   export function create(elementJsonFile: ElementJsonFile, rustElementJsonFileReference: RustElementJsonFileReference): ElementJsonFileReference {
     return new ElementJsonFileReferenceImpl(elementJsonFile, rustElementJsonFileReference)
   }

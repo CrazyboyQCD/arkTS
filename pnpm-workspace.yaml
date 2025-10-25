@@ -44,23 +44,23 @@ catalogs:
     reflect-metadata: ^0.2.2
   prod:
     '@arkts/headless-jsonrpc': ^0.0.9
-    '@arkts/project-detector': ^1.1.3-alpha.25
-    '@arkts/project-detector-android-arm-eabi': ^1.1.3-alpha.25
-    '@arkts/project-detector-android-arm64': ^1.1.3-alpha.25
-    '@arkts/project-detector-darwin-arm64': ^1.1.3-alpha.25
-    '@arkts/project-detector-darwin-x64': ^1.1.3-alpha.25
-    '@arkts/project-detector-freebsd-x64': ^1.1.3-alpha.25
-    '@arkts/project-detector-linux-arm-gnueabihf': ^1.1.3-alpha.25
-    '@arkts/project-detector-linux-arm64-gnu': ^1.1.3-alpha.25
-    '@arkts/project-detector-linux-arm64-musl': ^1.1.3-alpha.25
-    '@arkts/project-detector-linux-x64-gnu': ^1.1.3-alpha.25
-    '@arkts/project-detector-linux-x64-musl': ^1.1.3-alpha.25
-    '@arkts/project-detector-openharmony-arm64': ^1.1.3-alpha.25
-    '@arkts/project-detector-openharmony-x64': ^1.1.3-alpha.25
-    '@arkts/project-detector-wasm32-wasi': ^1.1.3-alpha.25
-    '@arkts/project-detector-win32-arm64-msvc': ^1.1.3-alpha.25
-    '@arkts/project-detector-win32-ia32-msvc': ^1.1.3-alpha.25
-    '@arkts/project-detector-win32-x64-msvc': ^1.1.3-alpha.25
+    '@arkts/project-detector': ^1.1.3-alpha.29
+    '@arkts/project-detector-android-arm-eabi': ^1.1.3-alpha.29
+    '@arkts/project-detector-android-arm64': ^1.1.3-alpha.29
+    '@arkts/project-detector-darwin-arm64': ^1.1.3-alpha.29
+    '@arkts/project-detector-darwin-x64': ^1.1.3-alpha.29
+    '@arkts/project-detector-freebsd-x64': ^1.1.3-alpha.29
+    '@arkts/project-detector-linux-arm-gnueabihf': ^1.1.3-alpha.29
+    '@arkts/project-detector-linux-arm64-gnu': ^1.1.3-alpha.29
+    '@arkts/project-detector-linux-arm64-musl': ^1.1.3-alpha.29
+    '@arkts/project-detector-linux-x64-gnu': ^1.1.3-alpha.29
+    '@arkts/project-detector-linux-x64-musl': ^1.1.3-alpha.29
+    '@arkts/project-detector-openharmony-arm64': ^1.1.3-alpha.29
+    '@arkts/project-detector-openharmony-x64': ^1.1.3-alpha.29
+    '@arkts/project-detector-wasm32-wasi': ^1.1.3-alpha.29
+    '@arkts/project-detector-win32-arm64-msvc': ^1.1.3-alpha.29
+    '@arkts/project-detector-win32-ia32-msvc': ^1.1.3-alpha.29
+    '@arkts/project-detector-win32-x64-msvc': ^1.1.3-alpha.29
     '@arkts/sdk-downloader': ^0.1.29
     '@napi-rs/wasm-runtime': ^1.0.7
     '@types/lodash': ^4.17.20
