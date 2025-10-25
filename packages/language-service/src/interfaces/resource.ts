@@ -1,8 +1,10 @@
 import type { DisposableSignal, Resource as RustResource } from '@arkts/project-detector'
 import type { Disposable } from 'vscode'
 import type { Product } from './product'
-import { ResourceDirectory as RustResourceDirectory } from '@arkts/project-detector'
+import { RawfileDirectory as RustRawfileDirectory, ResfileDirectory as RustResfileDirectory, ResourceDirectory as RustResourceDirectory } from '@arkts/project-detector'
 import { UriUtil } from '../utils/uri-util'
+import { RawfileDirectory } from './rawfile-directory'
+import { ResfileDirectory } from './resfile-directory'
 import { ResourceDirectory } from './resource-directory'
 
 export interface Resource extends Disposable {
@@ -15,11 +17,15 @@ export interface Resource extends Disposable {
 export namespace Resource {
   class ResourceImpl implements Resource {
     private readonly findAllSignal: DisposableSignal<RustResourceDirectory[]>
+    private readonly rawfileDirectorySignal: DisposableSignal<RustRawfileDirectory | null>
+    private readonly resfileDirectorySignal: DisposableSignal<RustResfileDirectory | null>
     constructor(
       private readonly product: Product,
       private readonly rustResource: RustResource,
     ) {
       this.findAllSignal = RustResourceDirectory.findAll(this.rustResource)
+      this.rawfileDirectorySignal = RustRawfileDirectory.from(this.rustResource)
+      this.resfileDirectorySignal = RustResfileDirectory.from(this.rustResource)
     }
 
     getProduct(): Product {
@@ -32,6 +38,14 @@ export namespace Resource {
 
     findByUri(uri: string): ResourceDirectory | undefined {
       return this.findAll().find(resourceDirectory => UriUtil.isContains(uri, resourceDirectory.getUnderlyingResourceDirectory().getUri()))
+    }
+
+    getRawfileDirectory(): RawfileDirectory | null {
+      return RawfileDirectory.create(this, this.rawfileDirectorySignal())
+    }
+
+    getResfileDirectory(): ResfileDirectory | null {
+      return ResfileDirectory.create(this, this.resfileDirectorySignal())
     }
 
     getUnderlyingResource(): RustResource {

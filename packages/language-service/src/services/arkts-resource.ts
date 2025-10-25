@@ -114,15 +114,14 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
     }
 
     async function findLocationLinkInModuleJson5(): Promise<LocationLink[]> {
-      const moduleJson5Path = projectDetectorManager.findByUri(decodedUri.toString())
+      const product = projectDetectorManager.findByUri(decodedUri.toString())
         ?.findByUri(decodedUri.toString())
         ?.findByUri(decodedUri.toString())
         ?.findByUri(decodedUri.toString())
-        ?.getUnderlyingProduct()
-        ?.getModuleJson5Path()
-      if (!moduleJson5Path) return []
+      const moduleJson5Path = product?.getUnderlyingProduct()?.getModuleJson5Path()
+      if (!moduleJson5Path || !product) return []
       if (moduleJson5Path.toString() !== decodedUri.toString()) return []
-      const content = await ctx.env.fs?.readFile(URI.parse(moduleJson5Path.toString())) ?? ''
+      const content = document.getText()
       const sourceFile = ets.parseJsonText(moduleJson5Path.toString(), content)
       const stringLiterals: ets.StringLiteral[] = []
       sourceFile.forEachChild(function walk(node: ets.Node): void {
@@ -136,27 +135,74 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
         return startPosition.line <= position.line && endPosition.line >= position.line && startPosition.character <= position.character && endPosition.character >= position.character
       })
       if (!currentStringLiteral) return []
-      return queryElementJsonFileReference()
-        .filter(reference => reference.getUnderlyingElementJsonFileReference().toJsonFormat() === currentStringLiteral.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, ''))
-        .map((reference) => {
-          const elementJsonFile = reference.getElementJsonFile().getUnderlyingElementJsonFile()
-          const jsonTextDocument = TextDocument.create(elementJsonFile.getUri().toString(), 'json', 0, elementJsonFile.getContent())
-          return {
-            targetUri: elementJsonFile.getUri().toString(),
-            targetRange: Range.create(
-              jsonTextDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
-              jsonTextDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
-            ),
-            targetSelectionRange: Range.create(
-              jsonTextDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
-              jsonTextDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
-            ),
-            originSelectionRange: Range.create(
-              document.positionAt(currentStringLiteral.getStart(sourceFile) + 1),
-              document.positionAt(currentStringLiteral.getEnd() - 1),
-            ),
-          }
+      const definitions: LocationLink[] = []
+      const elementReferences = queryElementJsonFileReference(product)
+      const mediaReferences = product?.findMediaReference() ?? []
+      const profileReferences = product?.findProfileReference() ?? []
+
+      for (const elementReference of elementReferences) {
+        if (elementReference.getUnderlyingElementJsonFileReference().toJsonFormat() !== currentStringLiteral.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')) continue
+        const elementJsonFile = elementReference.getElementJsonFile().getUnderlyingElementJsonFile()
+        const content = elementJsonFile.getContent()
+        const textDocument = TextDocument.create(elementJsonFile.getUri().toString(), 'json', 0, content)
+        definitions.push({
+          targetUri: elementJsonFile.getUri().toString(),
+          targetRange: Range.create(
+            textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
+            textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
+          ),
+          targetSelectionRange: Range.create(
+            textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
+            textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
+          ),
+          originSelectionRange: Range.create(
+            document.positionAt(currentStringLiteral.getStart(sourceFile) + 1),
+            document.positionAt(currentStringLiteral.getEnd() - 1),
+          ),
         })
+      }
+
+      for (const mediaReference of mediaReferences) {
+        if (mediaReference.toJsonFormat() !== currentStringLiteral.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')) continue
+        const mediaDirectoryUri = mediaReference.getUri()
+        definitions.push({
+          targetUri: mediaDirectoryUri.toString(),
+          targetRange: Range.create(
+            Position.create(0, 0),
+            Position.create(0, 0),
+          ),
+          targetSelectionRange: Range.create(
+            Position.create(0, 0),
+            Position.create(0, 0),
+          ),
+          originSelectionRange: Range.create(
+            document.positionAt(currentStringLiteral.getStart(sourceFile) + 1),
+            document.positionAt(currentStringLiteral.getEnd() - 1),
+          ),
+        })
+      }
+
+      for (const profileReference of profileReferences) {
+        if (profileReference.toJsonFormat() !== currentStringLiteral.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')) continue
+        const profileDirectoryUri = profileReference.getUri()
+        definitions.push({
+          targetUri: profileDirectoryUri.toString(),
+          targetRange: Range.create(
+            Position.create(0, 0),
+            Position.create(0, 0),
+          ),
+          targetSelectionRange: Range.create(
+            Position.create(0, 0),
+            Position.create(0, 0),
+          ),
+          originSelectionRange: Range.create(
+            document.positionAt(currentStringLiteral.getStart(sourceFile) + 1),
+            document.positionAt(currentStringLiteral.getEnd() - 1),
+          ),
+        })
+      }
+
+      return definitions
     }
 
     function provideArktsDefinition(): LocationLink[] | null {
@@ -189,30 +235,78 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
       }
 
       if (scope === 'app') {
-        const references = queryElementJsonFileReference()
-        return references
-          .filter(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat() === firstArgumentText)
-          .map((reference) => {
-            const elementJsonFile = reference.getElementJsonFile().getUnderlyingElementJsonFile()
-            const content = elementJsonFile.getContent()
-            const textDocument = TextDocument.create(elementJsonFile.getUri().toString(), 'json', 0, content)
+        const definitions: LocationLink[] = []
+        const product = projectDetectorManager.findByUri(decodedUri.toString())
+          ?.findByUri(decodedUri.toString())
+          ?.findByUri(decodedUri.toString())
+          ?.findByUri(decodedUri.toString())
+        const elementReferences = queryElementJsonFileReference(product)
+        const mediaReferences = product?.findMediaReference() ?? []
+        const profileReferences = product?.findProfileReference() ?? []
 
-            return {
-              targetUri: elementJsonFile.getUri().toString(),
-              targetRange: Range.create(
-                textDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
-                textDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
-              ),
-              targetSelectionRange: Range.create(
-                textDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
-                textDocument.positionAt(reference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
-              ),
-              originSelectionRange: Range.create(
-                document.positionAt(currentCallExpression.arguments[0].getStart(sourceFile) + 1),
-                document.positionAt(currentCallExpression.arguments[0].getEnd() - 1),
-              ),
-            }
+        for (const elementReference of elementReferences) {
+          if (elementReference.getUnderlyingElementJsonFileReference().toEtsFormat() !== firstArgumentText) continue
+          const elementJsonFile = elementReference.getElementJsonFile().getUnderlyingElementJsonFile()
+          const content = elementJsonFile.getContent()
+          const textDocument = TextDocument.create(elementJsonFile.getUri().toString(), 'json', 0, content)
+          definitions.push({
+            targetUri: elementJsonFile.getUri().toString(),
+            targetRange: Range.create(
+              textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
+              textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
+            ),
+            targetSelectionRange: Range.create(
+              textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameStart() + 1),
+              textDocument.positionAt(elementReference.getUnderlyingElementJsonFileReference().getNameEnd() - 1),
+            ),
+            originSelectionRange: Range.create(
+              document.positionAt(currentCallExpression.arguments[0].getStart(sourceFile) + 1),
+              document.positionAt(currentCallExpression.arguments[0].getEnd() - 1),
+            ),
           })
+        }
+
+        for (const mediaReference of mediaReferences) {
+          if (mediaReference.toEtsFormat() !== firstArgumentText) continue
+          const mediaDirectoryUri = mediaReference.getUri()
+          definitions.push({
+            targetUri: mediaDirectoryUri.toString(),
+            targetRange: Range.create(
+              Position.create(0, 0),
+              Position.create(0, 0),
+            ),
+            targetSelectionRange: Range.create(
+              Position.create(0, 0),
+              Position.create(0, 0),
+            ),
+            originSelectionRange: Range.create(
+              document.positionAt(currentCallExpression.arguments[0].getStart(sourceFile) + 1),
+              document.positionAt(currentCallExpression.arguments[0].getEnd() - 1),
+            ),
+          })
+        }
+
+        for (const profileReference of profileReferences) {
+          if (profileReference.toEtsFormat() !== firstArgumentText) continue
+          const profileDirectoryUri = profileReference.getUri()
+          definitions.push({
+            targetUri: profileDirectoryUri.toString(),
+            targetRange: Range.create(
+              Position.create(0, 0),
+              Position.create(0, 0),
+            ),
+            targetSelectionRange: Range.create(
+              Position.create(0, 0),
+              Position.create(0, 0),
+            ),
+            originSelectionRange: Range.create(
+              document.positionAt(currentCallExpression.arguments[0].getStart(sourceFile) + 1),
+              document.positionAt(currentCallExpression.arguments[0].getEnd() - 1),
+            ),
+          })
+        }
+
+        return definitions
       }
 
       return []
@@ -282,12 +376,16 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
             }
 
             // 本地资源诊断
-            const references = projectDetectorManager.findByUri(decodedUri.toString())
+            const product = projectDetectorManager.findByUri(decodedUri.toString())
               ?.findByUri(decodedUri.toString())
               ?.findByUri(decodedUri.toString())
               ?.findByUri(decodedUri.toString())
-              ?.findElementReference() ?? []
-            const reference = references.find(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat() === resourceValue)
+            const references = [
+              ...new Set(product?.findMediaReference().map(reference => reference.toEtsFormat())),
+              ...new Set(product?.findElementReference().map(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat())),
+              ...new Set(product?.findProfileReference().map(reference => reference.toEtsFormat())),
+            ]
+            const reference = references.find(reference => reference === resourceValue)
             if (reference) continue
             diagnostics.push({
               message: `Resource ${resourceValue} not found in current scope.`,
@@ -333,10 +431,13 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
             const stringLiteralText = currentStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')
             if (!stringLiteralText) return null
             const items: CompletionItem[] = []
-            const jsonFormats = [...new Set(currentProduct.findElementReference().map(reference => reference.getUnderlyingElementJsonFileReference().toJsonFormat()))]
+            const jsonFormats = [
+              ...new Set(currentProduct.findMediaReference().map(reference => reference.toJsonFormat())),
+              ...new Set(currentProduct.findElementReference().map(reference => reference.getUnderlyingElementJsonFileReference().toJsonFormat())),
+              ...new Set(currentProduct.findProfileReference().map(reference => reference.toJsonFormat())),
+            ]
 
             for (const jsonFormat of jsonFormats) {
-              if (jsonFormat.startsWith('$color')) continue
               if (!jsonFormat.startsWith(stringLiteralText)) continue
               const spilted = jsonFormat.split(stringLiteralText)
 
@@ -364,12 +465,18 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
           const firstArgumentText = globalCallFinder.getFirstArgumentText(currentCallExpression, sourceFile) ?? ''
           const sysResource = config.getSysResource()
           const sysEtsFormats = sysResource ? SysResource.toEtsFormat(sysResource) : []
-          const elementReferences = projectDetectorManager.findByUri(decodedUri.toString())
+          const product = projectDetectorManager.findByUri(decodedUri.toString())
             ?.findByUri(decodedUri.toString())
             ?.findByUri(decodedUri.toString())
             ?.findByUri(decodedUri.toString())
-            ?.findElementReference() ?? []
-          const etsFormats = [...new Set(elementReferences.map(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat()))]
+          const elementReferences = product?.findElementReference() ?? []
+          const mediaReferences = product?.findMediaReference() ?? []
+          const profileReferences = product?.findProfileReference() ?? []
+          const etsFormats = [
+            ...new Set(elementReferences.map(reference => reference.getUnderlyingElementJsonFileReference().toEtsFormat())),
+            ...new Set(mediaReferences.map(reference => reference.toEtsFormat())),
+            ...new Set(profileReferences.map(reference => reference.toEtsFormat())),
+          ]
           const items: CompletionItem[] = []
 
           if (!firstArgumentText.startsWith('app')) {

@@ -8,3 +8,4 @@ shims.d.ts
 hilog.html
 scripts/
 test/
+vite.config.mts
