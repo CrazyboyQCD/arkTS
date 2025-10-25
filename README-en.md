@@ -32,7 +32,7 @@ This is an ArkTS VSCode extension developed based on Volar. 🌹 It appears that
   - All `color.json` files under `resources/element/` for kv value configuration
   - `main_pages.json5`
 - 📦 Starting from version 1.x, supports installation and management of `OpenHarmony SDK`, and automatically detects the `API version` of the currently opened project, showing popup prompts for `download` or `switch`
-- 🆓 `$r`, `$rawfile` completion, code formatting, `hilog` logging and other features are planned for future support. PRs are welcomed 👀
+- 🥇 Starting from version 1.1.6+, supports perfect `$r` function completion and jump, supports `module.json5` file completion and jump, supports global reference query for all `json` files under `resources/element/`; supported by [@arkts/project-detector](https://github.com/ohosvscode/project-detector) hvigor project analyzer ✊
 
 ![Screenshot](./screenshots/edit.gif)
 

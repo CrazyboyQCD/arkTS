@@ -29,10 +29,10 @@
   - `oh-package.json5` 模块级别/项目级别配置
   - `module.json5` 模块级别/项目级别配置
   - `code-linter.json5` 模块级别/项目级别配置
-  - `resources/element/`下所有的`color.json`等的kv值配置
+  - `resources/element/`下所有的`color.json`、`string.json`等的kv值配置
   - `main_pages.json5`
 - 📦 1.x版本开始支持安装和管理`OpenHarmony SDK`，并且支持根据当前打开的项目自动探测`API版本`，发出弹窗提示`下载`或`切换`
-- 🆓 `$r`，`$rawfile` 补全、代码格式化、`hilog`日志等功能正在计划支持的路上，欢迎PR👀
+- 🥇 1.1.6+ 版本开始支持完美的 `$r` 函数补全和跳转、支持 `module.json5` 文件的补全和跳转、`resources/element/` 下所有`json`文件点击查询全局引用；由 [@arkts/project-detector](https://github.com/ohosvscode/project-detector) hvigor项目分析器提供强力支撑 ✊
 
 ![截图](./screenshots/edit.gif)
 
