@@ -1,7 +1,10 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: './src/index.ts',
+  entry: {
+    index: './src/index.ts',
+    permission: './src/auth/permission.json',
+  },
   outDir: './out',
   format: ['cjs', 'esm'],
   sourcemap: true,

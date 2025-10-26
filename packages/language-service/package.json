@@ -27,6 +27,11 @@
       "import": "./out/index.mjs",
       "default": "./out/index.js"
     },
+    "./permission": {
+      "types": "./out/permission.d.ts",
+      "import": "./out/permission.mjs",
+      "default": "./out/permission.js"
+    },
     "./dist/*": "./dist/*"
   },
   "main": "out/index.js",
