@@ -363,13 +363,13 @@ export namespace ResourceProvider {
       if (currentRequestPermissionsStringLiteral) {
         for (const permissionName of Object.keys(permissions)) {
           if (!permissionName.startsWith(currentRequestPermissionsStringLiteralText)) continue
-          const split = permissionName.split(currentRequestPermissionsStringLiteralText)
+          const suffix = permissionName.slice(currentRequestPermissionsStringLiteralText.length)
 
           items.push({
             label: permissionName,
             kind: CompletionItemKind.Value,
             detail: permissions[permissionName].description,
-            insertText: (currentRequestPermissionsStringLiteralText && split.length > 1) ? split[1] : permissionName,
+            insertText: (currentRequestPermissionsStringLiteralText && permissionName.length > currentRequestPermissionsStringLiteralText.length) ? suffix : permissionName,
             documentation: {
               kind: MarkupKind.Markdown,
               value: `### ${permissions[permissionName].description}\n- 1️⃣ 权限级别: ${permissions[permissionName].level}\n- 🧀 权限类型: ${permissions[permissionName].type}\n- 🔑 授权方式: ${permissions[permissionName].grantMode}\n- 📦 起始版本: ${permissions[permissionName].startVersion}\n${permissions[permissionName].note ? `- 📝 其他说明: ${permissions[permissionName].note}` : ''}`,
