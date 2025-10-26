@@ -33,6 +33,7 @@ This is an ArkTS VSCode extension developed based on Volar. 🌹 It appears that
   - `main_pages.json5`
 - 📦 Starting from version 1.x, supports installation and management of `OpenHarmony SDK`, and automatically detects the `API version` of the currently opened project, showing popup prompts for `download` or `switch`
 - 🥇 Starting from version 1.1.6+, supports perfect `$r` function completion and jump, supports `module.json5` file completion and jump, supports global reference query for all `json` files under `resources/element/`; supported by [@arkts/project-detector](https://github.com/ohosvscode/project-detector) hvigor project analyzer ✊
+- 🍞 Starting from version 1.1.8+, supports `module.json5` file path completion and jump, reference expression error diagnosis and other new features ✨
 
 ![Screenshot](./screenshots/edit.gif)
 

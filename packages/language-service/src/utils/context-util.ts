@@ -11,6 +11,10 @@ export interface TSProvider {
 export class ContextUtil {
   constructor(private readonly context: LanguageServiceContext) {}
 
+  getContext(): LanguageServiceContext {
+    return this.context
+  }
+
   /**
    * 获取已有的`LanguageService`对象
    *
