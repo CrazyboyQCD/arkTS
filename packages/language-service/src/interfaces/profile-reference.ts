@@ -1,9 +1,9 @@
 import type { Uri } from '@arkts/project-detector'
 import type { ProfileDirectory } from './profile-directory'
+import type { ResourceReference } from './reference'
 import path from 'node:path'
 
-export interface ProfileReference {
-  getUri(): Uri
+export interface ProfileReference extends ResourceReference {
   getProfileDirectory(): ProfileDirectory
   getRawFileName(): string
   toEtsFormat(): `app.profile.${string}`
@@ -35,6 +35,14 @@ export namespace ProfileReference {
 
     getProfileDirectory(): ProfileDirectory {
       return this.profileDirectory
+    }
+
+    getStart(): number {
+      return 0
+    }
+
+    getEnd(): number {
+      return 0
     }
   }
 

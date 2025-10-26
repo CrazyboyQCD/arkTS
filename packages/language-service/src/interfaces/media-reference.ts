@@ -1,9 +1,9 @@
 import type { Uri } from '@arkts/project-detector'
 import type { MediaDirectory } from './media-directory'
+import type { ResourceReference } from './reference'
 import path from 'node:path'
 
-export interface MediaReference {
-  getUri(): Uri
+export interface MediaReference extends ResourceReference {
   getMediaDirectory(): MediaDirectory
   getRawFileName(): string
   toEtsFormat(): `app.media.${string}`
@@ -35,6 +35,14 @@ export namespace MediaReference {
 
     getMediaDirectory(): MediaDirectory {
       return this.mediaDirectory
+    }
+
+    getStart(): number {
+      return 0
+    }
+
+    getEnd(): number {
+      return 0
     }
   }
 

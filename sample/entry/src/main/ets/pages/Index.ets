@@ -65,7 +65,7 @@ struct Index {
         Column() {
           Row() {
             Text(item.toString())
-            Text().backgroundColor($r('app.color.start_window_background'))
+            Text().backgroundColor($r('app.color.secondary_color'))
           }
         }
       })
