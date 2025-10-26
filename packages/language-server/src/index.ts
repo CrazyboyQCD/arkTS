@@ -9,6 +9,7 @@ import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { LanguageServerConfigManager } from './classes/config-manager'
 import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
+import { patchSemantic } from './patches/patch-semantic'
 
 const connection = createConnection()
 const server = createServer(connection)
@@ -79,6 +80,7 @@ connection.onInitialize(async (params) => {
     isAutoClosingTagsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
     isFormattingEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
   })
+  patchSemantic(typescriptServices)
 
   connection.onRequest('ets/onDidChangeTextDocument', () => {})
 

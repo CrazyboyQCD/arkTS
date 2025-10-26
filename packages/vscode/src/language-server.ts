@@ -129,7 +129,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       outputChannel: this.getOutputChannel(),
       initializationOptions: {
         typescript: { tsdk: tsdk!.tsdk },
-        ohos: await sdkAnalyzer.toOhosClientOptions(force, tsdk?.tsdk),
+        ohos: await sdkAnalyzer.toOhosClientOptions(force, tsdk!.tsdk),
         debug: vscode.workspace.getConfiguration('ets').get<boolean>('lspDebugMode'),
         ets: {
           resourceReferenceDiagnostic: vscode.workspace.getConfiguration('ets').get<'error' | 'warning' | 'none'>('resourceReferenceDiagnostic', 'error'),

@@ -19,7 +19,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
       etsLoaderPath: '',
       baseUrl: '',
       lib: [],
-      typeRoots: [],
       paths: {},
       relativeWithConfigFilePaths: {},
     },
@@ -166,16 +165,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     return this.config.ohos.lib || []
   }
 
-  setTypeRoots(typeRoots: string[]): this {
-    this.logger.getConsola().info(`ohos.typeRoots changed: new: ${typeRoots}, old: ${this.config.ohos.typeRoots}`)
-    this.config.ohos.typeRoots = typeRoots
-    return this
-  }
-
-  getTypeRoots(): string[] {
-    return this.config.ohos.typeRoots || []
-  }
-
   setPaths(paths: import('ohos-typescript').MapLike<string[]>): this {
     this.logger.getConsola().info(`ohos.paths changed: new: ${JSON.stringify(paths, null, 2)}, old: ${JSON.stringify(this.config.ohos.paths, null, 2)}`)
     this.config.ohos.paths = paths
@@ -215,26 +204,9 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     if (config.ohos?.paths) this.setPaths(config.ohos.paths)
     if (config.ohos?.relativeWithConfigFilePaths) this.setRelativeWithConfigFilePaths(config.ohos.relativeWithConfigFilePaths)
     if (config.ohos?.sdkPath) this.setSdkPath(config.ohos.sdkPath)
-    if (config.ohos?.typeRoots) this.setTypeRoots(config.ohos.typeRoots)
     if (config.typescript?.tsdk) this.setTypeScriptTsdk(config.typescript.tsdk)
     if (config.debug !== undefined) this.setDebug(config.debug)
     return this
-  }
-
-  private convertPaths<TCompilerOptions extends { paths?: import('ohos-typescript').MapLike<string[]>, [key: string]: any }>(compilerOptions: TCompilerOptions): TCompilerOptions {
-    if (typeof compilerOptions.configFilePath === 'string') {
-      const configFilePathDir = path.dirname(compilerOptions.configFilePath)
-      const baseUrl = this.getBaseUrl()
-
-      for (const mappingPath in compilerOptions.paths || {}) {
-        if (!Array.isArray(compilerOptions.paths?.[mappingPath])) continue
-
-        compilerOptions.paths[mappingPath] = compilerOptions.paths[mappingPath].map((p) => {
-          return path.isAbsolute(p) ? p : path.relative(baseUrl, path.resolve(configFilePathDir, p))
-        })
-      }
-    }
-    return compilerOptions
   }
 
   /**
@@ -286,16 +258,32 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     }
   }
 
+  private convertPaths<TCompilerOptions extends { paths?: import('ohos-typescript').MapLike<string[]>, [key: string]: any }>(compilerOptions: TCompilerOptions): TCompilerOptions {
+    if (typeof compilerOptions.configFilePath === 'string') {
+      const configFilePathDir = path.dirname(compilerOptions.configFilePath)
+      const baseUrl = this.getBaseUrl()
+
+      for (const mappingPath in compilerOptions.paths || {}) {
+        if (!Array.isArray(compilerOptions.paths?.[mappingPath])) continue
+
+        compilerOptions.paths[mappingPath] = compilerOptions.paths[mappingPath].map((p) => {
+          return path.isAbsolute(p) ? p : path.relative(baseUrl, path.resolve(configFilePathDir, p))
+        })
+      }
+    }
+    return compilerOptions
+  }
+
   getTsConfig(originalSettings: ets.CompilerOptions): ets.CompilerOptions {
     // 将 originalSettings.paths 中的路径转换为相对于 baseUrl 的路径，这样用户就仍然能使用tsconfig配置paths
     originalSettings = defu({ paths: this.getRelativeWithConfigFilePaths() }, originalSettings)
     originalSettings = this.convertPaths(originalSettings)
     const finalCompilerOptions = defu(originalSettings, {
       etsLoaderPath: this.getEtsLoaderPath(),
-      typeRoots: this.getTypeRoots(),
-      baseUrl: this.getBaseUrl(),
-      lib: this.getLib(),
       paths: this.getPaths(),
+      baseUrl: this.getBaseUrl(),
+      enableStrictCheckOHModule: true,
+      skipOhModulesLint: false,
       experimentalDecorators: true,
       emitDecoratorMetadata: true,
       strict: true,
@@ -305,6 +293,15 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
       moduleResolution: ets.ModuleResolutionKind.NodeNext,
       module: ets.ModuleKind.ESNext,
       target: ets.ScriptTarget.ESNext,
+      etsAnnotationsEnable: true,
+      compatibleSdkVersion: 20,
+      packageManagerType: 'ohpm',
+      alwaysStrict: true,
+      mixCompile: true,
+      tsImportSendableEnable: true,
+      ets: {
+        libs: this.getLib(),
+      } as ets.EtsOptions,
     } satisfies ets.CompilerOptions, this.getEtsLoaderConfigCompilerOptions())
     return this.fixTsConfig(finalCompilerOptions)
   }

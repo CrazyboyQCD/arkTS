@@ -314,12 +314,11 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
    * @returns {OhosClientOptions} The client options.
    * @throws {SdkAnalyzerException} If a path is not exists it will throw an error.
    */
-  async toOhosClientOptions(force: boolean = false, tsdk?: string): Promise<OhosClientOptions> {
+  async toOhosClientOptions(force: boolean = false, tsdk: string | undefined = undefined): Promise<OhosClientOptions> {
     const sdkPath = await this.getSdkUri(force)
     const etsComponentPath = await this.getEtsComponentFolder(force)
     const etsLoaderConfigPath = await this.getEtsLoaderConfigPath(force)
     const etsLoaderPath = vscode.Uri.joinPath(sdkPath, 'ets', 'build-tools', 'ets-loader')
-    const workspaceFolder = this.fileSystem.getCurrentWorkspaceDir()
 
     // Force load typescript default libs if tsdk is provided (For ArkTS)
     const typescriptDefaultLibs = [
@@ -401,15 +400,9 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
         ...(tsdk ? typescriptDefaultLibs.map(lib => path.join(tsdk, lib)) : []),
         ...fg.sync(declarationsLib, { onlyFiles: true, absolute: true }),
       ].filter(Boolean) as string[],
-      typeRoots: [
-        workspaceFolder ? vscode.Uri.joinPath(workspaceFolder, 'node_modules', '@types').fsPath : undefined,
-        workspaceFolder ? vscode.Uri.joinPath(workspaceFolder, 'oh_modules', '@types').fsPath : undefined,
-        vscode.Uri.joinPath(this.sdkUri, 'ets', 'api', '@internal').fsPath,
-      ].filter(Boolean) as string[],
       baseUrl: vscode.Uri.joinPath(sdkPath, 'ets').fsPath,
       paths: {
         '*': [
-          workspaceFolder ? vscode.Uri.joinPath(workspaceFolder, 'oh_modules', '*').fsPath : undefined,
           './api/*',
           './kits/*',
           './arkts/*',

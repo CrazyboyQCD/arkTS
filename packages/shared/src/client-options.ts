@@ -16,8 +16,6 @@ export interface OhosClientOptions {
   etsLoaderPath: string | undefined
   /** The libs of the SDK, and typescript compiler options. */
   lib: string[]
-  /** typeRoots for the typescript compiler. */
-  typeRoots: string[]
   /** The base url for the typescript compiler. */
   baseUrl: string
   /** The paths for the typescript compiler, will be original pass to typescript. */
