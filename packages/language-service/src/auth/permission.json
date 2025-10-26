@@ -1,0 +1,1216 @@
+{
+  "$schema": "./permission.schema.json",
+  "permissions": {
+    "ohos.permission.USE_BLUETOOTH": {
+      "description": "允许应用查看蓝牙的配置，包括蓝牙名称、蓝牙设备类型、开关状态等",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.GET_BUNDLE_INFO": {
+      "description": "允许查询应用的基本信息",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.PREPARE_APP_TERMINATE": {
+      "description": "允许应用关闭前执行自定义的预关闭动作，例如关闭前弹窗确认",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.PRINT": {
+      "description": "允许应用获取打印框架的能力",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.DISCOVER_BLUETOOTH": {
+      "description": "允许应用配置本地蓝牙、查找远端设备、发起配对连接",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.ACCELEROMETER": {
+      "description": "允许应用读取加速度传感器的数据。包括加速度计传感器、未校准加速度计传感器、线性加速器传感器",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.ACCESS_BIOMETRIC": {
+      "description": "允许应用使用生物特征识别能力进行身份认证",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 6
+    },
+    "ohos.permission.ACCESS_NOTIFICATION_POLICY": {
+      "description": "允许访问通知策略（控制铃声静音切换时所需）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.GET_NETWORK_INFO": {
+      "description": "允许应用获取数据网络信息",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.SET_NETWORK_INFO": {
+      "description": "允许配置数据网络，包括激活、取消激活网络、监听网络状态",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.GET_WIFI_INFO": {
+      "description": "允许应用获取 Wi-Fi 信息（扫描结果、连接状态、设备能力等）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.GYROSCOPE": {
+      "description": "允许读取陀螺仪传感器数据",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.INTERNET": {
+      "description": "允许使用 Internet 网络",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.KEEP_BACKGROUND_RUNNING": {
+      "description": "允许 Service Ability 在后台持续运行",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.NFC_CARD_EMULATION": {
+      "description": "允许应用实现卡模拟功能",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.NFC_TAG": {
+      "description": "允许应用读写 Tag 卡片",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.PRIVACY_WINDOW": {
+      "description": "允许设置隐私窗口（禁止截屏录屏）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 9,
+      "note": "API9--10 为 system_basic；API11 起变更为 normal"
+    },
+    "ohos.permission.PUBLISH_AGENT_REMINDER": {
+      "description": "允许应用使用后台代理提醒",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.SET_WIFI_INFO": {
+      "description": "允许配置 Wi-Fi 设备，包括扫描、连接、断开及 P2P 功能",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.VIBRATE": {
+      "description": "允许控制马达振动（单次、自定义、预置效果）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.CLEAN_BACKGROUND_PROCESSES": {
+      "description": "允许识别并清理后台进程",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.COMMONEVENT_STICKY": {
+      "description": "允许发布粘性公共事件",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.MODIFY_AUDIO_SETTINGS": {
+      "description": "允许修改音频设置",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.RUNNING_LOCK": {
+      "description": "允许获取运行锁保证后台运行",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.SET_WALLPAPER": {
+      "description": "允许设置壁纸",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.ACCESS_CERT_MANAGER": {
+      "description": "允许查询证书及私有凭据",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.hsdr.HSDR_ACCESS": {
+      "description": "允许访问安全检测与响应框架",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.RUN_DYN_CODE": {
+      "description": "允许方舟运行时执行动态字节码（系统应用可用）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.READ_CLOUD_SYNC_CONFIG": {
+      "description": "允许查询云同步配置",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.STORE_PERSISTENT_DATA": {
+      "description": "允许应用存储持久化数据（仅恢复出厂或重装清除）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ACCESS_EXTENSIONAL_DEVICE_DRIVER": {
+      "description": "允许使用外接设备增强功能",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.READ_ACCOUNT_LOGIN_STATE": {
+      "description": "允许读取用户账号登录状态",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.ACCESS_SERVICE_NAVIGATION_INFO": {
+      "description": "允许访问导航信息服务",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.PROTECT_SCREEN_LOCK_DATA": {
+      "description": "允许锁屏后保护应用敏感数据。系统会创建 el5 高安全目录",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.ACCESS_CAR_DISTRIBUTED_ENGINE": {
+      "description": "允许访问出行分布式业务引擎（车机信息）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.WINDOW_TOPMOST": {
+      "description": "允许将窗口设置为置顶窗口",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 13,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.MANAGE_INPUT_INFRARED_EMITTER": {
+      "description": "允许使用红外接口（发送、查询频率）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 12,
+      "note": "API12--15 系统应用可用；API16 起普通应用可用"
+    },
+    "ohos.permission.INPUT_KEYBOARD_CONTROLLER": {
+      "description": "允许设置键盘功能键状态（如 CapsLock）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 15
+    },
+    "ohos.permission.SET_ABILITY_INSTANCE_INFO": {
+      "description": "允许单独配置每个 Ability 图标和标签信息",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 15
+    },
+    "ohos.permission.NDK_START_SELF_UI_ABILITY": {
+      "description": "允许通过 C API 启动自身 UIAbility",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 15
+    },
+    "ohos.permission.GET_FILE_ICON": {
+      "description": "允许获取指定类型文件图标",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 17
+    },
+    "ohos.permission.DETECT_GESTURE": {
+      "description": "允许感知手势操作",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20
+    },
+    "ohos.permission.kernel.NET_RAW": {
+      "description": "允许抓取网络数据包（需用户认证）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.kernel.DEBUGGER": {
+      "description": "允许应用获取调试能力（PTRACE 调试）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.kernel.ALLOW_DEBUG": {
+      "description": "允许 C/C++ 程序被调试（存在内存 dump 风险）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.BACKGROUND_MANAGER_POWER_SAVE_MODE": {
+      "description": "允许设置自身进程的省电模式（用于长任务时防止限制）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.SET_WINDOW_TRANSPARENT": {
+      "description": "允许设置主窗透明和去除阴影",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.kernel.IGNORE_LIBRARY_VALIDATION": {
+      "description": "允许独立二进制程序加载不同 ownerid 的 SO（不适用于 HAP）",
+      "level": "normal",
+      "type": "开放权限（系统授权）",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ACCESS_BLUETOOTH": {
+      "description": "允许应用接入蓝牙并使用蓝牙功能。包括扫描和发现外围蓝牙设备、与外围设备配对和连接、支持低功耗蓝牙广播与扫描",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.MEDIA_LOCATION": {
+      "description": "允许应用访问用户媒体文件中的地理位置信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.APP_TRACKING_CONSENT": {
+      "description": "允许应用读取开放匿名设备标识符（OAID）",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 9,
+      "note": "是否弹窗取决于\"要求应用请求关联\"的系统开关状态。若开关关闭，系统不会弹窗，默认授予权限；若开启，需用户确认后才能授予。开关路径：设置 > 隐私与安全 > 跨应用关联"
+    },
+    "ohos.permission.ACTIVITY_MOTION": {
+      "description": "允许应用读取用户的运动状态（如检测用户是否在运动、步数记录等）",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.CAMERA": {
+      "description": "允许应用使用相机",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.DISTRIBUTED_DATASYNC": {
+      "description": "允许不同设备间进行数据交换",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.LOCATION_IN_BACKGROUND": {
+      "description": "允许应用在后台运行时获取设备位置信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7,
+      "note": "无法直接通过弹窗获取授权；需引导用户前往设置手动开启后台位置权限。必须先申请前台位置权限（APPROXIMATELY_LOCATION 或 LOCATION）。路径：设置 > 隐私与安全 > 位置 > 具体应用 或 设置 > 应用和元服务 > 具体应用 > 位置"
+    },
+    "ohos.permission.LOCATION": {
+      "description": "允许应用获取设备的精确位置信息。需与 ohos.permission.APPROXIMATELY_LOCATION 一同声明",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.APPROXIMATELY_LOCATION": {
+      "description": "允许应用获取模糊位置信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.MICROPHONE": {
+      "description": "允许应用使用麦克风",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.READ_CALENDAR": {
+      "description": "允许应用读取日历信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.WRITE_CALENDAR": {
+      "description": "允许应用添加、移除或修改日历活动",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.READ_HEALTH_DATA": {
+      "description": "允许应用读取用户健康数据",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.ACCESS_NEARLINK": {
+      "description": "允许应用接入星闪（NearLink）并使用其功能，如配对、连接外围设备等",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY": {
+      "description": "允许应用访问公共目录中的 Download 目录及其子目录",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 11,
+      "note": "支持设备：PC / 2in1 / Tablet。API 11 为 system_basic，自 API 12 起变更为 normal"
+    },
+    "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY": {
+      "description": "允许应用访问公共目录下的 Documents 目录及其子目录",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 11,
+      "note": "支持设备：PC / 2in1 / Tablet。API 11 为 system_basic，自 API 12 起变更为 normal"
+    },
+    "ohos.permission.CUSTOM_SCREEN_CAPTURE": {
+      "description": "允许应用进行屏幕捕获（截图、录屏）",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 14,
+      "note": "支持设备：PC / 2in1 / Tablet"
+    },
+    "ohos.permission.READ_MEDIA": {
+      "description": "允许应用读取用户外部存储中的媒体文件信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7,
+      "note": "废弃版本：12。替代方案：文件权限组废弃替代方案"
+    },
+    "ohos.permission.WRITE_MEDIA": {
+      "description": "允许应用读写用户外部存储中的媒体文件信息",
+      "level": "normal",
+      "type": "开放权限（用户授权）",
+      "grantMode": "user_grant",
+      "startVersion": 7,
+      "note": "废弃版本：12。替代方案：文件权限组废弃替代方案"
+    },
+    "ohos.permission.SYSTEM_FLOAT_WINDOW": {
+      "description": "允许应用使用悬浮窗的能力",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 7,
+      "note": "可申请此权限的特殊场景与功能：多人视频通话，屏幕共享。设备要求：仅PC/2in1设备应用可申请"
+    },
+    "ohos.permission.READ_CONTACTS": {
+      "description": "允许应用读取联系人数据",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 8,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步联系人信息"
+    },
+    "ohos.permission.WRITE_CONTACTS": {
+      "description": "允许应用添加、移除或更改联系人数据",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 8,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步联系人信息"
+    },
+    "ohos.permission.READ_AUDIO": {
+      "description": "允许读取用户公共目录的音频文件",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 9,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步音频类文件"
+    },
+    "ohos.permission.WRITE_AUDIO": {
+      "description": "允许修改用户公共目录的音频文件",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 9,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步音频类文件"
+    },
+    "ohos.permission.READ_IMAGEVIDEO": {
+      "description": "允许读取用户公共目录的图片或视频文件",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 9,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步图片/视频类文件"
+    },
+    "ohos.permission.WRITE_IMAGEVIDEO": {
+      "description": "允许修改用户公共目录的图片或视频文件",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 9,
+      "note": "可申请此权限的特殊场景与功能：应用需要克隆、备份或同步图片/视频类文件"
+    },
+    "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY": {
+      "description": "允许应用访问公共目录下 Desktop 目录及子目录",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 11,
+      "note": "可申请此权限的特殊场景与功能：仅PC/2in1设备应用可申请"
+    },
+    "ohos.permission.ACCESS_DDK_USB": {
+      "description": "允许扩展外设驱动访问 USB DDK 接口开发 USB 总线扩展外设驱动",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 11,
+      "note": "可申请此权限的特殊场景与功能：外接设备总线类型为 USB 总线"
+    },
+    "ohos.permission.ACCESS_DDK_HID": {
+      "description": "允许扩展外设驱动访问 HID DDK 接口开发 HID 类扩展外设驱动",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 11,
+      "note": "可申请此权限的特殊场景与功能：外接设备为人机交互外设（如手写板、游戏手柄、键鼠）"
+    },
+    "ohos.permission.READ_PASTEBOARD": {
+      "description": "允许应用读取剪贴板",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 11,
+      "note": "可申请此权限的特殊场景与功能：PC/2in1设备上的应用均可申请"
+    },
+    "ohos.permission.FILE_ACCESS_PERSIST": {
+      "description": "允许应用支持持久化访问文件 Uri",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.INTERCEPT_INPUT_EVENT": {
+      "description": "允许应用拦截输入事件",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 11,
+      "note": "可申请此权限的特殊场景与功能：应用为云桌面或远程登录客户端"
+    },
+    "ohos.permission.INPUT_MONITORING": {
+      "description": "允许应用监听输入事件",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 7,
+      "note": "可申请此权限的特殊场景与功能：应用需要录屏，且录屏过程中有显示键盘按键事件"
+    },
+    "ohos.permission.SHORT_TERM_WRITE_IMAGEVIDEO": {
+      "description": "允许应用保存图片、视频到用户公共目录",
+      "level": "normal",
+      "type": "受限开放权限",
+      "grantMode": "user_grant",
+      "startVersion": 12,
+      "note": "可申请此权限的特殊场景与功能：应用无法使用安全保存控件，如 H5 网页应用等"
+    },
+    "ohos.permission.READ_WRITE_USER_FILE": {
+      "description": "允许应用访问并修改用户目录下的文件",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 13,
+      "note": "可申请此权限的特殊场景与功能：应用为 IDE 或其他开发调测工具"
+    },
+    "ohos.permission.READ_WRITE_USB_DEV": {
+      "description": "允许应用连接设备，并通过 USB 调试读写该设备",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 13,
+      "note": "可申请此权限的特殊场景与功能：应用为 IDE 或其他开发调测工具"
+    },
+    "ohos.permission.GET_WIFI_PEERS_MAC": {
+      "description": "允许应用获取对端 Wi-Fi 设备的 MAC 地址",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 8,
+      "note": "可申请此权限的特殊场景与功能：用于智能家居设备、智能穿戴设备等 IoT 智能设备联网时"
+    },
+    "ohos.permission.SET_TELEPHONY_ESIM_STATE_OPEN": {
+      "description": "允许运营商应用添加 eSIM 配置文件",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 13
+    },
+    "ohos.permission.kernel.DISABLE_CODE_MEMORY_PROTECTION": {
+      "description": "允许应用禁用本应用的代码运行时完整性保护",
+      "level": "system_basic",
+      "type": "受限开放权限",
+      "grantMode": "system_grant",
+      "startVersion": 14
+    },
+    "ohos.permission.SET_FILE_GUARD_POLICY": {
+      "description": "允许应用下发文件管控策略",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.FILE_GUARD_MANAGER": {
+      "description": "允许应用进行公共目录扫描及设置文件扩展属性",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.FILE_GUARD_FILE_WRITE": {
+      "description": "允许企业应用修改文件",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS": {
+      "description": "允许应用跨系统本地账号交互",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.GET_RUNNING_INFO": {
+      "description": "允许应用获取运行态信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.RUNNING_STATE_OBSERVER": {
+      "description": "允许应用监听应用状态",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED": {
+      "description": "允许查询应用的基本信息和其他敏感信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.GET_WIFI_CONFIG": {
+      "description": "允许应用获取 Wi-Fi 配置信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 8,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.SET_WIFI_CONFIG": {
+      "description": "允许应用配置 Wi-Fi 信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 8
+    },
+    "ohos.permission.GET_DOMAIN_ACCOUNTS": {
+      "description": "允许应用查询域账号信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.QUERY_AUDIT_EVENT": {
+      "description": "允许企业安全类应用查询安全审计事件",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.KILL_APP_PROCESSES": {
+      "description": "允许系统应用结束其他应用进程",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.MANAGE_ENTERPRISE_WIFI_CONNECTION": {
+      "description": "允许应用管理 Wi-Fi 的连接",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 15
+    },
+    "ohos.permission.ACCESS_ENTERPRISE_USER_TRUSTED_CERT": {
+      "description": "允许应用管理企业设备的用户 CA 证书",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.MANAGE_NET_FIREWALL": {
+      "description": "允许系统应用配置防火墙规则",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.GET_NET_FIREWALL": {
+      "description": "允许系统应用查询防火墙规则和查询防火墙拦截记录",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.GET_DOMAIN_ACCOUNT_SERVER_CONFIGS": {
+      "description": "允许应用获取域账号服务器配置",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.MANAGE_DOMAIN_ACCOUNT_SERVER_CONFIGS": {
+      "description": "允许应用管理域账号服务器配置",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.MANAGE_DOMAIN_ACCOUNTS": {
+      "description": "允许应用管理域账号",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.GET_SIGNATURE_INFO": {
+      "description": "允许应用获取应用包的签名信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.VISIBLE_WINDOW_INFO": {
+      "description": "允许应用获取当前屏幕的可见窗口信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 18
+    },
+    "ohos.permission.kernel.AUTH_AUDIT_EVENT": {
+      "description": "允许企业安全应用阻断安全审计事件",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.SUPPORT_APP_SERVICE_EXTENSION": {
+      "description": "允许应用作为 AppServiceExtension 被拉起",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_EAP": {
+      "description": "允许企业网络安全软件在 EAP 报文中新增私有信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.SUPPORT_INSTALL_ON_U1": {
+      "description": "允许应用安装在 1 用户",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.QUERY_LOCAL_WORKSPACES": {
+      "description": "允许企业普通应用查询工作空间和不允许删除的空间列表",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.SET_NET_EXT_ATTRIBUTE": {
+      "description": "允许应用设置网络扩展属性",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.MANAGE_ANTIVIRUS": {
+      "description": "允许企业应用管理防病毒软件",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.REGISTER_ANTIVIRUS": {
+      "description": "允许企业防病毒软件向系统注册、更新基本信息",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.CALL_TPM_CMD": {
+      "description": "允许应用调用 TPM（Trusted Platform Module）命令",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ENTERPRISE_WORKSPACES_EVENT_SUBSCRIBE": {
+      "description": "允许企业应用订阅企业数字空间相关事件",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.sec.ACCESS_UDID": {
+      "description": "允许应用获取 UDID",
+      "level": "system_basic",
+      "type": "企业类应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 7
+    },
+    "ohos.permission.ENTERPRISE_GET_DEVICE_INFO": {
+      "description": "允许应用激活设备管理应用，包括读取设备 ID、硬盘序列号、OS 版本、机器名等",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_GET_NETWORK_INFO": {
+      "description": "允许设备管理应用查询网络信息，如网卡设置、IP 地址、MAC 地址等",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_INSTALL_BUNDLE": {
+      "description": "允许设备管理应用安装和卸载包",
+      "level": "system_core",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_SET_APP_RUNNING_POLICY": {
+      "description": "允许设备管理应用设置应用运行管理策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_RESET_DEVICE": {
+      "description": "允许设备管理应用恢复设备出厂设置",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_ACCOUNT_POLICY": {
+      "description": "允许设备管理应用设置账户管理策略，例如新增账号",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_BUNDLE_INSTALL_POLICY": {
+      "description": "允许设备管理应用设置包安装管理策略，例如设置包安装白名单",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_DATETIME": {
+      "description": "允许设备管理应用设置系统时间，并禁止用户修改系统时间策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.ENTERPRISE_SET_NETWORK": {
+      "description": "允许设备管理应用设置网络信息，如禁用、开启网卡",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_WIFI": {
+      "description": "允许设备管理应用设置和查询 Wi-Fi 信息，如禁用 Wi-Fi，设置 Wi-Fi 连接",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SUBSCRIBE_MANAGED_EVENT": {
+      "description": "允许设备管理应用订阅管理事件，如锁屏事件、软件版本更新事件等",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.ENTERPRISE_RESTRICT_POLICY": {
+      "description": "允许设备管理员下发和获取限制类策略，如禁用 HDC、禁用直连打印服务等",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_SCREENOFF_TIME": {
+      "description": "允许设备管理员设置系统休眠时间",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_USB": {
+      "description": "允许设备管理员管理 USB",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_NETWORK": {
+      "description": "允许设备管理员管理网络",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_CERTIFICATE": {
+      "description": "允许设备管理员管理证书",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_GET_SETTINGS": {
+      "description": "允许设备管理员查询\"设置\"应用数据",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.INSTALL_ENTERPRISE_MDM_BUNDLE": {
+      "description": "允许在企业设备上安装企业 MDM 应用包",
+      "level": "system_core",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.INSTALL_SELF_BUNDLE": {
+      "description": "允许企业 MDM 应用在企业设备上自升级",
+      "level": "system_core",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.ENTERPRISE_SET_BROWSER_POLICY": {
+      "description": "允许设备设置/取消浏览器策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 10
+    },
+    "ohos.permission.SET_ENTERPRISE_INFO": {
+      "description": "允许设备管理应用设置企业信息，包括企业名称和描述信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 9
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_SECURITY": {
+      "description": "允许设备设置安全管理策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_BLUETOOTH": {
+      "description": "允许设备管理应用设置和查询蓝牙信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_SYSTEM": {
+      "description": "允许设备管理系统设置参数策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_WIFI": {
+      "description": "允许设备管理应用设置和查询 Wi-Fi 信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_RESTRICTIONS": {
+      "description": "允许设备管理应用管理限制策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_APPLICATION": {
+      "description": "允许设备管理应用管理应用策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_LOCATION": {
+      "description": "允许设备管理应用设置和查询位置信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_REBOOT": {
+      "description": "允许设备管理应用进行关机重启操作",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_LOCK_DEVICE": {
+      "description": "允许设备管理应用锁定设备",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_SETTINGS": {
+      "description": "允许设备管理应用管理设置",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 11
+    },
+    "ohos.permission.ENTERPRISE_OPERATE_DEVICE": {
+      "description": "允许设备管理应用操作设备",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.ENTERPRISE_ADMIN_MANAGE": {
+      "description": "允许应用管理设备管理应用",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 12
+    },
+    "ohos.permission.ENTERPRISE_RECOVERY_KEY": {
+      "description": "允许应用管理企业级恢复密钥",
+      "level": "system_core",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 13
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_DELEGATED_POLICY": {
+      "description": "允许设备管理应用委托其他应用设置设备管控策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 14
+    },
+    "ohos.permission.ENTERPRISE_GET_ALL_BUNDLE_INFO": {
+      "description": "允许设备管理应用获取设备所有应用信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_SET_USER_RESTRICTION": {
+      "description": "允许设备管理应用限制用户修改系统设置",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_APN": {
+      "description": "允许设备管理应用管理设备 APN 策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_TELEPHONY": {
+      "description": "允许设备管理应用管理设备通话策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_SET_KIOSK": {
+      "description": "允许设备管理应用设置 Kiosk 模式",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_LOCAL_PUBLICSPACES": {
+      "description": "允许企业应用启用、创建、删除工作空间",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ENTERPRISE_FILE_TRANSFER_AUDIT_POLICY_MANAGEMENT": {
+      "description": "允许 MDM 应用管理文件传输的策略和审计信息",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ENTERPRISE_SET_WALLPAPER": {
+      "description": "允许设备管理应用设置壁纸",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.MANAGE_PREINSTALLED_ANTIVIRUS": {
+      "description": "允许 MDM 应用管理系统预装的防病毒软件",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    },
+    "ohos.permission.ENTERPRISE_MANAGE_USER_GRANT_PERMISSION": {
+      "description": "允许设备管理应用（MDM）设置 user_grant 类权限策略",
+      "level": "system_basic",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：Phone | PC/2in1 | Tablet"
+    },
+    "ohos.permission.ENTERPRISE_ACCESS_DLP_FILE": {
+      "description": "允许设备管理应用（MDM）生成、解密 DLP 文件，查询 DLP 文件策略",
+      "level": "system_core",
+      "type": "仅MDM应用可用权限",
+      "grantMode": "system_grant",
+      "startVersion": 20,
+      "note": "支持设备：PC/2in1"
+    }
+  }
+}

@@ -43,6 +43,10 @@ export function createArkTSResource(projectDetectorManager: ProjectDetectorManag
         provideDocumentLinks(document, token) {
           return resourceProvider.getDocumentLinkProvider().provideDocumentLinks(document, token)
         },
+
+        provideHover(document, position, token) {
+          return resourceProvider.getHoverProvider().provideHover(document, position, token)
+        },
       }
     },
   }
