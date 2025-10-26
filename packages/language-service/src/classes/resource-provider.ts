@@ -1,12 +1,13 @@
 import type { LanguageServerConfigurator } from '@arkts/shared'
-import type { CompletionContext, CompletionItem, CompletionList, Diagnostic, DocumentLink, FileStat, LanguageServicePluginInstance, LocationLink, NullableProviderResult, TextDocument } from '@volar/language-server'
+import type { CompletionContext, CompletionItem, CompletionList, Diagnostic, DocumentLink, FileStat, Hover, LanguageServicePluginInstance, LocationLink, NullableProviderResult, TextDocument } from '@volar/language-server'
 import type * as ets from 'ohos-typescript'
 import type { Product, ProjectDetectorManager } from '../interfaces'
 import type { ContextUtil } from '../utils/context-util'
 import type { GlobalCallExpressionFinder } from './global-call-finder'
 import path from 'node:path'
-import { CompletionItemKind, DiagnosticSeverity, FileType, Position, Range } from '@volar/language-server'
+import { CompletionItemKind, DiagnosticSeverity, FileType, MarkupKind, Position, Range } from '@volar/language-server'
 import { URI } from 'vscode-uri'
+import { permissions } from '../auth/permission'
 import { Reference } from '../interfaces/reference'
 import { SysResource } from '../interfaces/sys-resource'
 import { LEADING_TRAILING_QUOTE_REGEX } from '../utils/regex'
@@ -16,6 +17,7 @@ export interface ResourceProvider {
   getCompletionProvider(): ResourceProvider.CompletionProvider
   getDiagnosticProvider(): ResourceProvider.DiagnosticProvider
   getDocumentLinkProvider(): ResourceProvider.DocumentLinkProvider
+  getHoverProvider(): ResourceProvider.HoverProvider
 }
 
 export namespace ResourceProvider {
@@ -26,6 +28,8 @@ export namespace ResourceProvider {
   export interface DiagnosticProvider extends Required<Pick<LanguageServicePluginInstance, 'provideDiagnostics'>> {}
 
   export interface DocumentLinkProvider extends Required<Pick<LanguageServicePluginInstance, 'provideDocumentLinks'>> {}
+
+  export interface HoverProvider extends Required<Pick<LanguageServicePluginInstance, 'provideHover'>> {}
 }
 
 export namespace ResourceProvider {
@@ -39,12 +43,14 @@ export namespace ResourceProvider {
     const completionProvider = new CompletionProviderImpl(context, globalCallExpressionFinder, projectDetectorManager, config, ets)
     const diagnosticProvider = new DiagnosticProviderImpl(context, globalCallExpressionFinder, projectDetectorManager, config, ets)
     const documentLinkProvider = new DocumentLinkProviderImpl(context, globalCallExpressionFinder, projectDetectorManager, config, ets)
+    const hoverProvider = new HoverProviderImpl(context, globalCallExpressionFinder, projectDetectorManager, config, ets)
 
     return {
       getDefinitionProvider: () => definitionProvider,
       getCompletionProvider: () => completionProvider,
       getDiagnosticProvider: () => diagnosticProvider,
       getDocumentLinkProvider: () => documentLinkProvider,
+      getHoverProvider: () => hoverProvider,
     }
   }
 
@@ -82,6 +88,46 @@ export namespace ResourceProvider {
         if (node.parent.initializer.getStart(sourceFile) !== node.getStart(sourceFile) || node.parent.initializer.getEnd() !== node.getEnd()) return node.forEachChild(walk)
         if (escapeText && node.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') !== escapeText) return node.forEachChild(walk)
         stringLiterals.push(node)
+        return node.forEachChild(walk)
+      }
+      sourceFile.forEachChild(walk)
+      return stringLiterals
+    }
+
+    getRequestPermissionsStringLiterals(sourceFile: ets.SourceFile): ets.StringLiteral[] {
+      const stringLiterals: ets.StringLiteral[] = []
+      let isInRequestPermissions = false
+      let isInArrayLiteralExpression = false
+      let isInObjectLiteralExpression = false
+      let isInObjectLiteralPropertyAssignment = false
+      const walk = (node: ets.Node): void => {
+        if (!isInRequestPermissions && this.ets.isPropertyAssignment(node) && node.name.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') === 'requestPermissions') {
+          isInRequestPermissions = true
+          node.forEachChild(walk)
+          isInRequestPermissions = false
+        }
+
+        if (isInRequestPermissions && !isInArrayLiteralExpression && this.ets.isArrayLiteralExpression(node)) {
+          isInArrayLiteralExpression = true
+          node.forEachChild(walk)
+          isInArrayLiteralExpression = false
+        }
+
+        if (isInRequestPermissions && isInArrayLiteralExpression && !isInObjectLiteralExpression && this.ets.isObjectLiteralExpression(node)) {
+          isInObjectLiteralExpression = true
+          node.forEachChild(walk)
+          isInObjectLiteralExpression = false
+        }
+
+        if (isInRequestPermissions && isInArrayLiteralExpression && isInObjectLiteralExpression && !isInObjectLiteralPropertyAssignment && this.ets.isPropertyAssignment(node)) {
+          isInObjectLiteralPropertyAssignment = true
+          if (node.name.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') === 'name' && this.ets.isStringLiteral(node.initializer)) {
+            stringLiterals.push(node.initializer)
+          }
+          node.forEachChild(walk)
+          isInObjectLiteralPropertyAssignment = false
+        }
+
         return node.forEachChild(walk)
       }
       sourceFile.forEachChild(walk)
@@ -293,6 +339,46 @@ export namespace ResourceProvider {
       const moduleJson5Path = product.getUnderlyingProduct().getModuleJson5Path()
       if (moduleJson5Path.toString() !== decodedUri.toString()) return []
       const sourceFile = this.ets.parseJsonText(moduleJson5Path.toString(), document.getText())
+      const items: CompletionItem[] = []
+
+      // completion for requestPermissions
+      // The structure of requestPermissions is:
+      // {
+      //   // PropertyAssignment
+      //   "requestPermissions": [ // ArrayLiteralExpression
+      //     {
+      //       // PropertyAssignment
+      //       name: "permissionName", // StringLiteral
+      //     }
+      //   ]
+      // }
+      const requestPermissionsStringLiterals = this.getRequestPermissionsStringLiterals(sourceFile)
+      const currentRequestPermissionsStringLiteral = requestPermissionsStringLiterals.find((stringLiteral) => {
+        const startPosition = document.positionAt(stringLiteral.getStart(sourceFile))
+        const endPosition = document.positionAt(stringLiteral.getEnd())
+        return startPosition.line <= position.line && endPosition.line >= position.line
+          && startPosition.character <= position.character && endPosition.character >= position.character
+      })
+      const currentRequestPermissionsStringLiteralText = currentRequestPermissionsStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') ?? ''
+      if (currentRequestPermissionsStringLiteral) {
+        for (const permissionName of Object.keys(permissions)) {
+          if (!permissionName.startsWith(currentRequestPermissionsStringLiteralText)) continue
+          const suffix = permissionName.slice(currentRequestPermissionsStringLiteralText.length)
+
+          items.push({
+            label: permissionName,
+            kind: CompletionItemKind.Value,
+            detail: permissions[permissionName].description,
+            insertText: (currentRequestPermissionsStringLiteralText && permissionName.length > currentRequestPermissionsStringLiteralText.length) ? suffix : permissionName,
+            documentation: {
+              kind: MarkupKind.Markdown,
+              value: `### ${permissions[permissionName].description}\n- 1️⃣ 权限级别: ${permissions[permissionName].level}\n- 🧀 权限类型: ${permissions[permissionName].type}\n- 🔑 授权方式: ${permissions[permissionName].grantMode}\n- 📦 起始版本: ${permissions[permissionName].startVersion}\n${permissions[permissionName].note ? `- 📝 其他说明: ${permissions[permissionName].note}` : ''}`,
+            },
+          })
+        }
+        return items
+      }
+
       const stringLiterals = this.findStringLiterals(sourceFile)
       const currentStringLiteral = stringLiterals.find((stringLiteral) => {
         const startPosition = document.positionAt(stringLiteral.getStart(sourceFile))
@@ -302,8 +388,6 @@ export namespace ResourceProvider {
       })
       const stringLiteralText = currentStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '')
       if (!currentStringLiteral || !stringLiteralText) return []
-
-      const items: CompletionItem[] = []
 
       // completion for file system
       if (triggerCharacter === '/') {
@@ -597,6 +681,57 @@ export namespace ResourceProvider {
       }
 
       return documentLinks
+    }
+  }
+
+  class HoverProviderImpl extends ResourceProviderImpl implements HoverProvider {
+    provideHover(document: TextDocument, position: Position): NullableProviderResult<Hover> {
+      const decodedUri = this.contextUtil.decodeTextDocumentUri(document)
+      if (!decodedUri) return null
+      const product = this.findProductByUri(decodedUri)
+      if (!product) return null
+      const moduleJson5Path = product.getUnderlyingProduct().getModuleJson5Path()
+      if (!moduleJson5Path) return null
+      const content = document.getText()
+      const sourceFile = this.ets.parseJsonText(moduleJson5Path.toString(), content)
+
+      const requestPermissionsStringLiterals = this.getRequestPermissionsStringLiterals(sourceFile)
+      const currentRequestPermissionsStringLiteral = requestPermissionsStringLiterals.find((stringLiteral) => {
+        const startPosition = document.positionAt(stringLiteral.getStart(sourceFile))
+        const endPosition = document.positionAt(stringLiteral.getEnd())
+        return startPosition.line <= position.line && endPosition.line >= position.line
+          && startPosition.character <= position.character && endPosition.character >= position.character
+      })
+      const currentRequestPermissionsStringLiteralText = currentRequestPermissionsStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') ?? ''
+      if (currentRequestPermissionsStringLiteral && currentRequestPermissionsStringLiteralText && permissions[currentRequestPermissionsStringLiteralText]) {
+        return {
+          contents: {
+            kind: MarkupKind.Markdown,
+            value: `### ${permissions[currentRequestPermissionsStringLiteralText].description}\n- 1️⃣ 权限级别: ${permissions[currentRequestPermissionsStringLiteralText].level}\n- 🧀 权限类型: ${permissions[currentRequestPermissionsStringLiteralText].type}\n- 🔑 授权方式: ${permissions[currentRequestPermissionsStringLiteralText].grantMode}\n- 📦 起始版本: ${permissions[currentRequestPermissionsStringLiteralText].startVersion}\n${permissions[currentRequestPermissionsStringLiteralText].note ? `- 📝 其他说明: ${permissions[currentRequestPermissionsStringLiteralText].note}` : ''}`,
+          },
+          range: Reference.toRange(currentRequestPermissionsStringLiteral, sourceFile, true),
+        }
+      }
+
+      const stringLiterals = this.findStringLiterals(sourceFile)
+      const currentStringLiteral = stringLiterals.find((stringLiteral) => {
+        const startPosition = document.positionAt(stringLiteral.getStart(sourceFile))
+        const endPosition = document.positionAt(stringLiteral.getEnd())
+        return startPosition.line <= position.line && endPosition.line >= position.line
+          && startPosition.character <= position.character && endPosition.character >= position.character
+      })
+      const stringLiteralText = currentStringLiteral?.getText(sourceFile).replace(LEADING_TRAILING_QUOTE_REGEX, '') ?? ''
+      if (currentStringLiteral && stringLiteralText) {
+        return {
+          contents: {
+            kind: MarkupKind.Markdown,
+            value: `${product.findReference().filter(reference => reference.toJsonFormat() === stringLiteralText).map(reference => `- [${reference.getUri().toString()}](${reference.getUri().toString()})`).join('\n')}`,
+          },
+          range: Reference.toRange(currentStringLiteral, sourceFile, true),
+        }
+      }
+
+      return null
     }
   }
 }
