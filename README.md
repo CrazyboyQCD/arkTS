@@ -118,9 +118,6 @@ PR地址: [https://github.com/material-extensions/vscode-material-icon-theme/pul
 | `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          | `/usr/local/bin/hdc or C://program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains`                                             |
 | `ets.sdkList`      | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          | `{"API20": "${os.homedir}/OpenHarmony/20", "API18": "/opt/OpenHarmony/18"}` |
 
-
-
-
 <!-- configs -->
 
 ## 命令
@@ -141,7 +138,6 @@ ArkTs-X 组织有维护一个官方的跨平台arkts项目构建管理cli,可用
 可以参考以下链接进行安装
 
 [命令行工具](https://gitcode.com/arkui-x/docs/blob/master/zh-cn/application-dev/quick-start/start-overview.md#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7ace-tools)
-
 
 参考使用方式：
 
