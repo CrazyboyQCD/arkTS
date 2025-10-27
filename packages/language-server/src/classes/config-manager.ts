@@ -281,6 +281,7 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     const finalCompilerOptions = defu(originalSettings, {
       etsLoaderPath: this.getEtsLoaderPath(),
       paths: this.getPaths(),
+      lib: this.getLib(),
       baseUrl: this.getBaseUrl(),
       enableStrictCheckOHModule: true,
       skipOhModulesLint: false,
@@ -299,9 +300,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
       alwaysStrict: true,
       mixCompile: true,
       tsImportSendableEnable: true,
-      ets: {
-        libs: this.getLib(),
-      } as ets.EtsOptions,
     } satisfies ets.CompilerOptions, this.getEtsLoaderConfigCompilerOptions())
     return this.fixTsConfig(finalCompilerOptions)
   }

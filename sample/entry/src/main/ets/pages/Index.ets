@@ -18,10 +18,12 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
-@interface Hello {
-  hello: string = "111";
-  world: string
+@interface MyAnnotation {
+  value: string = "hello world"
 }
+
+@MyAnnotation
+class MyClass {}
 
 @Entry
 @Component
