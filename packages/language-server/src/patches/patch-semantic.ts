@@ -44,6 +44,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
               value: `@interface ${annotationDeclaration.name.getText(sourceFile).replace(/^["'`]|["'`]$/g, '')}`,
             },
             '注意：@interface声明的注解仅在API20及以上版本可用。详见: https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts#用户自定义注解',
+            'Note: @interface declarations are only available in API20 and above. See: https://developer.huawei.com/consumer/en/doc/harmonyos-guides/introduction-to-arkts#custom-annotation',
           ],
           range: {
             start: document.positionAt(nameStart),
@@ -102,6 +103,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
           ets.SemanticClassificationFormat.TwentyTwenty,
         )
         for (const classification of classifications) {
+          // @interface默认是256，我们将其改为2824，即ts装饰器的高亮类型
           if (classification.classificationType === 256) {
             classification.classificationType = 2824
           }
