@@ -113,9 +113,9 @@ PR地址: [https://github.com/material-extensions/vscode-material-icon-theme/pul
 | ------------------ | ---------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- | --------------------------------------------------------------- |
 | `ets.sdkPath`      | %configuration.ets.sdkPath.description%                                                                    | `string`  | `""`                          | ```${os.homedir}/AppData/Local/OpenHarmony/20```                              |
 | `ets.baseSdkPath`  | %configuration.ets.baseSdkPath.description%                                                                | `string`  | `"${os.homedir}/OpenHarmony"` | `"${os.homedir}/AppData/Local/OpenHarmony"`                                   |
-| `ets.hmsPath`      | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          | ```C://program Files/Huawei/DevEco Studio/sdk/default/hms```                              |
+| `ets.hmsPath`      | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          | <ul><li>Windows: <code>C:/Program Files/Huawei/DevEco Studio/sdk/default/hms</code></li></ul>                             |
 | `ets.lspDebugMode` | %configuration.ets.lspDebugMode.description%                                                               | `boolean` | `false`                       | `true`                                                          |
-| `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          | `/usr/local/bin/hdc or C://program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains`                                             |
+| `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          | <ul><li>Unix: <code>/usr/local/bin/hdc</code></li><li>Windows: <code>C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains</code></li></ul>                                             |
 | `ets.sdkList`      | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          | `{"API20": "${os.homedir}/OpenHarmony/20", "API18": "/opt/OpenHarmony/18"}` |
 
 <!-- configs -->
@@ -146,7 +146,7 @@ ohos@user Desktop % ace create demo
 ? Enter the project name(demo): # 输入工程名称，不输入默认为文件夹名称
 ? Enter the bundleName (com.example.demo):  # 输入包名，不输入默认为com.example.工程名
 ? Enter the runtimeOS (1: OpenHarmony, 2: HarmonyOS): 1 # 输入RuntimeOS系统
-? Please select the Complie SDk (1: 10, 2: 11, 3: 12): 2 # 输入编译SDK版本
+? Please select the Complie SDK (1: 10, 2: 11, 3: 12): 2 # 输入编译SDK版本
 Signing iOS app for device deployment using developer identity: "Apple Development: xxxxx"
 
 Project created. Target directory:  ${当前目录}/demo.
