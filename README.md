@@ -109,14 +109,14 @@ PR地址: [https://github.com/material-extensions/vscode-material-icon-theme/pul
 
 <!-- configs -->
 
-| Key                | Description                                                                                                | Type      | Default                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- |
-| `ets.sdkPath`      | %configuration.ets.sdkPath.description%                                                                    | `string`  | `""`                          |
-| `ets.baseSdkPath`  | %configuration.ets.baseSdkPath.description%                                                                | `string`  | `"${os.homedir}/OpenHarmony"` |
-| `ets.hmsPath`      | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          |
-| `ets.lspDebugMode` | %configuration.ets.lspDebugMode.description%                                                               | `boolean` | `false`                       |
-| `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          |
-| `ets.sdkList`      | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          |
+| Key                | Description                                                                                                | Type      | Default                       | Example                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- | --------------------------------------------------------------- |
+| `ets.sdkPath`      | %configuration.ets.sdkPath.description%                                                                    | `string`  | `""`                          | ```${os.homedir}/AppData/Local/OpenHarmony/20```                              |
+| `ets.baseSdkPath`  | %configuration.ets.baseSdkPath.description%                                                                | `string`  | `"${os.homedir}/OpenHarmony"` | `"${os.homedir}/AppData/Local/OpenHarmony"`                                   |
+| `ets.hmsPath`      | %configuration.ets.hmsPath.description%                                                                    | `string`  | `""`                          | <ul><li>Windows: <code>C:/Program Files/Huawei/DevEco Studio/sdk/default/hms</code></li></ul>                             |
+| `ets.lspDebugMode` | %configuration.ets.lspDebugMode.description%                                                               | `boolean` | `false`                       | `true`                                                          |
+| `ets.hdcPath`      | %configuration.ets.hdcPath.description%                                                                    | `string`  | `""`                          | <ul><li>Unix: <code>/usr/local/bin/hdc</code></li><li>Windows: <code>C:/Program Files/Huawei/DevEco Studio/sdk/default/openharmony/toolchains</code></li></ul>                                             |
+| `ets.sdkList`      | A list of installed OpenHarmony SDK paths. Keys should follow the pattern API[number] (e.g., API9, API10). | `object`  | `{}`                          | `{"API20": "${os.homedir}/OpenHarmony/20", "API18": "/opt/OpenHarmony/18"}` |
 
 <!-- configs -->
 
@@ -130,6 +130,33 @@ PR地址: [https://github.com/material-extensions/vscode-material-icon-theme/pul
 | `ets.installSDK`    | ETS: %command.installSDK%    |
 
 <!-- commands -->
+
+## 推荐食用搭配
+
+ArkTs-X 组织有维护一个官方的跨平台arkts项目构建管理cli,可用于build和烧录
+
+可以参考以下链接进行安装
+
+[命令行工具](https://gitcode.com/arkui-x/docs/blob/master/zh-cn/application-dev/quick-start/start-overview.md#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7ace-tools)
+
+参考使用方式：
+
+```bash
+ohos@user Desktop % ace create demo
+? Enter the project name(demo): # 输入工程名称，不输入默认为文件夹名称
+? Enter the bundleName (com.example.demo):  # 输入包名，不输入默认为com.example.工程名
+? Enter the runtimeOS (1: OpenHarmony, 2: HarmonyOS): 1 # 输入RuntimeOS系统
+? Please select the Complie SDK (1: 10, 2: 11, 3: 12): 2 # 输入编译SDK版本
+Signing iOS app for device deployment using developer identity: "Apple Development: xxxxx"
+
+Project created. Target directory:  ${当前目录}/demo.
+In order to run your app, type:
+
+   $ cd demo
+   $ ace run
+
+Your app code is in demo/entry.
+```
 
 ## Star History 🌟
 
