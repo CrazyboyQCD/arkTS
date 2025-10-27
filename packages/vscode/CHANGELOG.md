@@ -1,5 +1,16 @@
 # vscode-naily-ets
 
+## 1.2.0
+
+### Minor Changes
+
+- 84ca9bc: feat: 添加注解的注释继承功能 (#176)
+
+### Patch Changes
+
+- 2fc2eb9: feat(language-service): 添加 module.json5 requestPermissions 部分补全功能
+- 9fdbf59: feat: 抽象资源补全为一个 namespace，并添加 module.json5 文件路径补全和跳转、引用表达式错误诊断
+
 ## 1.1.7
 
 ### Patch Changes

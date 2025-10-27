@@ -1,5 +1,18 @@
 # @arkts/language-server
 
+## 1.2.0
+
+### Minor Changes
+
+- 84ca9bc: feat: 添加注解的注释继承功能 (#176)
+
+### Patch Changes
+
+- 9fdbf59: feat: 抽象资源补全为一个 namespace，并添加 module.json5 文件路径补全和跳转、引用表达式错误诊断
+- Updated dependencies [2fc2eb9]
+- Updated dependencies [9fdbf59]
+  - @arkts/language-service@1.1.4
+
 ## 1.1.5
 
 ### Patch Changes
