@@ -18,6 +18,8 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
+/** # Foo */
+/** # Bar */
 @interface MyAnnotation {
   value: string = "hello world"
 }

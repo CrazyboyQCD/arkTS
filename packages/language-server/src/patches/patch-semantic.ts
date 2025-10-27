@@ -5,6 +5,15 @@ import { convertClassificationsToSemanticTokens } from 'volar-service-typescript
 import { ContextUtil } from '../utils/finder'
 import { convertSpansToClassifications } from '../utils/span-to-classification'
 
+function getMarkdownJSDoc(node: ets.HasJSDoc): string[] {
+  const markdownJsdocs: string[] = []
+  const jsDocComment = ((node as any).jsDoc ?? []) as ets.JSDoc[]
+  for (const jsDoc of jsDocComment) {
+    markdownJsdocs.push(ets.getTextOfJSDocComment(jsDoc.comment) ?? '')
+  }
+  return markdownJsdocs
+}
+
 /**
  * 补丁：为`@interface`声明的注解提供正确的悬浮提示，以及正确的语义高亮。
  * 语义高亮将其由原本的类似class声明的高亮转为ts装饰器一样的高亮。
@@ -45,6 +54,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
             },
             '注意：@interface声明的注解仅在API20及以上版本可用。详见: https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/introduction-to-arkts#用户自定义注解',
             'Note: @interface declarations are only available in API20 and above. See: https://developer.huawei.com/consumer/en/doc/harmonyos-guides/introduction-to-arkts#custom-annotation',
+            ...getMarkdownJSDoc(annotationDeclaration),
           ],
           range: {
             start: document.positionAt(nameStart),
@@ -73,13 +83,13 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
       if (!sourceFile) return
       const decorator = findDecoratorInPosition(currentPositionOffset, sourceFile)
       if (!decorator) return
+      if (!decorator.annotationDeclaration) return
       if (currentPositionOffset >= decorator.expression.getStart(sourceFile) && currentPositionOffset <= decorator.expression.getEnd()) {
+        const annotationText = decorator.expression.getText(sourceFile).replace(/^["'`]|["'`]$/g, '')
+        const markdownJsdocs = getMarkdownJSDoc(decorator.annotationDeclaration)
         return {
           contents: [
-            {
-              language: 'ets',
-              value: `@interface ${decorator.expression.getText(sourceFile).replace(/^["'`]|["'`]$/g, '')}`,
-            },
+            `\`\`\`ets\n@interface ${annotationText}\n\`\`\`\n\n${markdownJsdocs.join('\n---\n')}`,
           ],
           range: Range.create(
             document.positionAt(decorator.expression.getStart(sourceFile)),
@@ -111,7 +121,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
         return convertClassificationsToSemanticTokens(document, span, legend, convertSpansToClassifications(classifications))
       },
 
-      provideHover(document, position, token) {
+      async provideHover(document, position, token) {
         const annotationDecoratorHover = provideAnnotationDecoratorHover(document, document.offsetAt(position))
         if (annotationDecoratorHover) return annotationDecoratorHover
         const annotationDeclarationHover = provideAnnotationDeclarationHover(document, document.offsetAt(position))
