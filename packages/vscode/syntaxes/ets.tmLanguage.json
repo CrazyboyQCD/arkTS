@@ -27,6 +27,27 @@
       ]
     },
     {
+      "begin": "(?<![_$[:alnum:]])(?:(\\bexport)\\s+)?(?:(\\bdeclare)\\s+)?(@interface)\\b(?=\\s+|/[/*])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.export.ts"
+        },
+        "2": {
+          "name": "storage.modifier.ts"
+        },
+        "3": {
+          "name": "storage.type.class.ts"
+        }
+      },
+      "end": "(?<=\\})",
+      "name": "meta.at-interface.ets",
+      "patterns": [
+        {
+          "include": "source.ts#class-declaration-or-expression-patterns"
+        }
+      ]
+    },
+    {
       "name": "meta.import.ets",
       "begin": "(?<![_$[:alnum:]])(?:(?<=\\.\\.\\.)|(?<!\\.))(?:(\\bexport)\\s+)?(?:(\\bdeclare)\\s+)?\\b(import)\\s+(lazy)(?:\\s+(type)(?!\\s+from))?(?!\\s*[:\\(])(?![_$[:alnum:]])(?:(?=\\.\\.\\.)|(?!\\.))",
       "beginCaptures": {

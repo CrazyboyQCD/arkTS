@@ -9,14 +9,21 @@ class MyLazyDataSource implements IDataSource {
     return 100;
   }
 
-  registerDataChangeListener(listener: DataChangeListener): void {
+  registerDataChangeListener(_listener: DataChangeListener): void {
     // Implement data change listener registration if needed
   }
 
-  unregisterDataChangeListener(listener: DataChangeListener): void {
+  unregisterDataChangeListener(_listener: DataChangeListener): void {
     // Implement data change listener unregistration if needed
   }
 }
+
+@interface MyAnnotation {
+  value: string = "hello world"
+}
+
+@MyAnnotation
+class MyClass {}
 
 @Entry
 @Component
