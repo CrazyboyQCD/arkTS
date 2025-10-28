@@ -20,15 +20,16 @@ class MyLazyDataSource implements IDataSource {
 }
 
 @interface MyAnnotation {
-  value: string = "hello world"
+  hello: string = "world"
 }
 
 @MyAnnotation
 class MyClass {}
 
+
 @Entry
 @Component
-struct Index {
+export struct Index {
   @State
   message: string = 'Hello World';
   testESObject: ESObject = 'Hello ESObject';
