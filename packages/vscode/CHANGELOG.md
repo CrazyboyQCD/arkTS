@@ -1,5 +1,11 @@
 # vscode-naily-ets
 
+## 1.2.1
+
+### Patch Changes
+
+- 4f5092a: fix: 修复 TS Plugin 未打包的问题 (#177)
+
 ## 1.2.0
 
 ### Minor Changes
