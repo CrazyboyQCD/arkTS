@@ -30,6 +30,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
         if (!ets.isAnnotationDeclaration(node)) return node.forEachChild(walk)
         if (currentPositionOffset >= node.getStart(sourceFile) && currentPositionOffset <= node.getEnd()) {
           foundAnnotationDeclaration = node
+          return
         }
         return node.forEachChild(walk)
       })
@@ -70,6 +71,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
         if (!ets.isAnnotation(node)) return node.forEachChild(walk)
         if (currentPositionOffset >= node.getStart(sourceFile) && currentPositionOffset <= node.getEnd()) {
           foundDecorator = node
+          return
         }
         return node.forEachChild(walk)
       })
@@ -105,6 +107,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
         if (!ets.isStructDeclaration(node)) return node.forEachChild(walk)
         if (currentPositionOffset >= node.getStart(sourceFile) && currentPositionOffset <= node.getEnd()) {
           foundStructDeclaration = node
+          return
         }
         return node.forEachChild(walk)
       })
@@ -143,6 +146,7 @@ export function patchSemantic(typescriptServices: LanguageServicePlugin[]): void
         if (!ets.isCallExpression(node)) return node.forEachChild(walk)
         if (currentPositionOffset >= node.getStart(sourceFile) && currentPositionOffset <= node.getEnd()) {
           foundCallExpression = node
+          return
         }
         return node.forEachChild(walk)
       })
