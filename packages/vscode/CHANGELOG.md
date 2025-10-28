@@ -1,5 +1,11 @@
 # vscode-naily-ets
 
+## 1.2.2
+
+### Patch Changes
+
+- bb337b3: fix: 修复 struct Hover、CallExpression Hover 的高亮问题，替换 typescript 语言为 ets 语言实现正确的高亮 (#179)
+
 ## 1.2.1
 
 ### Patch Changes
