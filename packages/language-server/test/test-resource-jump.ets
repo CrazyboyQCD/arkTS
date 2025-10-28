@@ -3,7 +3,7 @@
 
 @Entry
 @Component
-struct TestPage {
+export struct TestPage {
   build() {
     Column() {
       Text('Hello World')
@@ -21,9 +21,6 @@ struct TestPage {
       // 测试诊断功能：下面的资源引用不存在，应该显示错误/警告
       Text($r('app.string.nonexistent_string'))  // 不存在的资源
         .fontColor($r('app.color.nonexistent_color'))  // 不存在的颜色
-      
-      // 测试无效格式
-      Text($r('invalid.format'))  // 无效的资源引用格式
     }
     .width('100%')
     .height('100%')
