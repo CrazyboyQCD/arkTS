@@ -1,4 +1,5 @@
 import { MyCustomComponent } from 'sample-library'
+import {} from '@kit.ArkData'
 
 class MyLazyDataSource implements IDataSource {
   getData(index: number): number {
@@ -18,8 +19,6 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
-/** # Foo */
-/** # Bar */
 @interface MyAnnotation {
   value: string = "hello world"
 }
