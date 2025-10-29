@@ -1,4 +1,3 @@
-import type { ResourceDiagnosticLevel } from './services/resource-diagnostic.service'
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
 import { createArkTServices, ProjectDetectorManager } from '@arkts/language-service'
@@ -7,7 +6,6 @@ import { createConnection, createServer, createTypeScriptProject, FileChangeType
 import * as ets from 'ohos-typescript'
 import { create as createTypeScriptServices } from 'volar-service-typescript'
 import { LanguageServerConfigManager } from './classes/config-manager'
-import { ResourceWatcher } from './classes/resource-watcher'
 import { logger } from './logger'
 import { patchSemantic } from './patches/patch-semantic'
 
@@ -22,29 +20,9 @@ connection.onRequest('ets/waitForEtsConfigurationChangedRequested', (e) => {
   lspConfiguration.setConfiguration(e)
 })
 
-// 全局配置状态
-let globalResourceDiagnosticLevel: ResourceDiagnosticLevel = 'error'
-
-// 监听配置变更
-connection.onDidChangeConfiguration((params) => {
-  const settings = params.settings
-  if (settings?.ets?.resourceReferenceDiagnostic) {
-    globalResourceDiagnosticLevel = settings.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
-    logger.getConsola().info('Resource diagnostic level changed to:', globalResourceDiagnosticLevel)
-  }
-})
-
-ResourceWatcher.from(connection)
-
 connection.onInitialize(async (params) => {
   if (params.locale) lspConfiguration.setLocale(params.locale)
   lspConfiguration.setConfiguration({ typescript: params.initializationOptions?.typescript })
-
-  // 初始化配置
-  if (params.initializationOptions?.ets?.resourceReferenceDiagnostic) {
-    globalResourceDiagnosticLevel = params.initializationOptions.ets.resourceReferenceDiagnostic as ResourceDiagnosticLevel
-    logger.getConsola().info('Initial resource diagnostic level:', globalResourceDiagnosticLevel)
-  }
 
   const tsdk = lspConfiguration.getTypeScriptTsdk()
 
@@ -82,6 +60,7 @@ connection.onInitialize(async (params) => {
   })
   patchSemantic(typescriptServices)
 
+  // TODO
   connection.onRequest('ets/onDidChangeTextDocument', () => {})
 
   return server.initialize(

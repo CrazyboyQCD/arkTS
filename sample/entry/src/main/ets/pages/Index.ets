@@ -19,13 +19,11 @@ class MyLazyDataSource implements IDataSource {
   }
 }
 
-@interface MyAnnotation {
+export @interface MyAnnotation {
   hello: string = "world"
 }
 
-@MyAnnotation
 class MyClass {}
-
 
 @Entry
 @Component
@@ -37,7 +35,7 @@ export struct Index {
   build() {
     Row() {
       Column() {
-        Text($r('app.string.welcome_message'))
+        Text($r('app.string.EntryAbility_label'))
           .fontSize(50)
           .fontWeight(FontWeight.Bold)
           .textAlign(TextAlign.Center)

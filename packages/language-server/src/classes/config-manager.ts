@@ -20,7 +20,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
       baseUrl: '',
       lib: [],
       paths: {},
-      relativeWithConfigFilePaths: {},
     },
     typescript: {
       tsdk: '',
@@ -152,7 +151,7 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
   }
 
   getBaseUrl(): string {
-    return this.config.ohos.baseUrl || ''
+    return this.config.ohos.baseUrl
   }
 
   setLib(lib: string[]): this {
@@ -175,16 +174,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     return this.config.ohos.paths || {}
   }
 
-  setRelativeWithConfigFilePaths(relativeWithConfigFilePaths: import('ohos-typescript').MapLike<string[]>): this {
-    this.logger.getConsola().info(`ohos.relativeWithConfigFilePaths changed: new: ${JSON.stringify(relativeWithConfigFilePaths, null, 2)}, old: ${JSON.stringify(this.config.ohos.relativeWithConfigFilePaths, null, 2)}`)
-    this.config.ohos.relativeWithConfigFilePaths = relativeWithConfigFilePaths
-    return this
-  }
-
-  getRelativeWithConfigFilePaths(): import('ohos-typescript').MapLike<string[]> {
-    return this.config.ohos.relativeWithConfigFilePaths || {}
-  }
-
   setLocale(locale: string): this {
     this.logger.getConsola().info(`locale changed: new: ${locale}, old: ${this.locale}`)
     this.locale = locale
@@ -202,7 +191,6 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     if (config.ohos?.etsLoaderPath) this.setEtsLoaderPath(config.ohos.etsLoaderPath)
     if (config.ohos?.lib) this.setLib(config.ohos.lib)
     if (config.ohos?.paths) this.setPaths(config.ohos.paths)
-    if (config.ohos?.relativeWithConfigFilePaths) this.setRelativeWithConfigFilePaths(config.ohos.relativeWithConfigFilePaths)
     if (config.ohos?.sdkPath) this.setSdkPath(config.ohos.sdkPath)
     if (config.typescript?.tsdk) this.setTypeScriptTsdk(config.typescript.tsdk)
     if (config.debug !== undefined) this.setDebug(config.debug)
@@ -258,26 +246,7 @@ export class LanguageServerConfigManager implements LanguageServerConfigurator {
     }
   }
 
-  private convertPaths<TCompilerOptions extends { paths?: import('ohos-typescript').MapLike<string[]>, [key: string]: any }>(compilerOptions: TCompilerOptions): TCompilerOptions {
-    if (typeof compilerOptions.configFilePath === 'string') {
-      const configFilePathDir = path.dirname(compilerOptions.configFilePath)
-      const baseUrl = this.getBaseUrl()
-
-      for (const mappingPath in compilerOptions.paths || {}) {
-        if (!Array.isArray(compilerOptions.paths?.[mappingPath])) continue
-
-        compilerOptions.paths[mappingPath] = compilerOptions.paths[mappingPath].map((p) => {
-          return path.isAbsolute(p) ? p : path.relative(baseUrl, path.resolve(configFilePathDir, p))
-        })
-      }
-    }
-    return compilerOptions
-  }
-
   getTsConfig(originalSettings: ets.CompilerOptions): ets.CompilerOptions {
-    // 将 originalSettings.paths 中的路径转换为相对于 baseUrl 的路径，这样用户就仍然能使用tsconfig配置paths
-    originalSettings = defu({ paths: this.getRelativeWithConfigFilePaths() }, originalSettings)
-    originalSettings = this.convertPaths(originalSettings)
     const finalCompilerOptions = defu(originalSettings, {
       etsLoaderPath: this.getEtsLoaderPath(),
       paths: this.getPaths(),

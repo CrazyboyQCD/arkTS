@@ -7,17 +7,17 @@ import * as vscode from 'vscode'
 import { Environment } from '../environment'
 import { Translator } from '../translate'
 import { SdkAnalyzer } from './sdk-analyzer'
+import { SdkVersionGuesser } from './sdk-guesser'
 
 type IsInstalledVersion = keyof typeof SdkVersion extends `API${infer N}` ? N : never
-
-interface SdkAnalyzerMetadata {
-  type: 'local' | 'workspace' | 'global'
-}
 
 @Service
 export class SdkManager extends Environment {
   @Autowired
-  protected readonly translator: Translator
+  public readonly translator: Translator
+
+  @Autowired
+  public readonly sdkVersionGuesser: SdkVersionGuesser
 
   /**
    * Set the path to the OpenHarmony SDK.
@@ -87,7 +87,7 @@ export class SdkManager extends Environment {
   }
 
   /** Get the path of the Ohos SDK from `local.properties` file. */
-  protected async getOhosSdkPathFromLocalProperties(): Promise<string | undefined> {
+  async getOhosSdkPathFromLocalProperties(): Promise<string | undefined> {
     try {
       const workspaceDir = this.getCurrentWorkspaceDir()
       if (!workspaceDir) return undefined
@@ -103,8 +103,8 @@ export class SdkManager extends Environment {
     catch {}
   }
 
-  private _analyzedSdkPath: string | undefined
-  private _analyzerSdkAnalyzer: SdkAnalyzer<SdkAnalyzerMetadata> | undefined
+  private static _analyzedSdkPath: string | undefined
+  private static _sdkAnalyzer: SdkAnalyzer | undefined
 
   public async getAnalyzedHmsSdkPath(): Promise<vscode.Uri | undefined> {
     const hmsSdkPath = vscode.workspace.getConfiguration('ets').get('hmsPath')
@@ -114,61 +114,28 @@ export class SdkManager extends Environment {
 
   /** Get the path of the Ohos SDK from `local.properties` file or configuration. */
   public async getAnalyzedSdkPath(force: boolean = false): Promise<string | undefined> {
-    if (!force && this._analyzedSdkPath) return this._analyzedSdkPath
+    if (!force && SdkManager._analyzedSdkPath) return SdkManager._analyzedSdkPath
+    const localSdkAnalyzer = await SdkAnalyzer.createLocalSdkAnalyzer(this)
+    const workspaceFolderAnalyzer = await SdkAnalyzer.createWorkspaceSdkAnalyzer(this)
+    const globalAnalyzer = await SdkAnalyzer.createGlobalSdkAnalyzer(this)
 
-    // Check the local.properties file first
-    const localSdkPath = await this.getOhosSdkPathFromLocalProperties()
-    const localSdkAnalyzer = localSdkPath
-      ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-          vscode.Uri.file(localSdkPath),
-          await this.getAnalyzedHmsSdkPath(),
-          this,
-          this.translator,
-          { type: 'local' },
-        )
-      : undefined
-
-    // Check the workspace folder configuration
-    const inspectedConfiguration = vscode.workspace.getConfiguration('ets').inspect<string>('sdkPath') || {} as ReturnType<ReturnType<typeof vscode.workspace.getConfiguration>['inspect']>
-    const workspaceFolderAnalyzer = inspectedConfiguration?.workspaceValue && typeof inspectedConfiguration.workspaceValue === 'string'
-      ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-          vscode.Uri.file(inspectedConfiguration.workspaceValue),
-          await this.getAnalyzedHmsSdkPath(),
-          this,
-          this.translator,
-          { type: 'workspace' },
-        )
-      : undefined
-
-    // Check the global configuration
-    const globalAnalyzer = inspectedConfiguration?.globalValue && typeof inspectedConfiguration.globalValue === 'string'
-      ? new SdkAnalyzer<SdkAnalyzerMetadata>(
-          vscode.Uri.file(inspectedConfiguration.globalValue),
-          await this.getAnalyzedHmsSdkPath(),
-          this,
-          this.translator,
-          { type: 'global' },
-        )
-      : undefined
-
-    // Choose a valid SDK path
-    const { choicedAnalyzer, analyzerStatus } = await SdkAnalyzer.choiceValidSdkPath<SdkAnalyzerMetadata>(
-      { analyzer: localSdkAnalyzer, metadata: { type: 'local' } },
-      { analyzer: workspaceFolderAnalyzer, metadata: { type: 'workspace' } },
-      { analyzer: globalAnalyzer, metadata: { type: 'global' } },
+    const { choicedAnalyzer, analyzerStatus } = await SdkAnalyzer.choiceValidSdkPath(
+      localSdkAnalyzer,
+      workspaceFolderAnalyzer,
+      globalAnalyzer,
     )
     const sdkPath = await choicedAnalyzer?.getSdkUri(force)
-    this.getConsola().info(`Analyzed OHOS SDK path: ${sdkPath}, current using analyzer: ${choicedAnalyzer?.getExtraMetadata()?.type}`)
+    this.getConsola().info(`Analyzed OHOS SDK path: ${sdkPath}, current using analyzer: ${choicedAnalyzer?.getIdentifier() || 'unknown identifier'}`)
     for (const status of analyzerStatus)
-      this.getConsola().info(`(${status.analyzer?.getExtraMetadata()?.type || status.metadata?.type || 'unknown type'}) Analyzer status: ${status.isValid ? 'available ✅' : 'no available ❌'} ${status.error ? status.error : ''}`)
-    this._analyzedSdkPath = sdkPath?.fsPath
-    this._analyzerSdkAnalyzer = choicedAnalyzer
-    return this._analyzedSdkPath
+      this.getConsola().info(`(${status.identifier || 'unknown identifier'}) Analyzer status: ${status.isValid ? 'available ✅' : 'no available ❌'} ${status.error ? status.error : ''}`)
+    SdkManager._analyzedSdkPath = sdkPath?.fsPath
+    SdkManager._sdkAnalyzer = choicedAnalyzer
+    return SdkManager._analyzedSdkPath
   }
 
-  public async getAnalyzedSdkAnalyzer(force: boolean = false): Promise<SdkAnalyzer<SdkAnalyzerMetadata> | undefined> {
-    if (!force && this._analyzerSdkAnalyzer) return this._analyzerSdkAnalyzer
+  public async getAnalyzedSdkAnalyzer(force: boolean = false): Promise<SdkAnalyzer | undefined> {
+    if (!force && SdkManager._sdkAnalyzer) return SdkManager._sdkAnalyzer
     await this.getAnalyzedSdkPath(force)
-    return this._analyzerSdkAnalyzer
+    return SdkManager._sdkAnalyzer
   }
 }

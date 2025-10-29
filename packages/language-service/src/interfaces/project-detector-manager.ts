@@ -3,6 +3,9 @@ import type { Emitter } from 'mitt'
 import { UriUtil } from '../utils/uri-util'
 import { ProjectDetector } from './project-detector'
 
+/** Empty function, provide a symbol to be used as a dependency injection token for IoC container framework. */
+export function ProjectDetectorManager(_v: never): void {}
+
 export interface ProjectDetectorManager extends Pick<Emitter<RustProjectDetector.EventMap>, 'emit'> {
   delete(workspaceFolder: string): void
   add(workspaceFolder: string): void

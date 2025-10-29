@@ -31,6 +31,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "catalog:lint",
     "@antfu/nip": "catalog:scripts",
+    "@arkts/language-service": "workspace:*",
     "@arkts/project-detector": "catalog:prod",
     "@arkts/project-detector-android-arm-eabi": "catalog:prod",
     "@arkts/project-detector-android-arm64": "catalog:prod",
