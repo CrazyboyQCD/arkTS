@@ -3,6 +3,8 @@
   "extension.description": "VS Code的OpenHarmony ArkTS语言支持",
   "command.installSDK": "安装/切换 OpenHarmony SDK",
   "command.restartServer": "重启 ArkTS 服务器",
+  "command.createProject": "创建 ArkTS 项目",
+  "viewWelcome.createProject": "\n使用Naily's ArkTS Support快速创建ArkTS项目。\n[创建 ArkTS 项目](command:ets.createProject)",
   "sdk.install.success": "OpenHarmony SDK {0} 安装成功。",
   "sdk.install.cancelled": "OpenHarmony SDK {0} 安装已取消。",
   "sdk.install.alreadyDownloading": "OpenHarmony SDK {0} 正在下载中。",
@@ -61,5 +63,15 @@
   "walkthroughs.ArkTS-Walkthrough.description": "帮助您设置 OpenHarmony ArkTS 开发环境。",
   "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK": "安装 OpenHarmony SDK",
   "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.description": "安装 OpenHarmony SDK 以支持 ArkTS 开发。\n[安装 OpenHarmony SDK](command:ets.installSDK)",
-  "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.media.markdown": "./assets/install-sdk.zh-cn.md"
+  "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.media.markdown": "./assets/install-sdk.zh-cn.md",
+  "project.createProject.title": "创建 ArkTS 项目",
+  "project.createProject.submit": "创建",
+  "project.createProject.application": "应用",
+  "project.createProject.projectName": "工程名",
+  "project.createProject.bundleName": "包名",
+  "project.createProject.savePath": "保存位置",
+  "project.createProject.compatibleSdkVersion": "兼容SDK",
+  "project.createProject.moduleName": "模块名",
+  "project.createProject.deviceType": "设备类型",
+  "project.templateMarket.title": "模版市场"
 }

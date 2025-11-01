@@ -29,8 +29,8 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
     this.getConsola().info(`Guessed OpenHarmony SDK version: ${guessedOhosSdkVersion}`)
     if (!guessedOhosSdkVersion) return
     const [sdkStringVersion, sdkNumberVersion] = guessedOhosSdkVersion
-    const currentSdkPath = await this.sdkManager.getAnalyzedSdkPath()
-    const currentSdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer()
+    const currentSdkPath = await this.sdkManager.getAnalyzedSdkPath(this)
+    const currentSdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer(this)
 
     // Check if the current SDK is the same as the guessed SDK.
     if (currentSdkPath) {

@@ -1,6 +1,7 @@
 import type { OhosClientOptions } from '@arkts/shared'
 import type { AbstractWatcher } from '../abstract-watcher'
 import type { Translator } from '../translate'
+import type { SdkVersionGuesser } from './sdk-guesser'
 import type { SdkManager } from './sdk-manager'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -143,9 +144,9 @@ export class SdkAnalyzer {
     if (type === 'global' && typeof inspectedConfiguration?.globalValue === 'string') return inspectedConfiguration.globalValue
   }
 
-  static async createLocalSdkAnalyzer(sdkManager: SdkManager): Promise<SdkAnalyzer | SdkAnalyzer.NotFoundError> {
+  static async createLocalSdkAnalyzer(sdkManager: SdkManager, sdkVersionGuesser: SdkVersionGuesser): Promise<SdkAnalyzer | SdkAnalyzer.NotFoundError> {
     const localSdkPath = await sdkManager.getOhosSdkPathFromLocalProperties()
-    const [, numbericSdkVersion] = sdkManager.sdkVersionGuesser.getGuessedOhosSdkVersion() || []
+    const [, numbericSdkVersion] = sdkVersionGuesser.getGuessedOhosSdkVersion() || []
     if (!localSdkPath || !numbericSdkVersion) return new SdkAnalyzer.NotFoundError('local', sdkManager.translator)
     const sdkUri = vscode.Uri.file(path.resolve(localSdkPath, numbericSdkVersion.toString()))
     return this.fromSdkManager(sdkManager, sdkUri, await sdkManager.getAnalyzedHmsSdkPath(), 'local')

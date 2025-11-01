@@ -8,7 +8,7 @@ import { EtsLanguageServer } from './language-server'
 import type { IClassWrapper } from 'unioc'
 import * as vscode from 'vscode'
 import { ProjectDetectorManager } from '@arkts/language-service'
-import { SdkVersionGuesser } from './sdk/sdk-guesser'
+import './project/command'
 
 class ArkTSExtension extends VSCodeBootstrap<Promise<LabsInfo | undefined>> {
   beforeInitialize(context: ExtensionContext): Promise<void> | void {
@@ -35,7 +35,6 @@ class ArkTSExtension extends VSCodeBootstrap<Promise<LabsInfo | undefined>> {
     })
 
     const globalContainer = this.getGlobalContainer()
-    await globalContainer.findOne<SdkVersionGuesser>(SdkVersionGuesser)?.resolve()
     const projectDetectorManager = ProjectDetectorManager.create(vscode.workspace.workspaceFolders?.map(folder => folder.uri.toString()) ?? [])
     this.createValue(projectDetectorManager, ProjectDetectorManager)
     const languageServer = globalContainer.findOne(EtsLanguageServer) as IClassWrapper<typeof EtsLanguageServer> | undefined

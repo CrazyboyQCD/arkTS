@@ -22,6 +22,7 @@ export default defineConfig({
   tsconfig: './tsconfig.json',
   platform: 'node',
   clean: false,
+  onSuccess: 'vite build',
   minify: {
     compress: {
       keepNames: {
@@ -37,9 +38,6 @@ export default defineConfig({
     },
   },
   outDir: '.',
-  env: {
-    NODE_ENV: 'production',
-  },
   inputOptions: {
     checks: {
       eval: false,
@@ -68,6 +66,7 @@ export default defineConfig({
         '../shared/src',
       ].map(p => path.join(process.cwd(), p))
     : false,
+  ignoreWatch: [/\.d\.ts$/],
   plugins: [
     {
       name: 'umd2esm',

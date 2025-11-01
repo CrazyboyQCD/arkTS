@@ -1,18 +1,7 @@
 packages:
   - packages/*
   - ohos-typescript
-linkWorkspacePackages: true
-dedupeInjectedDeps: false
-recursiveInstall: true
-publicHoistPattern:
-  - '@arkts/project-detector'
-  - '@arkts/project-detector-*'
-  - mitt
-  - alien-signals
-  - chokidar
-  - '@napi-rs/wasm-runtime'
-lockfile: true
-nodeLinker: isolated
+
 catalogs:
   build:
     '@swc/core': ^1.13.5
@@ -31,7 +20,7 @@ catalogs:
   frontend:
     '@vitejs/plugin-vue': ^6.0.1
     '@vitejs/plugin-vue-jsx': ^5.1.1
-    '@vueuse/core': ^13.9.0
+    '@vueuse/core': 13.9.0
     pinia: ^3.0.3
     unocss: ^66.5.1
     vite: npm:rolldown-vite@latest
@@ -111,6 +100,15 @@ catalogs:
     '@vitest/coverage-v8': ^3.2.4
     '@vitest/ui': ^3.2.4
     vitest: ^3.2.4
+
+dedupeInjectedDeps: false
+
+linkWorkspacePackages: true
+
+lockfile: true
+
+nodeLinker: isolated
+
 onlyBuiltDependencies:
   - '@swc/core'
   - '@vscode/vsce-sign'
@@ -118,3 +116,13 @@ onlyBuiltDependencies:
   - keytar
   - simple-git-hooks
   - unrs-resolver
+
+publicHoistPattern:
+  - '@arkts/project-detector'
+  - '@arkts/project-detector-*'
+  - mitt
+  - alien-signals
+  - chokidar
+  - '@napi-rs/wasm-runtime'
+
+recursiveInstall: true

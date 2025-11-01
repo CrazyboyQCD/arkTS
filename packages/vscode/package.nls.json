@@ -3,6 +3,8 @@
   "extension.description": "OpenHarmony ArkTS language support for VS Code",
   "command.installSDK": "Install/Switch OpenHarmony SDK",
   "command.restartServer": "Restart ETS Language Server",
+  "command.createProject": "Create ArkTS Project",
+  "viewWelcome.createProject": "\nQuickly create ArkTS projects using Naily's ArkTS Support.\n[Create ArkTS Project](command:ets.createProject)",
   "sdk.install.success": "OpenHarmony SDK {0} installed successfully.",
   "sdk.install.cancelled": "OpenHarmony SDK {0} installation cancelled.",
   "sdk.install.alreadyDownloading": "OpenHarmony SDK {0} is already downloading.",
@@ -61,5 +63,15 @@
   "walkthroughs.ArkTS-Walkthrough.description": "Help you setup OpenHarmony ArkTS development environment with your IDE.",
   "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK": "Install OpenHarmony SDK",
   "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.description": "Install OpenHarmony SDK to support ArkTS development. \n[Install OpenHarmony SDK](command:ets.installSDK)",
-  "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.media.markdown": "./assets/install-sdk.md"
+  "walkthroughs.ArkTS-Walkthrough.steps.installOpenHarmonySDK.media.markdown": "./assets/install-sdk.md",
+  "project.createProject.title": "Create ArkTS Project",
+  "project.templateMarket.title": "Template Market",
+  "project.createProject.submit": "Create",
+  "project.createProject.application": "Application",
+  "project.createProject.projectName": "Project Name",
+  "project.createProject.bundleName": "Bundle Name",
+  "project.createProject.savePath": "Save Path",
+  "project.createProject.compatibleSdkVersion": "Compatible SDK Version",
+  "project.createProject.moduleName": "Module Name",
+  "project.createProject.deviceType": "Device Type"
 }

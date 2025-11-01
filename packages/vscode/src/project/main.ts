@@ -1,0 +1,34 @@
+import type { ConnectionProtocol } from './interfaces/connection-protocol'
+import { createBirpc } from 'birpc'
+import { createPinia } from 'pinia'
+import { createApp } from 'vue'
+import { createI18n } from 'vue-i18n'
+import Root from './Root.vue'
+import { router } from './routers'
+import 'uno.css'
+
+async function main(): Promise<void> {
+  window.vscode = acquireVsCodeApi()
+  window.connection = createBirpc<ConnectionProtocol.ServerFunction, ConnectionProtocol.ClientFunction>({}, {
+    on: fn => window.addEventListener('message', msg => fn(msg.data)),
+    post: data => window.vscode.postMessage(data),
+    serialize: data => JSON.stringify(data),
+    deserialize: data => JSON.parse(data),
+  })
+
+  const app = createApp(Root)
+  app.use(router)
+  const i18n = createI18n({
+    legacy: false,
+    locale: 'C',
+    flatJson: true,
+    messages: {
+      C: await window.connection.findAllL10nByCurrentLanguage(),
+    },
+  })
+  app.use(i18n)
+  app.use(createPinia())
+  app.mount('#app')
+}
+
+window.addEventListener('load', main)

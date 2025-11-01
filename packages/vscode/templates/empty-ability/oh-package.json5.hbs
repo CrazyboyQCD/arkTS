@@ -1,0 +1,10 @@
+{
+  "modelVersion": "{{modelVersion}}",
+  "description": "Please describe the basic information.",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hypium": "{{hypiumVersion}}"{{#if (and (gte compatibleBaseApi '11') (isEqual apiType "stageMode"))}},
+    "@ohos/hamock": "{{hamockVersion}}"
+    {{/if}}
+  }
+}

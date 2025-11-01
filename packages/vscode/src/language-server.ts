@@ -10,6 +10,7 @@ import { Autowired } from 'unioc'
 import { Command, Disposable, ExtensionContext, WatchConfiguration } from 'unioc/vscode'
 import * as vscode from 'vscode'
 import { LanguageServerContext } from './context/server-context'
+import { SdkVersionGuesser } from './sdk/sdk-guesser'
 import { SdkManager } from './sdk/sdk-manager'
 import { Translator } from './translate'
 import { sleep } from './utils'
@@ -25,6 +26,9 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
 
   @Autowired
   protected readonly sdkManager: SdkManager
+
+  @Autowired
+  protected readonly sdkVersionGuesser: SdkVersionGuesser
 
   onExecuteCommand(): void {
     this.restart().catch(e => this.handleLanguageServerError(e))
@@ -111,8 +115,8 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
    * @throws {SdkAnalyzerException} If the SDK path have any no right, it will throw an error.
    */
   async getClientOptions(force: boolean = false): Promise<LanguageClientOptions> {
-    const sdkPath = await this.sdkManager.getAnalyzedSdkPath(force)
-    const sdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer(force)
+    const sdkPath = await this.sdkManager.getAnalyzedSdkPath(this.sdkVersionGuesser, force)
+    const sdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer(this.sdkVersionGuesser, force)
     if (!sdkPath || !sdkAnalyzer) {
       vscode.window.showErrorMessage(this.translator.t('sdk.error.validSdkPath'))
       throw new Error(this.translator.t('sdk.error.validSdkPath'))
@@ -190,7 +194,7 @@ export class EtsLanguageServer extends LanguageServerContext implements Command,
       this.handleDidChangeTextDocumentRequest()
       // support for auto close tag
       if (this._client) activateAutoInsertion('ets', this._client)
-      this.getConsola().info('ETS Language Server restarted!')
+      this.getConsola().info(`ETS Language Server ${type}!`)
       vscode.window.setStatusBarMessage(`ETS Language Server ${type}!`, 1000)
       return [undefined, clientOptions]
     }

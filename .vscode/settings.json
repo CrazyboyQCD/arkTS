@@ -45,5 +45,23 @@
       "pattern": "."
     }
   ],
-  "oxc.enable": true
+  "material-icon-theme.folders.associations": {
+    "AppScope": "app",
+    "hvigor": "tools",
+    "ohosTest": "test",
+    "ets": "typescript",
+    "composables": "hook"
+  },
+  "oxc.enable": true,
+  "i18n-ally.localesPaths": "./packages/vscode",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.keystyle": "flat",
+  "i18n-ally.enabledFrameworks": [
+    "vscode",
+    "vue",
+    "general"
+  ],
+  "i18n-ally.dirStructure": "file",
+  "i18n-ally.pathMatcher": "package.nls.?{locale?}.json",
+  "i18n-ally.sourceLanguage": "en"
 }

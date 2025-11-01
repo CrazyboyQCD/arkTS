@@ -16,9 +16,6 @@ export class SdkManager extends Environment {
   @Autowired
   public readonly translator: Translator
 
-  @Autowired
-  public readonly sdkVersionGuesser: SdkVersionGuesser
-
   /**
    * Set the path to the OpenHarmony SDK.
    *
@@ -113,9 +110,9 @@ export class SdkManager extends Environment {
   }
 
   /** Get the path of the Ohos SDK from `local.properties` file or configuration. */
-  public async getAnalyzedSdkPath(force: boolean = false): Promise<string | undefined> {
+  public async getAnalyzedSdkPath(sdkVersionGuesser: SdkVersionGuesser, force: boolean = false): Promise<string | undefined> {
     if (!force && SdkManager._analyzedSdkPath) return SdkManager._analyzedSdkPath
-    const localSdkAnalyzer = await SdkAnalyzer.createLocalSdkAnalyzer(this)
+    const localSdkAnalyzer = await SdkAnalyzer.createLocalSdkAnalyzer(this, sdkVersionGuesser)
     const workspaceFolderAnalyzer = await SdkAnalyzer.createWorkspaceSdkAnalyzer(this)
     const globalAnalyzer = await SdkAnalyzer.createGlobalSdkAnalyzer(this)
 
@@ -133,9 +130,9 @@ export class SdkManager extends Environment {
     return SdkManager._analyzedSdkPath
   }
 
-  public async getAnalyzedSdkAnalyzer(force: boolean = false): Promise<SdkAnalyzer | undefined> {
+  public async getAnalyzedSdkAnalyzer(sdkVersionGuesser: SdkVersionGuesser, force: boolean = false): Promise<SdkAnalyzer | undefined> {
     if (!force && SdkManager._sdkAnalyzer) return SdkManager._sdkAnalyzer
-    await this.getAnalyzedSdkPath(force)
+    await this.getAnalyzedSdkPath(sdkVersionGuesser, force)
     return SdkManager._sdkAnalyzer
   }
 }
