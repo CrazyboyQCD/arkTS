@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
+const { isOnline } = useNetwork()
 const isBack = ref(false)
 const routeHistory = ref<string[]>([route.path])
 let isPopState = false
@@ -69,17 +70,63 @@ const transitionClasses = computed(() => {
     leaveToClass,
   }
 })
+
+const error = ref<Error | null>(null)
+const key = ref(0)
+const isThrowErrorIfNoNetwork = computed(() => {
+  if (route.meta.throwErrorIfNoNetwork === true && !isOnline.value) return true
+  return false
+})
+watch(isThrowErrorIfNoNetwork, () => key.value++)
+
+if (isThrowErrorIfNoNetwork.value) {
+  onErrorCaptured((err) => {
+    error.value = err
+  })
+}
 </script>
 
 <template>
-  <div class="mx-1 md:mx-10 lg:mx-20 xl:mx-30 2xl:mx-60 mt-6 md:mt-13 transition-all duration-300 select-none relative">
+  <div class="mx-1 md:mx-10 lg:mx-20 xl:mx-30 2xl:mx-60 mt-6 mb-10 md:mt-13 transition-all duration-300 select-none relative">
     <RouterView v-slot="{ Component }">
       <template v-if="Component">
         <Transition v-bind="transitionClasses">
           <div :key="$route.path" class="w-full">
             <KeepAlive>
               <Suspense>
-                <component :is="Component" />
+                <template #default>
+                  <!-- Bind key to force re-render when isThrowErrorIfNoNetwork changes. -->
+                  <component :is="Component" :key />
+                </template>
+                <template #fallback>
+                  <div class="relative top-[-6rem] left-[-1rem] right-[-1rem] bottom-0 flex flex-col items-center justify-center gap-2 z-50 w-[calc(100%+2rem)] h-screen">
+                    <div v-if="error" class="flex flex-col items-center justify-center gap-2 bg-[var(--vscode-editor-background)] p-4 rounded">
+                      <div class="i-ph-warning-duotone font-size-10 text-[var(--vscode-errorForeground)]" />
+                      <div>加载失败, 请提交 issue 或联系开发者修复此问题：</div>
+                      <a href="https://github.com/ohosvscode/arkTS/issues">
+                        https://github.com/ohosvscode/arkTS/issues
+                      </a>
+                      <NCode class="text-sm whitespace-pre-wrap">
+                        {{ error?.stack }}
+                      </NCode>
+                      <NButton type="primary" mt-2 @click="$router.back()">
+                        {{ $t('goback') }}
+                      </NButton>
+                    </div>
+
+                    <div v-else-if="isThrowErrorIfNoNetwork" class="flex flex-col items-center justify-center gap-2 bg-[var(--vscode-editor-background)] p-4 rounded">
+                      <div class="i-ph-warning-duotone font-size-10 text-[var(--vscode-errorForeground)]" />
+                      <div>{{ $t('noNetwork') }}</div>
+                      <NButton type="primary" mt-2 @click="$router.back()">
+                        {{ $t('goback') }}
+                      </NButton>
+                    </div>
+
+                    <div v-else class="flex flex-col items-center justify-center gap-2">
+                      <LoadingSpinner size-full />
+                    </div>
+                  </div>
+                </template>
               </Suspense>
             </KeepAlive>
           </div>

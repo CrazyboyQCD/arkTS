@@ -6,7 +6,7 @@ const { title, back = false } = defineProps<{
 </script>
 
 <template>
-  <div flex="~ gap-2 justify-between items-center" m="b6">
+  <div flex="~ gap-2 justify-between items-center wrap" m="b6">
     <div v-if="back" flex="~ gap-2 items-center">
       <NButton v-if="back" circle text @click="$router.back()">
         <div i-ph-arrow-left font-size="2xl" />

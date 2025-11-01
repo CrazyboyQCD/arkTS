@@ -20,6 +20,9 @@ async function main(): Promise<void> {
   app.use(router)
   const i18n = createI18n({
     legacy: false,
+    // `C` is mean `Current`, we only need to use it, not to change it.
+    // The language change will be handled by the VS Code extension,
+    // we just need to follow the vscode itself.
     locale: 'C',
     flatJson: true,
     messages: {

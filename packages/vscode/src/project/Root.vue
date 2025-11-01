@@ -18,6 +18,19 @@ const themeOverrides: GlobalThemeOverrides = {
     buttonColor2: 'var(--vscode-button-background)',
     buttonColor2Pressed: 'var(--vscode-button-activeBackground)',
     borderRadius: '2px',
+    cardColor: 'var(--vscode-input-background)',
+    tagColor: 'var(--vscode-background)',
+  },
+  Card: {
+    borderColor: 'none',
+  },
+  Tabs: {
+    tabColorSegment: 'var(--vscode-button-background)',
+    colorSegment: 'var(--vscode-input-background)',
+    colorSegmentActive: 'var(--vscode-button-hoverBackground)',
+  },
+  Tag: {
+    border: '1px solid var(--vscode-button-background)',
   },
   Button: {
     border: 'var(--vscode-input-border)',
