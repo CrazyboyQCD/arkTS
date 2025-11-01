@@ -6,7 +6,6 @@ export default defineConfig({
     presetIcons(),
     presetAttributify(),
     presetTypography(),
-    presetIcons(),
   ],
   content: {
     pipeline: {
