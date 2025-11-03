@@ -15,6 +15,7 @@ export default antfu({
     'antfu/if-newline': 'off',
     'naily/if-oneline': 'error',
     'ts/no-redeclare': 'off',
+    'vue/singleline-html-element-content-newline': 'off',
   },
   plugins: {
     naily: {

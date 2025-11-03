@@ -87,7 +87,7 @@ if (isThrowErrorIfNoNetwork.value) {
 </script>
 
 <template>
-  <div class="mx-1 md:mx-10 lg:mx-20 xl:mx-30 2xl:mx-60 mt-6 mb-10 md:mt-13 transition-all duration-300 select-none relative">
+  <div class="mx-1 md:mx-10 lg:mx-20 xl:mx-30 2xl:mx-60 mt-6 mb-10 md:mt-13 transition-all duration-300 relative">
     <RouterView v-slot="{ Component }">
       <template v-if="Component">
         <Transition v-bind="transitionClasses">
@@ -102,7 +102,9 @@ if (isThrowErrorIfNoNetwork.value) {
                   <div class="relative top-[-6rem] left-[-1rem] right-[-1rem] bottom-0 flex flex-col items-center justify-center gap-2 z-50 w-[calc(100%+2rem)] h-screen">
                     <div v-if="error" class="flex flex-col items-center justify-center gap-2 bg-[var(--vscode-editor-background)] p-4 rounded">
                       <div class="i-ph-warning-duotone font-size-10 text-[var(--vscode-errorForeground)]" />
-                      <div>加载失败, 请提交 issue 或联系开发者修复此问题：</div>
+                      <div select-none>
+                        加载失败, 请提交 issue 或联系开发者修复此问题：
+                      </div>
                       <a href="https://github.com/ohosvscode/arkTS/issues">
                         https://github.com/ohosvscode/arkTS/issues
                       </a>
@@ -116,7 +118,9 @@ if (isThrowErrorIfNoNetwork.value) {
 
                     <div v-else-if="isThrowErrorIfNoNetwork" class="flex flex-col items-center justify-center gap-2 bg-[var(--vscode-editor-background)] p-4 rounded">
                       <div class="i-ph-warning-duotone font-size-10 text-[var(--vscode-errorForeground)]" />
-                      <div>{{ $t('noNetwork') }}</div>
+                      <div select-none>
+                        {{ $t('noNetwork') }}
+                      </div>
                       <NButton type="primary" mt-2 @click="$router.back()">
                         {{ $t('goback') }}
                       </NButton>

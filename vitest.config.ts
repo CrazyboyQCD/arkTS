@@ -6,6 +6,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      '**/build/**',
       '**/out/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',

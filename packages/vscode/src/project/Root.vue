@@ -82,7 +82,7 @@ const themeOverrides: GlobalThemeOverrides = {
 </script>
 
 <template>
-  <NConfigProvider :theme-overrides>
+  <NConfigProvider :theme-overrides inline-theme-disabled>
     <RouterView />
   </NConfigProvider>
 </template>

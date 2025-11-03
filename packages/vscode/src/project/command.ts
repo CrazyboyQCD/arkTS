@@ -39,12 +39,16 @@ export class CreateProjectCommand implements Command, IOnActivate {
     )
     this.currentCreateProjectWebviewPanel.webview.html = fs.readFileSync(path.resolve(this.extensionUri.fsPath, 'build', 'project.html'), 'utf-8')
     useCompiledWebviewPanel(this.currentCreateProjectWebviewPanel, path.resolve(this.extensionUri.fsPath, 'build', 'project.html'))
-    this.currentCreateProjectConnection = createBirpc<ConnectionProtocol.ClientFunction, ConnectionProtocol.ServerFunction>(keepClassInstanceThis(this.serverFunction), {
-      on: fn => this.currentCreateProjectWebviewPanel?.webview.onDidReceiveMessage(msg => fn(msg)),
-      post: data => this.currentCreateProjectWebviewPanel?.webview.postMessage(data),
-      serialize: data => JSON.stringify(data),
-      deserialize: data => JSON.parse(data),
-    })
+    this.currentCreateProjectConnection = createBirpc<ConnectionProtocol.ClientFunction, ConnectionProtocol.ServerFunction>(
+      keepClassInstanceThis(this.serverFunction),
+      {
+        on: fn => this.currentCreateProjectWebviewPanel?.webview.onDidReceiveMessage(msg => fn(msg)),
+        post: data => this.currentCreateProjectWebviewPanel?.webview.postMessage(data),
+        serialize: data => JSON.stringify(data),
+        deserialize: data => JSON.parse(data),
+      },
+    )
+    this.serverFunction.onRpcInitialized(this.currentCreateProjectConnection)
     this.currentCreateProjectWebviewPanel.onDidDispose(() => {
       this.currentCreateProjectConnection?.$close()
       this.currentCreateProjectWebviewPanel = undefined

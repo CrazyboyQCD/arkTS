@@ -9,7 +9,9 @@ import 'uno.css'
 
 async function main(): Promise<void> {
   window.vscode = acquireVsCodeApi()
-  window.connection = createBirpc<ConnectionProtocol.ServerFunction, ConnectionProtocol.ClientFunction>({}, {
+  window.connection = createBirpc<ConnectionProtocol.ServerFunction, ConnectionProtocol.ClientFunction>({
+    onOpenDialog: (dialogId, uri) => onOpenDialog.callbacks.forEach(callback => callback(uri, dialogId)),
+  }, {
     on: fn => window.addEventListener('message', msg => fn(msg.data)),
     post: data => window.vscode.postMessage(data),
     serialize: data => JSON.stringify(data),
@@ -31,6 +33,7 @@ async function main(): Promise<void> {
   })
   app.use(i18n)
   app.use(createPinia())
+  await new Promise(resolve => setTimeout(resolve, 500))
   app.mount('#app')
 }
 

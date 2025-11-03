@@ -1,4 +1,13 @@
+import type * as vscode from 'vscode'
+
 export namespace ConnectionProtocol {
+  export namespace File {
+    export interface Stat {
+      isFile: boolean
+      isDirectory: boolean
+    }
+  }
+
   export interface ServerFunction {
     /**
      * Check if the path exists
@@ -6,7 +15,14 @@ export namespace ConnectionProtocol {
      * @param path - The path to check
      * @returns True if the path exists, false otherwise
      */
-    checkPathExists(path: string): Promise<boolean>
+    stat(path: string): Promise<false | File.Stat>
+    /**
+     * Read the directory.
+     *
+     * @param path - The path to read.
+     * @returns The directory contents.
+     */
+    readDirectory(path: string): Promise<false | string[]>
     /**
      * Get the home directory
      *
@@ -33,9 +49,34 @@ export namespace ConnectionProtocol {
      * @returns The response object.
      */
     requestTemplateMarketDetail(productId: string): Promise<ServerFunction.RequestTemplateMarketDetail.Response>
+    /**
+     * Create an open dialog.
+     *
+     * @returns The response object.
+     */
+    createOpenDialog(options?: ServerFunction.CreateOpenDialog.Options): Promise<string>
+    /**
+     * Download and extract template.
+     *
+     * @param url - The url of the template.
+     * @returns The response object.
+     */
+    downloadAndExtractTemplate(url: string): Promise<void>
+    /**
+     * Create a project.
+     *
+     * @param context - The context object for compile handlebars template.
+     * @param templateName - The template name in the `packages/vscode/templates` directory.
+     * @param savePath - The save path for the project.
+     * @returns The response object.
+     */
+    createProject(context: Record<string, string | number | boolean | string[]>, templateName: string, savePath: string): Promise<void>
   }
 
   export namespace ServerFunction {
+    export namespace CreateOpenDialog {
+      export interface Options extends Omit<vscode.OpenDialogOptions, 'defaultUri'> {}
+    }
     /**
      * The request template market list namespace.
      *
@@ -78,12 +119,12 @@ export namespace ConnectionProtocol {
           productId: string
           productName: string
           briefInfo: string
-          companyName: string
+          companyName?: string
           productPublicizePicList?: Result.ProductPublicizePic[]
           updateTime: string
           score: string
           version: string
-          licenseName: string
+          licenseName?: string
           saleNum: number
         }
 
@@ -107,15 +148,23 @@ export namespace ConnectionProtocol {
           export function is(value: unknown): value is Result {
             return typeof value === 'object'
               && value !== null
+              && 'productId' in value
+              && typeof value.productId === 'string'
               && 'productName' in value
               && typeof value.productName === 'string'
               && 'briefInfo' in value
               && typeof value.briefInfo === 'string'
-              && 'companyName' in value
-              && typeof value.companyName === 'string'
+              && (!('companyName' in value) || typeof value.companyName === 'string')
               && (!('productPublicizePicList' in value) || (Array.isArray(value.productPublicizePicList) && value.productPublicizePicList.every(item => Result.ProductPublicizePic.is(item))))
               && 'updateTime' in value
               && typeof value.updateTime === 'string'
+              && 'score' in value
+              && typeof value.score === 'string'
+              && 'version' in value
+              && typeof value.version === 'string'
+              && (!('licenseName' in value) || typeof value.licenseName === 'string')
+              && 'saleNum' in value
+              && typeof value.saleNum === 'number'
           }
         }
 
@@ -145,9 +194,25 @@ export namespace ConnectionProtocol {
         export interface Result {
           productEntity: Result.ProductEntity
           productPublicizePicList?: Result.ProductPublicizePic[]
+          productTemplateList?: Result.ProductTemplate[]
         }
 
         export namespace Result {
+          export interface ProductTemplate {
+            /**
+             * The product template version.
+             */
+            version: string
+            /**
+             * The product template changelog.
+             */
+            desc: string
+            /**
+             * The product template file url, is a `.zip` file.
+             */
+            fileUrl: string
+          }
+
           export interface ProductPublicizePic {
             picUrl: string
           }
@@ -190,10 +255,6 @@ export namespace ConnectionProtocol {
              * The product license name.
              */
             licenseName: string
-            /**
-             * The product version.
-             */
-            version: string
             /**
              * The product update time.
              */
@@ -259,5 +320,7 @@ export namespace ConnectionProtocol {
     }
   }
 
-  export interface ClientFunction {}
+  export interface ClientFunction {
+    onOpenDialog(dialogId: string, uri: string[] | undefined): void
+  }
 }

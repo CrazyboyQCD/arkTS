@@ -31,18 +31,37 @@ export interface CheckboxInput extends Input {
   required?: boolean
 }
 
-export type ProjectInput = TextInput | SelectInput | CheckboxInput
+export interface TextButtonContent {
+  type: 'text'
+  text: string
+}
+
+export interface IconButtonContent {
+  type: 'icon'
+  icon: string
+}
+
+export type ButtonContent = TextButtonContent | IconButtonContent
+
+export interface TextButtonGroupInput extends Omit<TextInput, 'type'> {
+  type: 'text-button-group'
+  buttonContent: ButtonContent | [TextButtonContent, IconButtonContent]
+  onClick?(project: ProjectConfiguration): void
+}
+
+export type BaseInput = TextInput | SelectInput | CheckboxInput
+export type ProjectInput = BaseInput | TextButtonGroupInput
 
 export interface ProjectConfiguration {
   title: string
   description: string
   icon?: string
   id: string
-  input: {
-    [key: string]: ProjectInput
-  }
+  input: { [key: string]: ProjectInput }
   rules?: FormRules
-  onChange?(input: ProjectConfiguration): void
+  onInit?(project: Ref<this>): void
+  onDestroy?(newProject: Ref<ProjectConfiguration>): void
+  onSubmit?(project: Ref<this>): void | Promise<void>
 }
 
 export interface ProjectConfigurationContext {
@@ -53,18 +72,41 @@ export interface ProjectConfigurationContext {
 
 export async function useProjectConfiguration(): Promise<ProjectConfigurationContext> {
   const { t } = useI18n()
+  const defaultBasePath = path.join(await window.connection.getHomeDirectory(), 'DevEcoStudioProjects')
+  const subscriptions = new Set<() => void>()
+  const modelVersionToSdkVersionMap = new Map(
+    [
+      ['6.0.0', 20],
+      ['5.1.1', 19],
+      ['5.1.0', 18],
+      ['6.0.5', 17],
+      ['5.0.4', 16],
+      ['5.0.3', 15],
+      ['5.0.2', 14],
+      ['5.0.1', 13],
+      ['5.0.0', 12],
+      ['4.1.0', 11],
+      ['4.0.0', 10],
+    ] as const,
+  )
 
   const projectConfigurations = ref<ProjectConfiguration[]>([
     {
       title: 'Empty Ability',
-      description: '此模板实现基础的Hello World功能。',
+      description: t('project.createProject.emptyAbilityDescription'),
       icon: 'i-ph-cube-duotone',
       id: 'empty-ability',
       rules: {
         savePath: {
           async asyncValidator(_rule, value: TextInput, callback) {
-            if (!value.value) return callback('请输入保存路径')
-            callback(await window.connection.checkPathExists(value.value) ? undefined : '保存路径不存在')
+            if (!value.value) return callback(t('project.createProject.savePathRequired'))
+            const stat = await window.connection.stat(value.value)
+            if (stat && !stat.isDirectory) return callback(t('project.createProject.savePathNotDirectory'))
+            let directoryFileNames = await window.connection.readDirectory(value.value)
+            if (!directoryFileNames) return callback()
+            directoryFileNames = directoryFileNames.filter(item => item !== '.DS_Store')
+            if (directoryFileNames.length > 0) return callback(t('project.createProject.savePathHasFiles', [directoryFileNames.join(', ').slice(0, 30)]))
+            callback()
           },
         },
       },
@@ -72,7 +114,7 @@ export async function useProjectConfiguration(): Promise<ProjectConfigurationCon
         projectName: {
           type: 'text',
           value: 'MyApplication',
-          placeholder: '请输入项目名称',
+          placeholder: t('project.createProject.projectNamePlaceholder'),
           label: t('project.createProject.projectName'),
           labelIcon: 'i-ph-pen-duotone',
           required: true,
@@ -80,31 +122,43 @@ export async function useProjectConfiguration(): Promise<ProjectConfigurationCon
         bundleName: {
           type: 'text',
           value: 'com.example.myapplication',
-          placeholder: '请输入包名',
+          placeholder: t('project.createProject.bundleNamePlaceholder'),
           label: t('project.createProject.bundleName'),
           labelIcon: 'i-ph-package-duotone',
           required: true,
         },
         savePath: {
-          type: 'text',
-          value: path.join(await window.connection.getHomeDirectory(), 'DevEcoStudioProjects', 'MyApplication'),
-          placeholder: '请输入保存路径',
+          type: 'text-button-group',
+          value: path.join(defaultBasePath, 'MyApplication'),
+          placeholder: t('project.createProject.savePathPlaceholder'),
           label: t('project.createProject.savePath'),
           labelIcon: 'i-ph-folder-duotone',
           required: true,
+          buttonContent: [
+            { type: 'text', text: t('project.createProject.selectSavePath') },
+            { type: 'icon', icon: 'i-ph-folder-duotone' },
+          ],
+          onClick: async project => (
+            createOpenDialog({
+              canSelectFiles: false,
+              canSelectFolders: true,
+              canSelectMany: false,
+              onClose(uri) {
+                if (!uri) return
+                if (uri.length !== 1) return
+                project.input.savePath.value = uri[0]
+              },
+            })
+          ),
         },
         compatibleSdkVersion: {
           type: 'select',
-          options: [
-            { value: 20, label: 'API20' },
-            { value: 18, label: 'API18' },
-            { value: 15, label: 'API15' },
-            { value: 14, label: 'API14' },
-            { value: 13, label: 'API13' },
-            { value: 12, label: 'API12' },
-            { value: 11, label: 'API11' },
-            { value: 10, label: 'API10' },
-          ],
+          options: Array
+            .from(modelVersionToSdkVersionMap.entries())
+            .map(([modelVersion, sdkVersion]) => ({
+              value: sdkVersion,
+              label: `${modelVersion}(API${sdkVersion})`,
+            })),
           label: t('project.createProject.compatibleSdkVersion'),
           value: 20,
           labelIcon: 'i-ph-cpu-duotone',
@@ -113,7 +167,7 @@ export async function useProjectConfiguration(): Promise<ProjectConfigurationCon
         moduleName: {
           type: 'text',
           value: 'entry',
-          placeholder: '请输入模块名称',
+          placeholder: t('project.createProject.moduleNamePlaceholder'),
           label: t('project.createProject.moduleName'),
           labelIcon: 'i-ph-bandaids-duotone',
           required: true,
@@ -127,18 +181,74 @@ export async function useProjectConfiguration(): Promise<ProjectConfigurationCon
             { value: 'tablet', label: 'Tablet' },
             { value: '2in1', label: '2in1' },
           ],
-          value: ['phone', 'tablet'],
+          value: ['phone'],
         },
       },
-      onChange(input) {
-        console.warn(input)
+      onInit: project => (
+        subscriptions.add(
+          watch(() => project.value.input.compatibleSdkVersion.value as number, (value) => {
+            if (value < 12) {
+              (project.value.input.deviceType as CheckboxInput).options = [
+                { value: 'phone', label: 'Phone' },
+                { value: 'tablet', label: 'Tablet' },
+                { value: '2in1', label: '2in1' },
+              ]
+              if ((project.value.input.deviceType as CheckboxInput).value?.includes('car')
+                || (project.value.input.deviceType as CheckboxInput).value?.includes('wearable')
+                || (project.value.input.deviceType as CheckboxInput).value?.includes('tv')
+              ) {
+                (project.value.input.deviceType as CheckboxInput).value = (project.value.input.deviceType.value as string[]).filter(item => !['car', 'wearable', 'tv'].includes(item))
+              }
+            }
+            else if (value < 18 && value >= 12) {
+              (project.value.input.deviceType as CheckboxInput).options = [
+                { value: 'phone', label: 'Phone' },
+                { value: 'tablet', label: 'Tablet' },
+                { value: '2in1', label: '2in1' },
+                { value: 'car', label: 'Car' },
+                { value: 'wearable', label: 'Wearable' },
+              ]
+              if ((project.value.input.deviceType as CheckboxInput).value?.includes('tv')) {
+                (project.value.input.deviceType as CheckboxInput).value = (project.value.input.deviceType.value as string[]).filter(item => item !== 'tv')
+              }
+            }
+            else {
+              (project.value.input.deviceType as CheckboxInput).options = [
+                { value: 'phone', label: 'Phone' },
+                { value: 'tablet', label: 'Tablet' },
+                { value: '2in1', label: '2in1' },
+                { value: 'car', label: 'Car' },
+                { value: 'wearable', label: 'Wearable' },
+                { value: 'tv', label: 'TV' },
+              ]
+            }
+          }, { immediate: true }),
+        )
+      ),
+      onDestroy: () => {
+        subscriptions.forEach(subscription => subscription())
+        subscriptions.clear()
       },
+      onSubmit: async project => (
+        await window.connection.createProject({
+          moduleName: project.value.input.moduleName.value as string,
+          projectName: project.value.input.projectName.value as string,
+          bundleName: project.value.input.bundleName.value as string,
+          sdkVersion: project.value.input.compatibleSdkVersion.value as number,
+          deviceType: project.value.input.deviceType.value as string[],
+          modelVersion: Array.from(modelVersionToSdkVersionMap.entries()).find(([_, sdkVersion]) => sdkVersion === project.value.input.compatibleSdkVersion.value as number)?.[0] as string,
+        }, 'empty-ability', project.value.input.savePath.value as string)
+      ),
     },
   ])
+
   const currentProjectId = ref<string>(projectConfigurations.value[0].id)
   const currentProject = ref<ProjectConfiguration>(projectConfigurations.value.find(item => item.id === currentProjectId.value)!)
-
-  watch(currentProject, newVal => newVal.onChange?.(newVal), { deep: true })
+  watch(currentProjectId, () => {
+    currentProject.value.onDestroy?.(currentProject)
+    currentProject.value = projectConfigurations.value.find(item => item.id === currentProjectId.value)!
+    currentProject.value.onInit?.(currentProject)
+  }, { immediate: true })
 
   return {
     projectConfigurations,

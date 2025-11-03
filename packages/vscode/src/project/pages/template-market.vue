@@ -37,9 +37,7 @@ const { currentPage } = useOffsetPagination({
   onPageCountChange: fetchData,
 })
 const { arrivedState } = useScroll(document)
-watch(() => arrivedState.bottom, () => {
-  if (arrivedState.bottom) currentPage.value++
-})
+watch(() => arrivedState.bottom, () => arrivedState.bottom ? currentPage.value++ : void 0)
 watch(isOnline, newValue => newValue === true ? error.value = null : null)
 </script>
 
@@ -48,9 +46,7 @@ watch(isOnline, newValue => newValue === true ? error.value = null : null)
     <Heading :title="$t('project.templateMarket.title')" back>
       <NTabs v-model:value="viewMode" type="segment" size="large">
         <NTab name="list" class="p0! m0!">
-          <NIcon m2 flex="~ gap-2 items-center">
-            <div i-ph-list-duotone font-size="2xl" />
-          </NIcon>
+          <NIcon m2 flex="~ gap-2 items-center"><div i-ph-list-duotone font-size="2xl" /></NIcon>
         </NTab>
         <NTab name="grid" class="p0! m0!">
           <NIcon m2 flex="~ gap-2 items-center">
@@ -65,7 +61,7 @@ watch(isOnline, newValue => newValue === true ? error.value = null : null)
         v-for="(item, index) in resultList" :key="index" size="small"
         break-inside-avoid mb-2 transition="all duration-300"
         cursor-pointer hover:bg="[var(--vscode-inputOption-hoverBackground)]"
-        hover:transform="scale-100.5" active:transform="scale-99.5" @click="$router.push(`/template-detail?productId=${item.productId}`)"
+        hover:transform="scale-100.5" active:transform="scale-99.5"
       >
         <TemplateItem :data="item" :view-mode transition="all duration-300" />
       </NCard>
@@ -77,20 +73,14 @@ watch(isOnline, newValue => newValue === true ? error.value = null : null)
     <div v-else-if="!isOnline" flex="~ justify-center items-center" my-10>
       <div flex="~ col gap-2 items-center" p-4 rounded bg="[var(--vscode-editor-background)]">
         <div i-ph-warning-duotone font-size="2xl" />
-        <div>
-          {{ $t('noNetwork') }}
-        </div>
+        <div>{{ $t('noNetwork') }}</div>
       </div>
     </div>
     <div v-else-if="error" flex="~ justify-center items-center" my-10>
       <div flex="~ col gap-2 items-center" p-4 rounded bg="[var(--vscode-editor-background)]">
         <div i-ph-warning-duotone font-size="2xl" />
-        <div>
-          {{ error.message }}
-        </div>
-        <NButton type="primary" @click="error = null">
-          {{ $t('retry') }}
-        </NButton>
+        <div>{{ error.message }}</div>
+        <NButton type="primary" @click="error = null">{{ $t('retry') }}</NButton>
       </div>
     </div>
   </div>

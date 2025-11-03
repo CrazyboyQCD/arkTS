@@ -9,6 +9,7 @@ declare global {
   const EffectScope: typeof import('vue').EffectScope
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
+  const callbacks: typeof import('./composables/on-open-dialog').callbacks
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
   const computedEager: typeof import('@vueuse/core').computedEager
@@ -20,6 +21,7 @@ declare global {
   const createEventHook: typeof import('@vueuse/core').createEventHook
   const createGlobalState: typeof import('@vueuse/core').createGlobalState
   const createInjectionState: typeof import('@vueuse/core').createInjectionState
+  const createOpenDialog: typeof import('./composables/on-open-dialog').createOpenDialog
   const createReactiveFn: typeof import('@vueuse/core').createReactiveFn
   const createRef: typeof import('@vueuse/core').createRef
   const createReusableTemplate: typeof import('@vueuse/core').createReusableTemplate
@@ -50,6 +52,7 @@ declare global {
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const markRaw: typeof import('vue').markRaw
   const nextTick: typeof import('vue').nextTick
+  const offOpenDialog: typeof import('./composables/on-open-dialog').offOpenDialog
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
   const onBeforeRouteLeave: typeof import('vue-router').onBeforeRouteLeave
@@ -63,6 +66,8 @@ declare global {
   const onKeyStroke: typeof import('@vueuse/core').onKeyStroke
   const onLongPress: typeof import('@vueuse/core').onLongPress
   const onMounted: typeof import('vue').onMounted
+  const onOpenDialog: typeof import('./composables/on-open-dialog').onOpenDialog
+  const onOpenDialogCallbacks: typeof import('./composables/on-open-dialog').onOpenDialogCallbacks
   const onRenderTracked: typeof import('vue').onRenderTracked
   const onRenderTriggered: typeof import('vue').onRenderTriggered
   const onScopeDispose: typeof import('vue').onScopeDispose
@@ -142,6 +147,7 @@ declare global {
   const useCloned: typeof import('@vueuse/core').useCloned
   const useColorMode: typeof import('@vueuse/core').useColorMode
   const useConfirmDialog: typeof import('@vueuse/core').useConfirmDialog
+  const useConnection: typeof import('./composables/connection').useConnection
   const useCountdown: typeof import('@vueuse/core').useCountdown
   const useCounter: typeof import('@vueuse/core').useCounter
   const useCssModule: typeof import('vue').useCssModule
@@ -177,6 +183,7 @@ declare global {
   const useFileSystemAccess: typeof import('@vueuse/core').useFileSystemAccess
   const useFocus: typeof import('@vueuse/core').useFocus
   const useFocusWithin: typeof import('@vueuse/core').useFocusWithin
+  const useFolderChooser: typeof import('./composables/folder-chooser').useFolderChooser
   const useFps: typeof import('@vueuse/core').useFps
   const useFullscreen: typeof import('@vueuse/core').useFullscreen
   const useGamepad: typeof import('@vueuse/core').useGamepad
@@ -305,6 +312,9 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
-  export type { Input, TextInput, SelectInput, CheckboxInput, ProjectInput, ProjectConfiguration, ProjectConfigurationContext } from './composables/project-configuration'
+  export type { CreateOpenDialogOptions } from './composables/on-open-dialog'
+  import('./composables/on-open-dialog')
+  // @ts-ignore
+  export type { Input, TextInput, SelectInput, CheckboxInput, TextButtonContent, IconButtonContent, ButtonContent, TextButtonGroupInput, BaseInput, ProjectInput, ProjectConfiguration, ProjectConfigurationContext } from './composables/project-configuration'
   import('./composables/project-configuration')
 }

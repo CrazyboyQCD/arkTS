@@ -6,39 +6,36 @@ const router = useRouter()
 async function handleSubmit(e: Event) {
   e.preventDefault()
   await formRef.value?.validate()
+  await currentProject.value.onSubmit?.(currentProject)
 }
 
-function handleChange() {
-  formRef.value?.validate()
-}
-handleChange()
+const handleChange = () => formRef.value?.validate()
 </script>
 
 <template>
   <div>
     <Heading :title="$t('project.createProject.title')">
       <NButton type="info" @click="router.push('/template-market')">
-        <NIcon mr-1>
-          <div i-ph-storefront-duotone />
-        </NIcon>
+        <NIcon mr-1><div i-ph-storefront-duotone /></NIcon>
         {{ $t('project.templateMarket.title') }}
       </NButton>
       <NButton type="primary" @click="handleSubmit">
-        <NIcon mr-1>
-          <div i-ph-plus-circle-duotone />
-        </NIcon>
-        创建
+        <NIcon mr-1><div i-ph-plus-circle-duotone /></NIcon>
+        {{ $t('project.createProject.submit') }}
       </NButton>
     </Heading>
 
     <div flex="~ gap-4 col sm:row justify-between">
       <div class="w-full md:w-2/5">
-        <h2 class="text-lg font-bold mb-2">
-          应用
-        </h2>
+        <h2 class="text-lg font-bold mb-2">{{ $t('project.createProject.application') }}</h2>
         <ul v-for="(item, index) in projectConfigurations" :key="index">
           <li :key="index">
-            <ProjectChoice :title="item.title" :description="item.description" :icon="item.icon" :selected="item.id === currentProjectId" />
+            <ProjectChoice
+              :title="item.title"
+              :description="item.description"
+              :icon="item.icon"
+              :selected="item.id === currentProjectId"
+            />
           </li>
         </ul>
       </div>
@@ -56,6 +53,19 @@ handleChange()
             <NCheckboxGroup v-else-if="item.type === 'checkbox'" v-model:value="item.value" :required="item.required" @change="handleChange">
               <NCheckbox v-for="(option, jndex) in item.options" :key="jndex" :value="option.value" :label="option.label" />
             </NCheckboxGroup>
+            <NInputGroup v-else-if="item.type === 'text-button-group'">
+              <NInput v-model:value="item.value" :placeholder="item.placeholder" :required="item.required" @change="handleChange" />
+              <NButton type="primary" @click="item.onClick?.(currentProject)">
+                <span v-if="Array.isArray(item.buttonContent)" flex="~ gap-1 items-center">
+                  <NIcon><div :class="item.buttonContent[1].icon" /></NIcon>
+                  <span>{{ item.buttonContent[0].text }}</span>
+                </span>
+                <span v-else>
+                  <NIcon v-if="item.buttonContent.type === 'icon'" mr-1><div :class="item.buttonContent.icon" /></NIcon>
+                  <span v-if="item.buttonContent.type === 'text'">{{ item.buttonContent.text }}</span>
+                </span>
+              </NButton>
+            </NInputGroup>
           </NFormItem>
         </NForm>
       </div>

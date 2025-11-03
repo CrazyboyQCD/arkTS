@@ -23,6 +23,7 @@ export @interface MyAnnotation {
   hello: string = "world"
 }
 
+@MyAnnotation
 class MyClass {}
 
 @Entry
