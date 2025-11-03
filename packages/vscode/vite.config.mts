@@ -1,3 +1,4 @@
+import path from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import autoImport from 'unplugin-auto-import/vite'
@@ -15,8 +16,8 @@ export default defineConfig(async () => {
   return {
     plugins: [
       vueRouter({
-        dts: 'src/project/routers/typed-router.d.ts',
-        routesFolder: 'src/project/pages',
+        dts: path.resolve(__dirname, 'src/project/routers/typed-router.d.ts'),
+        routesFolder: path.resolve(__dirname, 'src/project/pages'),
       }),
       vue(),
       vueJsx(),
@@ -28,21 +29,21 @@ export default defineConfig(async () => {
           VueRouterAutoImports,
         ],
         dirs: [
-          'src/project/composables',
+          path.resolve(__dirname, 'src/project/composables'),
         ],
-        dts: 'src/project/auto-imports.d.ts',
+        dts: path.resolve(__dirname, 'src/project/auto-imports.d.ts'),
       }),
       components({
         dirs: [
-          'src/project/components',
+          path.resolve(__dirname, 'src/project/components'),
         ],
-        dts: 'src/project/components.d.ts',
+        dts: path.resolve(__dirname, 'src/project/components.d.ts'),
         resolvers: [
           NaiveUiResolver(),
         ],
       }),
       layouts({
-        layoutsDirs: 'src/project/layouts',
+        layoutsDirs: path.resolve(__dirname, 'src/project/layouts'),
         defaultLayout: 'Default',
       }),
       unoCSS.default(),
@@ -59,11 +60,11 @@ export default defineConfig(async () => {
     base: './',
 
     build: {
-      outDir: 'build',
+      outDir: path.resolve(__dirname, 'build'),
       assetsDir: '.',
       rollupOptions: {
         input: [
-          'project.html',
+          path.resolve(__dirname, 'project.html'),
         ],
       },
     },
