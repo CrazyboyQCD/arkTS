@@ -35,6 +35,12 @@
   },
   "activationEvents": [],
   "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "explorer",
+        "contents": "%viewWelcome.createProject%"
+      }
+    ],
     "jsonValidation": [
       {
         "fileMatch": "module.json5",
@@ -139,6 +145,11 @@
       {
         "command": "ets.installSDK",
         "title": "%command.installSDK%",
+        "category": "ETS"
+      },
+      {
+        "command": "ets.createProject",
+        "title": "%command.createProject%",
         "category": "ETS"
       }
     ],

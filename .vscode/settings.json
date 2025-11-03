@@ -45,16 +45,23 @@
       "pattern": "."
     }
   ],
-  "editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
-  "editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDefinition",
-  "editor.gotoLocation.alternativeTypeDefinitionCommand": "editor.action.revealDefinition",
-  "editor.selectionHighlight": false,
-  "files.autoSave": "onFocusChange",
-  "editor.suggest.snippetsPreventQuickSuggestions": false,
-  "editor.quickSuggestions": {
-    "other": "on",
-    "comments": "off",
-    "strings": "on"
+  "material-icon-theme.folders.associations": {
+    "AppScope": "app",
+    "hvigor": "tools",
+    "ohosTest": "test",
+    "ets": "typescript",
+    "composables": "hook"
   },
-  "oxc.enable": true
+  "oxc.enable": true,
+  "i18n-ally.localesPaths": "./packages/vscode",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.keystyle": "flat",
+  "i18n-ally.enabledFrameworks": [
+    "vscode",
+    "vue",
+    "general"
+  ],
+  "i18n-ally.dirStructure": "file",
+  "i18n-ally.pathMatcher": "package.nls.?{locale?}.json",
+  "i18n-ally.sourceLanguage": "en"
 }

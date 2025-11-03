@@ -1,10 +1,15 @@
-import { defineConfig, presetAttributify, presetIcons, presetTypography, presetUno } from 'unocss'
+import { defineConfig, presetAttributify, presetIcons, presetTypography, presetWind4 } from 'unocss'
 
 export default defineConfig({
   presets: [
-    presetUno(),
+    presetWind4(),
     presetIcons(),
     presetAttributify(),
     presetTypography(),
   ],
+  content: {
+    pipeline: {
+      include: [/\.(vue|svelte|[jt]sx|ts|vine.ts|mdx?|astro|elm|php|phtml|html)($|\?)/],
+    },
+  },
 })

@@ -21,16 +21,16 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
   protected readonly translator: Translator
 
   onActivate(): void {
-    this.guessOhosSdkVersion()
+    this.openGuessOhosSdkVersionDialog()
   }
 
-  async guessOhosSdkVersion(): Promise<keyof typeof SdkVersion | undefined> {
+  async openGuessOhosSdkVersionDialog(): Promise<keyof typeof SdkVersion | undefined> {
     const guessedOhosSdkVersion = this.getGuessedOhosSdkVersion()
     this.getConsola().info(`Guessed OpenHarmony SDK version: ${guessedOhosSdkVersion}`)
     if (!guessedOhosSdkVersion) return
     const [sdkStringVersion, sdkNumberVersion] = guessedOhosSdkVersion
-    const currentSdkPath = await this.sdkManager.getAnalyzedSdkPath()
-    const currentSdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer()
+    const currentSdkPath = await this.sdkManager.getAnalyzedSdkPath(this)
+    const currentSdkAnalyzer = await this.sdkManager.getAnalyzedSdkAnalyzer(this)
 
     // Check if the current SDK is the same as the guessed SDK.
     if (currentSdkPath) {
@@ -52,7 +52,7 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
         choiceNo,
       )
       if (choiceResult === choiceYes) {
-        const inferredSdkPosition = currentSdkAnalyzer?.getExtraMetadata()?.type
+        const inferredSdkPosition = currentSdkAnalyzer?.getIdentifier()
         const targetSdkPath = path.join(await this.sdkManager.getOhosSdkBasePath(), sdkNumberVersion.toString())
         await this.sdkManager.setOhosSdkPath(targetSdkPath, inferredSdkPosition === 'global' ? vscode.ConfigurationTarget.Global : vscode.ConfigurationTarget.Workspace)
         vscode.window.showInformationMessage(this.translator.t('sdk.guess.switch.success', { args: [sdkStringVersion] }))
@@ -108,14 +108,16 @@ export class SdkVersionGuesser extends Environment implements IOnActivate {
 
       if (!sdkVersion || Number.isNaN(sdkVersion)) return
 
-      if (sdkVersion === 10) return ['API10', 10]
-      else if (sdkVersion === 11) return ['API11', 11]
-      else if (sdkVersion === 12) return ['API12', 12]
-      else if (sdkVersion === 13) return ['API13', 13]
-      else if (sdkVersion === 14) return ['API14', 14]
-      else if (sdkVersion === 15) return ['API15', 15]
-      else if (sdkVersion === 18) return ['API18', 18]
-      else if (sdkVersion === 20) return ['API20', 20]
+      switch (sdkVersion) {
+        case 10: return ['API10', 10]
+        case 11: return ['API11', 11]
+        case 12: return ['API12', 12]
+        case 13: return ['API13', 13]
+        case 14: return ['API14', 14]
+        case 15: return ['API15', 15]
+        case 18: return ['API18', 18]
+        case 20: return ['API20', 20]
+      }
     }
     catch (error) {
       this.getConsola().error(error)

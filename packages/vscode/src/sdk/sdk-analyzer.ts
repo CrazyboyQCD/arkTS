@@ -1,6 +1,8 @@
 import type { OhosClientOptions } from '@arkts/shared'
 import type { AbstractWatcher } from '../abstract-watcher'
 import type { Translator } from '../translate'
+import type { SdkVersionGuesser } from './sdk-guesser'
+import type { SdkManager } from './sdk-manager'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -8,61 +10,114 @@ import fg from 'fast-glob'
 import * as vscode from 'vscode'
 import { SdkAnalyzerException } from './sdk-analyzer-exception'
 
-interface ChoiceValidSdkPathStatus<TMetadata extends Record<string, any>> {
+interface ChoiceValidSdkPathStatus {
   isValid: boolean
   error: unknown
-  analyzer: SdkAnalyzer<TMetadata> | undefined
-  metadata?: TMetadata
+  analyzer: SdkAnalyzer | undefined
+  identifier?: SdkAnalyzer.Identifier
 }
 
-interface ChoiceValidSdkPathReturn<TMetadata extends Record<string, any>> {
-  choicedAnalyzer: SdkAnalyzer<TMetadata> | undefined
-  analyzerStatus: ChoiceValidSdkPathStatus<TMetadata>[]
+interface ChoiceValidSdkPathReturn {
+  choicedAnalyzer: SdkAnalyzer | undefined
+  analyzerStatus: ChoiceValidSdkPathStatus[]
 }
 
-interface ChoiceValidSdkPathOptions<TMetadata extends Record<string, any>> {
-  analyzer: SdkAnalyzer<TMetadata> | undefined
-  metadata?: TMetadata
-}
-
-export class SdkAnalyzer<TMetadata = Record<string, any>> {
+export class SdkAnalyzer {
   constructor(
     private readonly sdkUri: vscode.Uri,
     private readonly hmsSdkUri: vscode.Uri | undefined,
     private readonly fileSystem: AbstractWatcher,
     private readonly translator: Translator,
-    private readonly extraMetadata?: TMetadata,
+    private readonly identifier: SdkAnalyzer.Identifier,
   ) {}
 
-  static async choiceValidSdkPath<TMetadata extends Record<string, any>>(...analyzers: ChoiceValidSdkPathOptions<TMetadata>[]): Promise<ChoiceValidSdkPathReturn<TMetadata>> {
-    const analyzerStatus: ChoiceValidSdkPathStatus<TMetadata>[] = []
+  public static readonly tsdkDefaultLibraries = [
+    'lib.d.ts',
+    'lib.decorators.legacy.d.ts', // Using legacy decorators
+    // 'lib.dom.asynciterable.d.ts', // Exclude dom lib
+    // 'lib.dom.d.ts', // Exclude dom lib
+    // 'lib.dom.iterable.d.ts', // Exclude dom lib
+    'lib.es5.d.ts',
+    'lib.es6.d.ts',
+    'lib.es2015.collection.d.ts',
+    'lib.es2015.core.d.ts',
+    'lib.es2015.d.ts',
+    'lib.es2015.generator.d.ts',
+    'lib.es2015.iterable.d.ts',
+    'lib.es2015.promise.d.ts',
+    'lib.es2015.proxy.d.ts',
+    'lib.es2015.reflect.d.ts',
+    'lib.es2015.symbol.d.ts',
+    'lib.es2015.symbol.wellknown.d.ts',
+    'lib.es2016.array.include.d.ts',
+    'lib.es2016.d.ts',
+    'lib.es2016.full.d.ts',
+    'lib.es2016.intl.d.ts',
+    'lib.es2017.arraybuffer.d.ts',
+    'lib.es2017.d.ts',
+    'lib.es2017.date.d.ts',
+    'lib.es2017.full.d.ts',
+    'lib.es2017.intl.d.ts',
+    'lib.es2017.object.d.ts',
+    'lib.es2017.sharedmemory.d.ts',
+    'lib.es2017.string.d.ts',
+    'lib.es2017.typedarrays.d.ts',
+    'lib.es2018.asyncgenerator.d.ts',
+    'lib.es2018.asynciterable.d.ts',
+    'lib.es2018.d.ts',
+    'lib.es2018.full.d.ts',
+    'lib.es2018.intl.d.ts',
+    'lib.es2018.promise.d.ts',
+    'lib.es2018.regexp.d.ts',
+    'lib.es2019.array.d.ts',
+    'lib.es2019.d.ts',
+    'lib.es2019.full.d.ts',
+    'lib.es2019.intl.d.ts',
+    'lib.es2019.object.d.ts',
+    'lib.es2019.string.d.ts',
+    'lib.es2019.symbol.d.ts',
+    'lib.es2020.bigint.d.ts',
+    'lib.es2020.d.ts',
+    'lib.es2020.date.d.ts',
+    'lib.es2020.full.d.ts',
+    'lib.es2020.intl.d.ts',
+    'lib.es2020.number.d.ts',
+    'lib.es2020.promise.d.ts',
+    'lib.es2020.sharedmemory.d.ts',
+    'lib.es2020.string.d.ts',
+    'lib.es2020.symbol.wellknown.d.ts',
+  ]
+
+  static async choiceValidSdkPath(...analyzers: (SdkAnalyzer | SdkAnalyzer.NotFoundError)[]): Promise<ChoiceValidSdkPathReturn> {
+    const analyzerStatus: ChoiceValidSdkPathStatus[] = []
 
     for (let i = 0; i < analyzers.length; i++) {
-      if (!analyzers[i].analyzer) {
+      const currentAnalyzer = analyzers[i]
+      if (currentAnalyzer instanceof SdkAnalyzer.NotFoundError) {
         analyzerStatus[i] = {
           isValid: false,
-          error: new Error(`Analyzer in index ${i}'s ${analyzers[i].metadata?.type || 'unknown'} type is undefined`),
+          error: analyzers[i],
           analyzer: undefined,
-          metadata: analyzers[i].metadata,
+          identifier: analyzers[i].getIdentifier(),
         }
         continue
       }
 
       try {
-        await analyzers[i].analyzer?.getAnalyzedSdkPath()
+        await currentAnalyzer.getAnalyzedSdkPath()
         analyzerStatus[i] = {
           isValid: true,
           error: undefined,
-          analyzer: analyzers[i].analyzer,
-          metadata: analyzers[i].metadata,
+          analyzer: currentAnalyzer,
+          identifier: currentAnalyzer.getIdentifier(),
         }
       }
       catch (error) {
         analyzerStatus[i] = {
           isValid: false,
           error,
-          analyzer: analyzers[i].analyzer,
-          metadata: analyzers[i].metadata,
+          analyzer: currentAnalyzer,
+          identifier: currentAnalyzer.getIdentifier(),
         }
       }
     }
@@ -73,8 +128,42 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
     }
   }
 
-  getExtraMetadata(): TMetadata | undefined {
-    return this.extraMetadata
+  static fromSdkManager(sdkManager: SdkManager, sdkUri: vscode.Uri, hmsSdkUri: vscode.Uri | undefined, identifier: SdkAnalyzer.Identifier): SdkAnalyzer {
+    return new SdkAnalyzer(
+      sdkUri,
+      hmsSdkUri,
+      sdkManager,
+      sdkManager.translator,
+      identifier,
+    )
+  }
+
+  static async getUserDefinedSdkPath(type: 'workspace' | 'global'): Promise<string | undefined> {
+    const inspectedConfiguration = vscode.workspace.getConfiguration('ets').inspect<string>('sdkPath') || {} as ReturnType<ReturnType<typeof vscode.workspace.getConfiguration>['inspect']>
+    if (type === 'workspace' && typeof inspectedConfiguration?.workspaceValue === 'string') return inspectedConfiguration.workspaceValue
+    if (type === 'global' && typeof inspectedConfiguration?.globalValue === 'string') return inspectedConfiguration.globalValue
+  }
+
+  static async createLocalSdkAnalyzer(sdkManager: SdkManager, sdkVersionGuesser: SdkVersionGuesser): Promise<SdkAnalyzer | SdkAnalyzer.NotFoundError> {
+    const localSdkPath = await sdkManager.getOhosSdkPathFromLocalProperties()
+    const [, numbericSdkVersion] = sdkVersionGuesser.getGuessedOhosSdkVersion() || []
+    if (!localSdkPath || !numbericSdkVersion) return new SdkAnalyzer.NotFoundError('local', sdkManager.translator)
+    const sdkUri = vscode.Uri.file(path.resolve(localSdkPath, numbericSdkVersion.toString()))
+    return this.fromSdkManager(sdkManager, sdkUri, await sdkManager.getAnalyzedHmsSdkPath(), 'local')
+  }
+
+  static async createWorkspaceSdkAnalyzer(sdkManager: SdkManager): Promise<SdkAnalyzer | SdkAnalyzer.NotFoundError> {
+    const sdkPath = await this.getUserDefinedSdkPath('workspace')
+    if (!sdkPath) return new SdkAnalyzer.NotFoundError('workspace', sdkManager.translator)
+    const sdkUri = vscode.Uri.file(sdkPath)
+    return this.fromSdkManager(sdkManager, sdkUri, await sdkManager.getAnalyzedHmsSdkPath(), 'workspace')
+  }
+
+  static async createGlobalSdkAnalyzer(sdkManager: SdkManager): Promise<SdkAnalyzer | SdkAnalyzer.NotFoundError> {
+    const sdkPath = await this.getUserDefinedSdkPath('global')
+    if (!sdkPath) return new SdkAnalyzer.NotFoundError('global', sdkManager.translator)
+    const sdkUri = vscode.Uri.file(sdkPath)
+    return this.fromSdkManager(sdkManager, sdkUri, await sdkManager.getAnalyzedHmsSdkPath(), 'global')
   }
 
   private isSdkUriExists = false
@@ -149,6 +238,10 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
     }
   }
 
+  getIdentifier(): SdkAnalyzer.Identifier {
+    return this.identifier
+  }
+
   private _cachedEtsLoaderConfigPath: vscode.Uri | undefined
   /**
    * Get the `ets/build-tools/ets-loader/tsconfig.json` path.
@@ -170,37 +263,6 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
       }
       throw error
     }
-  }
-
-  private getRelativeWithConfigFilePaths(): Record<string, string[]> {
-    const currentWorkspaceDir = this.fileSystem.getCurrentWorkspaceDir()
-    if (!currentWorkspaceDir) return {}
-
-    const buildProfileJson5 = this.fileSystem.readBuildProfileJson5<unknown>()
-    if (!buildProfileJson5) return {}
-
-    const [buildProfileFilePath, buildProfile] = buildProfileJson5 || []
-    if (!buildProfile || !buildProfileFilePath) return {}
-
-    if (typeof buildProfile !== 'object' || !buildProfile || !('modules' in buildProfile) || !Array.isArray(buildProfile.modules)) return {}
-
-    const relativeWithConfigFilePaths: Record<string, string[]> = {}
-    for (let i = 0; i < buildProfile.modules.length; i++) {
-      const mod: unknown = buildProfile.modules[i]
-      if (typeof mod !== 'object' || !mod || !('srcPath' in mod) || typeof mod.srcPath !== 'string') continue
-
-      const ohPackageJson5 = this.fileSystem.readOhPackageJson5<unknown>(vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath))
-      if (!ohPackageJson5) continue
-      const [, ohPackageJson] = ohPackageJson5
-      if (typeof ohPackageJson !== 'object' || !ohPackageJson || !('name' in ohPackageJson) || typeof ohPackageJson.name !== 'string') continue
-      relativeWithConfigFilePaths[ohPackageJson.name] = [
-        vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath).fsPath,
-      ]
-      relativeWithConfigFilePaths[`${ohPackageJson.name}/*`] = [
-        vscode.Uri.joinPath(currentWorkspaceDir, mod.srcPath, '*').fsPath,
-      ]
-    }
-    return relativeWithConfigFilePaths
   }
 
   private isHmsSdkUriExists = false
@@ -320,64 +382,6 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
     const etsLoaderConfigPath = await this.getEtsLoaderConfigPath(force)
     const etsLoaderPath = vscode.Uri.joinPath(sdkPath, 'ets', 'build-tools', 'ets-loader')
 
-    // Force load typescript default libs if tsdk is provided (For ArkTS)
-    const typescriptDefaultLibs = [
-      'lib.d.ts',
-      'lib.decorators.legacy.d.ts', // Using legacy decorators
-      // 'lib.dom.asynciterable.d.ts', // Exclude dom lib
-      // 'lib.dom.d.ts', // Exclude dom lib
-      // 'lib.dom.iterable.d.ts', // Exclude dom lib
-      'lib.es5.d.ts',
-      'lib.es6.d.ts',
-      'lib.es2015.collection.d.ts',
-      'lib.es2015.core.d.ts',
-      'lib.es2015.d.ts',
-      'lib.es2015.generator.d.ts',
-      'lib.es2015.iterable.d.ts',
-      'lib.es2015.promise.d.ts',
-      'lib.es2015.proxy.d.ts',
-      'lib.es2015.reflect.d.ts',
-      'lib.es2015.symbol.d.ts',
-      'lib.es2015.symbol.wellknown.d.ts',
-      'lib.es2016.array.include.d.ts',
-      'lib.es2016.d.ts',
-      'lib.es2016.full.d.ts',
-      'lib.es2016.intl.d.ts',
-      'lib.es2017.arraybuffer.d.ts',
-      'lib.es2017.d.ts',
-      'lib.es2017.date.d.ts',
-      'lib.es2017.full.d.ts',
-      'lib.es2017.intl.d.ts',
-      'lib.es2017.object.d.ts',
-      'lib.es2017.sharedmemory.d.ts',
-      'lib.es2017.string.d.ts',
-      'lib.es2017.typedarrays.d.ts',
-      'lib.es2018.asyncgenerator.d.ts',
-      'lib.es2018.asynciterable.d.ts',
-      'lib.es2018.d.ts',
-      'lib.es2018.full.d.ts',
-      'lib.es2018.intl.d.ts',
-      'lib.es2018.promise.d.ts',
-      'lib.es2018.regexp.d.ts',
-      'lib.es2019.array.d.ts',
-      'lib.es2019.d.ts',
-      'lib.es2019.full.d.ts',
-      'lib.es2019.intl.d.ts',
-      'lib.es2019.object.d.ts',
-      'lib.es2019.string.d.ts',
-      'lib.es2019.symbol.d.ts',
-      'lib.es2020.bigint.d.ts',
-      'lib.es2020.d.ts',
-      'lib.es2020.date.d.ts',
-      'lib.es2020.full.d.ts',
-      'lib.es2020.intl.d.ts',
-      'lib.es2020.number.d.ts',
-      'lib.es2020.promise.d.ts',
-      'lib.es2020.sharedmemory.d.ts',
-      'lib.es2020.string.d.ts',
-      'lib.es2020.symbol.wellknown.d.ts',
-    ]
-
     // issue: https://github.com/Groupguanfang/arkTS/pull/68
     const declarationsLib = process.platform === 'win32'
       ? [
@@ -397,7 +401,7 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
       etsComponentPath: etsComponentPath.fsPath,
       etsLoaderConfigPath: etsLoaderConfigPath.fsPath,
       lib: [
-        ...(tsdk ? typescriptDefaultLibs.map(lib => path.join(tsdk, lib)) : []),
+        ...(tsdk ? SdkAnalyzer.tsdkDefaultLibraries.map(lib => path.join(tsdk, lib)) : []),
         ...fg.sync(declarationsLib, { onlyFiles: true, absolute: true }),
       ].filter(Boolean) as string[],
       baseUrl: vscode.Uri.joinPath(sdkPath, 'ets').fsPath,
@@ -410,8 +414,22 @@ export class SdkAnalyzer<TMetadata = Record<string, any>> {
         '@internal/full/*': ['./api/@internal/full/*'],
         ...await this.hmsToTypeScriptCompilerOptionsPaths(),
       },
-      relativeWithConfigFilePaths: this.getRelativeWithConfigFilePaths(),
       etsLoaderPath: etsLoaderPath.fsPath,
+    }
+  }
+}
+
+export namespace SdkAnalyzer {
+  export type Identifier = 'local' | 'workspace' | 'global'
+
+  export class NotFoundError extends SdkAnalyzerException {
+    constructor(private readonly identifier: SdkAnalyzer.Identifier, translator: Translator) {
+      super(SdkAnalyzerException.Code.SDKPathNotFound, translator)
+      this.message = `SDK analyzer with identifier ${identifier} not found, please check your ${identifier} configuration.`
+    }
+
+    getIdentifier(): SdkAnalyzer.Identifier {
+      return this.identifier
     }
   }
 }
