@@ -1,5 +1,12 @@
 # vscode-naily-ets
 
+## 1.2.3
+
+### Patch Changes
+
+- 5583113: feat: 更新依赖，删除一些无用的旧代码
+- 82444bd: feat: 添加 i18n-ally 插件推荐、添加 ArkTS 模版 (#181)
+
 ## 1.2.2
 
 ### Patch Changes

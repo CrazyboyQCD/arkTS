@@ -1,5 +1,11 @@
 # @arkts/types
 
+## 1.1.3
+
+### Patch Changes
+
+- 82444bd: feat: 添加 i18n-ally 插件推荐、添加 ArkTS 模版 (#181)
+
 ## 1.1.2
 
 ### Patch Changes

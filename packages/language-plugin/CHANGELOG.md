@@ -1,5 +1,11 @@
 # @arkts/language-plugin
 
+## 1.1.6
+
+### Patch Changes
+
+- 82444bd: feat: 添加 i18n-ally 插件推荐、添加 ArkTS 模版 (#181)
+
 ## 1.1.5
 
 ### Patch Changes
