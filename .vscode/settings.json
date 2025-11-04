@@ -50,7 +50,12 @@
     "hvigor": "tools",
     "ohosTest": "test",
     "ets": "typescript",
-    "composables": "hook"
+    "composables": "hook",
+    "vfs": "other",
+    "language-service": "controller",
+    "language-plugin": "plugin",
+    "language-server": "server",
+    "typescript-plugin": "plugin"
   },
   "oxc.enable": true,
   "i18n-ally.localesPaths": "./packages/vscode",

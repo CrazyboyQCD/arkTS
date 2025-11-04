@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["**/ohos-typescript/**/*", "**/out/**/*", "**/node_modules/**/*", "**/dist/**/*"]
+}
