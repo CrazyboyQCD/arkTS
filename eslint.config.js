@@ -8,6 +8,7 @@ export default antfu({
     'sample/**/*',
     'packages/declarations/ets/**/*',
     'packages/vscode/src/generated/**/*',
+    'packages/vfs/src/**/*',
   ],
   rules: {
     'ts/no-namespace': 'off',
