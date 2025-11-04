@@ -1,5 +1,15 @@
 # @arkts/language-service
 
+## 1.1.5
+
+### Patch Changes
+
+- 82444bd: feat: 添加 i18n-ally 插件推荐、添加 ArkTS 模版 (#181)
+- Updated dependencies [5583113]
+- Updated dependencies [82444bd]
+  - @arkts/shared@1.0.10
+  - @arkts/types@1.1.3
+
 ## 1.1.4
 
 ### Patch Changes

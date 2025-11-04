@@ -1,5 +1,14 @@
 # @arkts/language-server
 
+## 1.2.2
+
+### Patch Changes
+
+- 5583113: feat: 更新依赖，删除一些无用的旧代码
+- 82444bd: feat: 添加 i18n-ally 插件推荐、添加 ArkTS 模版 (#181)
+- Updated dependencies [82444bd]
+  - @arkts/language-service@1.1.5
+
 ## 1.2.1
 
 ### Patch Changes
