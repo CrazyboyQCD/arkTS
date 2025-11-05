@@ -29,8 +29,7 @@ class MyClass {}
 @Entry
 @Component
 export struct Index {
-  @State
-  message: string = 'Hello World';
+  @State message: string = 'Hello World';
   testESObject: ESObject = 'Hello ESObject';
 
   build() {
@@ -59,7 +58,7 @@ export struct Index {
         .accessibilityDescription('Test')
         .align(Alignment.Center)
 
-      ForEach([1, 2, 3, 4], (item: string) => {
+      ForEach([1, 2, 3, 4], (item) => {
         Column() {
           Row() {
             Text(item.toString())
@@ -69,7 +68,7 @@ export struct Index {
         }
       })
 
-      LazyForEach(new MyLazyDataSource(), (item) => {
+      LazyForEach(new MyLazyDataSource(), (item: number) => {
         Column() {
           Row() {
             Text(item.toString())

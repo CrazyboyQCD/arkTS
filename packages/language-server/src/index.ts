@@ -81,6 +81,17 @@ connection.onInitialize(async (params) => {
           options.project.typescript.languageServiceHost.getCompilationSettings = () => {
             return lspConfiguration.getTsConfig(originalSettings as ets.CompilerOptions) as any
           }
+          const patchedGetScriptKind = (fileName: string): ets.ScriptKind => {
+            if (fileName.endsWith('.ets')) return ets.ScriptKind.ETS
+            else if (fileName.endsWith('.js')) return ets.ScriptKind.JS
+            else if (fileName.endsWith('.jsx')) return ets.ScriptKind.JSX
+            else if (fileName.endsWith('.ts')) return ets.ScriptKind.TS
+            else if (fileName.endsWith('.tsx')) return ets.ScriptKind.TSX
+            else if (fileName.endsWith('.json')) return ets.ScriptKind.JSON
+            else return ets.ScriptKind.Unknown
+          }
+          patchedGetScriptKind.patched = true
+          options.project.typescript.languageServiceHost.getScriptKind = patchedGetScriptKind as any
         },
       }
     }),

@@ -5,6 +5,7 @@ import { URI } from 'vscode-uri'
 
 export interface TSProvider {
   'typescript/languageService'(): ets.LanguageService
+  'typescript/languageServiceHost'(): ets.LanguageServiceHost
 }
 
 /** 一些工具类，用于services中获取一些对象。 */
@@ -24,7 +25,22 @@ export class ContextUtil {
   getLanguageService(): ets.LanguageService | null {
     const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
     if (!languageService) return null
-    return languageService
+    return languageService as ets.LanguageService
+  }
+
+  private _standaloneLanguageService: ets.LanguageService | null = null
+
+  getStandaloneLanguageService(ets: typeof import('ohos-typescript')): ets.LanguageService | null {
+    if (this._standaloneLanguageService) return this._standaloneLanguageService
+    if (!this.context.project.typescript?.languageServiceHost) return null
+    this._standaloneLanguageService = ets.createLanguageService(this.context.project.typescript.languageServiceHost as any)
+    return this._standaloneLanguageService
+  }
+
+  getLanguageServiceHost(): ets.LanguageServiceHost | null {
+    const languageServiceHost = this.context.inject<TSProvider>(`typescript/languageServiceHost`)
+    if (!languageServiceHost) return null
+    return languageServiceHost as ets.LanguageServiceHost
   }
 
   decodeTextDocumentUri(document: TextDocument): URI | null {
@@ -44,7 +60,7 @@ export class ContextUtil {
     const decoded = this.context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
     if (!decoded) return null
     const [decodedUri] = decoded
-    const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
+    const languageService = this.getLanguageService()
     if (!languageService) return null
     const program = languageService.getProgram()
     if (!program) return null
@@ -87,5 +103,16 @@ export class ContextUtil {
       .sort((a, b) => b.matchLength - a.matchLength)
 
     return matches[0]?.folder.toString()
+  }
+
+  /**
+   * 获取独立增量编译 Program.
+   */
+  getIncrementalProgram(ets: typeof import('ohos-typescript')): ets.EmitAndSemanticDiagnosticsBuilderProgram {
+    const incrementalProgram = ets.createIncrementalProgramForArkTs({
+      rootNames: this.getLanguageService()?.getProgram()?.getRootFileNames() ?? [],
+      options: this.getLanguageService()?.getProgram()?.getCompilerOptions() ?? {},
+    })
+    return incrementalProgram
   }
 }
