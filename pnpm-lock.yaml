@@ -915,6 +915,8 @@ importers:
         specifier: catalog:prod
         version: 3.1.0
 
+  packages/vfs: {}
+
   packages/vscode:
     dependencies:
       '@napi-rs/wasm-runtime':
