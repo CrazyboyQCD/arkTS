@@ -188,6 +188,16 @@
           "markdownDescription": "%configuration.ets.ignoreWorkspaceLocalPropertiesFile.description%",
           "default": false
         },
+        "ets.linterVersion": {
+          "type": "string",
+          "description": "The version of the ArkTS linter to use. Set to 'off' to disable the linter.",
+          "enum": [
+            "1.0",
+            "1.1",
+            "off"
+          ],
+          "default": "1.1"
+        },
         "ets.resourceReferenceDiagnostic": {
           "type": "string",
           "description": "未匹配到的 $r() 资源引用的诊断级别",

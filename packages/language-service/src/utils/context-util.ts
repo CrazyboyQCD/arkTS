@@ -5,6 +5,7 @@ import { URI } from 'vscode-uri'
 
 export interface TSProvider {
   'typescript/languageService'(): ets.LanguageService
+  'typescript/languageServiceHost'(): ets.LanguageServiceHost
 }
 
 /** 一些工具类，用于services中获取一些对象。 */
@@ -16,7 +17,7 @@ export class ContextUtil {
   }
 
   /**
-   * 获取已有的`LanguageService`对象
+   * 获取 volar service 中已有的`LanguageService`对象
    *
    * @description ⚠️ 注意，此方法只能在provide层使用，在create(context)层中使用是拿不到LanguageService对象的！！
    * @returns LanguageService对象，如果获取失败则返回null
@@ -24,7 +25,61 @@ export class ContextUtil {
   getLanguageService(): ets.LanguageService | null {
     const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
     if (!languageService) return null
-    return languageService
+    return languageService as ets.LanguageService
+  }
+
+  private documentRegistries: [boolean, string, ets.DocumentRegistry][] = []
+
+  getDocumentRegistry(
+    ets: typeof import('ohos-typescript'),
+    useCaseSensitiveFileNames: boolean,
+    currentDirectory: string,
+  ): ets.DocumentRegistry {
+    let documentRegistry = this.documentRegistries.find(item =>
+      item[0] === useCaseSensitiveFileNames && item[1] === currentDirectory,
+    )?.[2]
+    if (!documentRegistry) {
+      documentRegistry = ets.createDocumentRegistry(useCaseSensitiveFileNames, currentDirectory)
+      this.documentRegistries.push([useCaseSensitiveFileNames, currentDirectory, documentRegistry])
+    }
+    return documentRegistry
+  }
+
+  private _standaloneLanguageService: ets.LanguageService | null = null
+
+  /**
+   * 获取全局独立的 LanguageService。该单例对象并不是从 volar service 中注入进来，而是直接
+   * 通过 ohos-typescript 的 `ets.createLanguageService()` 函数创建。
+   *
+   * @description ⚠️ 注意，此方法只能在provide层使用，在create(context)层中使用是`有可能`拿不到LanguageService对象的。
+   * @param ets ohos-typescript 实例
+   */
+  getStandaloneLanguageService(ets: typeof import('ohos-typescript')): ets.LanguageService | null {
+    if (this._standaloneLanguageService) return this._standaloneLanguageService
+    if (!this.context.project.typescript?.languageServiceHost) return null
+    this._standaloneLanguageService = ets.createLanguageService(
+      this.context.project.typescript.languageServiceHost as any,
+      this.getDocumentRegistry(
+        ets,
+        this.context.project.typescript.sys.useCaseSensitiveFileNames,
+        this.context.project.typescript.languageServiceHost.getCurrentDirectory(),
+      ),
+    )
+    return this._standaloneLanguageService
+  }
+
+  dispose(): void {
+    if (this._standaloneLanguageService) {
+      this._standaloneLanguageService.dispose()
+      this._standaloneLanguageService = null
+    }
+    this.documentRegistries = []
+  }
+
+  getLanguageServiceHost(): ets.LanguageServiceHost | null {
+    const languageServiceHost = this.context.inject<TSProvider>(`typescript/languageServiceHost`)
+    if (!languageServiceHost) return null
+    return languageServiceHost as ets.LanguageServiceHost
   }
 
   decodeTextDocumentUri(document: TextDocument): URI | null {
@@ -44,7 +99,7 @@ export class ContextUtil {
     const decoded = this.context.decodeEmbeddedDocumentUri(URI.parse(document.uri))
     if (!decoded) return null
     const [decodedUri] = decoded
-    const languageService = this.context.inject<TSProvider>(`typescript/languageService`)
+    const languageService = this.getLanguageService()
     if (!languageService) return null
     const program = languageService.getProgram()
     if (!program) return null
