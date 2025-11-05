@@ -143,15 +143,4 @@ export class ContextUtil {
 
     return matches[0]?.folder.toString()
   }
-
-  /**
-   * 获取独立增量编译 Program.
-   */
-  getIncrementalProgram(ets: typeof import('ohos-typescript')): ets.EmitAndSemanticDiagnosticsBuilderProgram {
-    const incrementalProgram = ets.createIncrementalProgramForArkTs({
-      rootNames: this.getLanguageService()?.getProgram()?.getRootFileNames() ?? [],
-      options: this.getLanguageService()?.getProgram()?.getCompilerOptions() ?? {},
-    })
-    return incrementalProgram
-  }
 }
