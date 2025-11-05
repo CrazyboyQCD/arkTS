@@ -688,6 +688,15 @@ export function createVirtualLanguageServiceHost(
       return fileVersions.get(fileName) || "0"
     },
     writeFile: sys.writeFile,
+    getScriptKind: fileName => {
+      if (fileName.endsWith('.ets')) return 8
+      else if (fileName.endsWith('.js')) return ts.ScriptKind.JS
+      else if (fileName.endsWith('.jsx')) return ts.ScriptKind.JSX
+      else if (fileName.endsWith('.ts')) return ts.ScriptKind.TS
+      else if (fileName.endsWith('.tsx')) return ts.ScriptKind.TSX
+      else if (fileName.endsWith('.json')) return ts.ScriptKind.JSON
+      else return ts.ScriptKind.Unknown
+    }
   } as LanguageServiceHost
 
   type Return = {

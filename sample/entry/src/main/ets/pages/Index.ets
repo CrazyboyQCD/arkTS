@@ -58,7 +58,7 @@ export struct Index {
         .accessibilityDescription('Test')
         .align(Alignment.Center)
 
-      ForEach([1, 2, 3, 4], (item) => {
+      ForEach([1, 2, 3, 4], (item: number) => {
         Column() {
           Row() {
             Text(item.toString())

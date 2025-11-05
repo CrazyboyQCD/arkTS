@@ -57,6 +57,7 @@ connection.onInitialize(async (params) => {
     isSuggestionsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
     isAutoClosingTagsEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
     isFormattingEnabled: document => !((document.languageId === 'json' || document.languageId === 'jsonc')),
+    disableAutoImportCache: true,
   })
   patchSemantic(typescriptServices)
 

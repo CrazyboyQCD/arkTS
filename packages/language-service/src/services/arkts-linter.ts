@@ -28,18 +28,24 @@ export function createArkTSLinter(ets: typeof import('ohos-typescript')): Langua
       }
 
       return {
+        dispose: () => contextUtil.dispose(),
         provideDiagnostics(document) {
           const languageService = contextUtil.getStandaloneLanguageService(ets)
           const documentUri = contextUtil.decodeTextDocumentUri(document)
           if (!languageService || !documentUri) return []
 
+          // getBuilderProgram() 在 ArkTS 中其实是支持一个参数: withLinterProgram, 用于指定是否
+          // 创建包含 linter 程序的 BuilderProgram （即，使用 ets.createIncrementalProgramForArkTs() 函数
+          // 来创建 builder Program）, 默认为不包含 linter 程序，因此需要强行传递一个 true 参数，确保拿到的
+          // BuilderProgram 是包含 linter 程序的。
           // eslint-disable-next-line ts/ban-ts-comment
           // @ts-expect-error
           const incrementalProgram = languageService.getBuilderProgram(true)
-          console.warn(incrementalProgram)
-          if (!incrementalProgram) return []
+          if (!incrementalProgram) {
+            console.warn('Failed to get incremental program, cannot run arkts linter.')
+            return []
+          }
           const arktsLinterDiagnostics = ets.ArkTSLinter_1_1.runArkTSLinter(incrementalProgram)
-          console.warn(arktsLinterDiagnostics)
           const diagnostics: Diagnostic[] = []
 
           for (const diagnostic of arktsLinterDiagnostics) {
