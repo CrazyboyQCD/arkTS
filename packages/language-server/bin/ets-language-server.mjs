@@ -3,9 +3,9 @@ import process from 'node:process'
 
 async function run() {
   if (process.argv.includes('--version')) {
-    const { version } = await import('../package.json')
+    const obj = await import('../package.json', { with: { type: 'json' } })
     // eslint-disable-next-line no-console
-    console.log(`${version}`)
+    console.log(`${obj.default.version}`)
   }
   else {
     await import('../out/index.mjs')
