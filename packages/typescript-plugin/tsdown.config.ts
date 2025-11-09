@@ -9,4 +9,6 @@ export default defineConfig({
   clean: true,
   external: [],
   noExternal: [],
+  platform: 'node',
+  shims: true,
 })
