@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 // 配置
 const config = {
   // 语言服务器路径（相对于项目根目录）
-  serverPath: path.resolve(__dirname, '../../packages/language-server/bin/ets-language-server.js'),
+  serverPath: path.resolve(__dirname, '../../packages/language-server/bin/ets-language-server.mjs'),
   // 工作区路径
   workspaceRoot: path.join(__dirname, 'test-workspace'),
   // TypeScript SDK 路径（使用 node_modules 中的 TypeScript）
@@ -496,7 +496,7 @@ async function main() {
   // 启动语言服务器
   logger.section('🔌 启动语言服务器');
   
-  const serverProcess = spawn('node', [config.serverPath], {
+  const serverProcess = spawn('node', [config.serverPath, '--stdio', '--server-mode'], {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env }
   });
