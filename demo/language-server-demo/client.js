@@ -48,15 +48,15 @@ const logger = {
 // 初始化测试工作区
 function initializeWorkspace() {
   logger.section('📦 初始化测试工作区');
-  
+
   const workspaceRoot = config.workspaceRoot;
-  
+
   // 创建工作区目录
   if (!fs.existsSync(workspaceRoot)) {
     fs.mkdirSync(workspaceRoot, { recursive: true });
     logger.success(`创建工作区目录: ${workspaceRoot}`);
   }
-  
+
   // 创建示例 ArkTS 文件
   const sampleFile = path.join(workspaceRoot, 'sample.ets');
   const sampleContent = `@Entry
@@ -75,23 +75,23 @@ struct Index {
   }
 }
 `;
-  
+
   fs.writeFileSync(sampleFile, sampleContent);
   logger.success(`创建示例文件: sample.ets`);
-  
+
   // 创建 package.json
   const packageJson = {
     name: 'test-workspace',
     version: '1.0.0',
     description: 'Test workspace for ArkTS Language Server'
   };
-  
+
   fs.writeFileSync(
     path.join(workspaceRoot, 'package.json'),
     JSON.stringify(packageJson, null, 2)
   );
   logger.success('创建 package.json');
-  
+
   return workspaceRoot;
 }
 
@@ -102,7 +102,7 @@ class JsonRpcClient {
     this.messageId = 0;
     this.pendingRequests = new Map();
     this.buffer = '';
-    
+
     // 设置数据处理器
     this.process.stdout.on('data', (data) => this.handleData(data));
     this.process.stderr.on('data', (data) => {
@@ -112,29 +112,29 @@ class JsonRpcClient {
       }
     });
   }
-  
+
   handleData(data) {
     this.buffer += data.toString();
-    
+
     while (true) {
       // 查找 Content-Length 头
       const lengthMatch = this.buffer.match(/Content-Length: (\d+)\r\n/);
       if (!lengthMatch) break;
-      
+
       const contentLength = parseInt(lengthMatch[1]);
       const headerEnd = this.buffer.indexOf('\r\n\r\n');
-      
+
       if (headerEnd === -1) break;
-      
+
       const messageStart = headerEnd + 4;
       const messageEnd = messageStart + contentLength;
-      
+
       if (this.buffer.length < messageEnd) break;
-      
+
       // 提取消息
       const messageJson = this.buffer.substring(messageStart, messageEnd);
       this.buffer = this.buffer.substring(messageEnd);
-      
+
       try {
         const message = JSON.parse(messageJson);
         this.handleMessage(message);
@@ -143,13 +143,13 @@ class JsonRpcClient {
       }
     }
   }
-  
+
   handleMessage(message) {
     if (message.id && this.pendingRequests.has(message.id)) {
       // 处理响应
       const { resolve, reject, method } = this.pendingRequests.get(message.id);
       this.pendingRequests.delete(message.id);
-      
+
       if (message.error) {
         logger.error(`请求 ${method} 失败:`);
         logger.data('错误', message.error);
@@ -169,7 +169,7 @@ class JsonRpcClient {
       }
     }
   }
-  
+
   sendRequest(method, params) {
     return new Promise((resolve, reject) => {
       const id = ++this.messageId;
@@ -179,32 +179,32 @@ class JsonRpcClient {
         method,
         params
       };
-      
+
       this.pendingRequests.set(id, { resolve, reject, method });
-      
+
       const messageJson = JSON.stringify(message);
       const messageStr = `Content-Length: ${Buffer.byteLength(messageJson)}\r\n\r\n${messageJson}`;
-      
+
       logger.info(`发送请求: ${method}`);
       logger.data('参数', params);
-      
+
       this.process.stdin.write(messageStr);
     });
   }
-  
+
   sendNotification(method, params) {
     const message = {
       jsonrpc: '2.0',
       method,
       params
     };
-    
+
     const messageJson = JSON.stringify(message);
     const messageStr = `Content-Length: ${Buffer.byteLength(messageJson)}\r\n\r\n${messageJson}`;
-    
+
     logger.info(`发送通知: ${method}`);
     logger.data('参数', params);
-    
+
     this.process.stdin.write(messageStr);
   }
 }
@@ -212,13 +212,13 @@ class JsonRpcClient {
 // 演示协议流程（不需要实际服务器）
 async function demonstrateProtocol() {
   logger.section('📚 LSP 协议通信演示');
-  
+
   // 初始化工作区
   const workspaceRoot = initializeWorkspace();
-  
+
   logger.section('📋 1. Initialize 请求');
   logger.info('客户端发送 initialize 请求，包含客户端能力和工作区信息');
-  
+
   const initializeRequest = {
     jsonrpc: '2.0',
     id: 1,
@@ -248,9 +248,9 @@ async function demonstrateProtocol() {
       }
     }
   };
-  
+
   logger.data('请求消息', initializeRequest);
-  
+
   logger.info('\n服务器响应包含服务器能力信息:');
   const initializeResponse = {
     jsonrpc: '2.0',
@@ -273,13 +273,13 @@ async function demonstrateProtocol() {
       }
     }
   };
-  
+
   logger.data('响应消息', initializeResponse);
-  
+
   logger.section('📋 2. ArkTS 配置请求');
   logger.info('发送 ets/waitForEtsConfigurationChangedRequested 请求');
   logger.info('这是 ArkTS Language Server 的特殊请求，用于配置 SDK 路径等信息');
-  
+
   const configRequest = {
     jsonrpc: '2.0',
     id: 2,
@@ -295,26 +295,26 @@ async function demonstrateProtocol() {
       debug: true
     }
   };
-  
+
   logger.data('配置请求', configRequest);
-  
+
   logger.section('📋 3. Initialized 通知');
   logger.info('客户端通知服务器初始化完成');
-  
+
   const initializedNotification = {
     jsonrpc: '2.0',
     method: 'initialized',
     params: {}
   };
-  
+
   logger.data('通知消息', initializedNotification);
-  
+
   logger.section('📋 4. textDocument/didOpen 通知');
   logger.info('客户端通知服务器打开了一个文档');
-  
+
   const sampleFile = path.join(workspaceRoot, 'sample.ets');
   const fileContent = fs.readFileSync(sampleFile, 'utf8');
-  
+
   const didOpenNotification = {
     jsonrpc: '2.0',
     method: 'textDocument/didOpen',
@@ -327,12 +327,12 @@ async function demonstrateProtocol() {
       }
     }
   };
-  
+
   logger.data('通知消息', didOpenNotification);
-  
+
   logger.section('📋 5. textDocument/hover 请求');
   logger.info('客户端请求某个位置的悬停信息');
-  
+
   const hoverRequest = {
     jsonrpc: '2.0',
     id: 3,
@@ -342,9 +342,9 @@ async function demonstrateProtocol() {
       position: { line: 2, character: 10 }
     }
   };
-  
+
   logger.data('请求消息', hoverRequest);
-  
+
   logger.info('\n服务器响应包含类型信息和文档:');
   const hoverResponse = {
     jsonrpc: '2.0',
@@ -360,12 +360,12 @@ async function demonstrateProtocol() {
       }
     }
   };
-  
+
   logger.data('响应消息', hoverResponse);
-  
+
   logger.section('📋 6. textDocument/completion 请求');
   logger.info('客户端请求代码补全');
-  
+
   const completionRequest = {
     jsonrpc: '2.0',
     id: 4,
@@ -375,9 +375,9 @@ async function demonstrateProtocol() {
       position: { line: 5, character: 10 }
     }
   };
-  
+
   logger.data('请求消息', completionRequest);
-  
+
   logger.info('\n服务器响应包含补全项列表:');
   const completionResponse = {
     jsonrpc: '2.0',
@@ -393,12 +393,12 @@ async function demonstrateProtocol() {
       ]
     }
   };
-  
+
   logger.data('响应消息', completionResponse);
-  
+
   logger.section('📋 7. textDocument/didClose 通知');
   logger.info('客户端通知服务器关闭了文档');
-  
+
   const didCloseNotification = {
     jsonrpc: '2.0',
     method: 'textDocument/didClose',
@@ -406,40 +406,40 @@ async function demonstrateProtocol() {
       textDocument: { uri: `file://${sampleFile}` }
     }
   };
-  
+
   logger.data('通知消息', didCloseNotification);
-  
+
   logger.section('📋 8. shutdown 请求');
   logger.info('客户端请求关闭服务器');
-  
+
   const shutdownRequest = {
     jsonrpc: '2.0',
     id: 5,
     method: 'shutdown',
     params: null
   };
-  
+
   logger.data('请求消息', shutdownRequest);
-  
+
   const shutdownResponse = {
     jsonrpc: '2.0',
     id: 5,
     result: null
   };
-  
+
   logger.data('响应消息', shutdownResponse);
-  
+
   logger.section('📋 9. exit 通知');
   logger.info('客户端通知服务器退出');
-  
+
   const exitNotification = {
     jsonrpc: '2.0',
     method: 'exit',
     params: null
   };
-  
+
   logger.data('通知消息', exitNotification);
-  
+
   logger.section('✨ 协议演示完成！');
   logger.success('以上演示了 LSP 协议的基本通信流程');
   logger.info('\n要测试真实的语言服务器，请:');
@@ -453,14 +453,14 @@ async function demonstrateProtocol() {
 // 主函数
 async function main() {
   logger.section('🚀 ArkTS Language Server Demo');
-  
+
   // 检查语言服务器是否存在
   const serverExists = fs.existsSync(config.serverPath);
-  
+
   // 检查 ohos-typescript 是否初始化
-  const ohosTypescriptExists = fs.existsSync(config.ohosTypescriptPath) && 
+  const ohosTypescriptExists = fs.existsSync(config.ohosTypescriptPath) &&
     fs.readdirSync(config.ohosTypescriptPath).length > 0;
-  
+
   if (!serverExists || !ohosTypescriptExists) {
     if (!serverExists) {
       logger.warn(`语言服务器未找到: ${config.serverPath}`);
@@ -469,7 +469,7 @@ async function main() {
       logger.info('  pnpm -F "@arkts/language-server" build');
       logger.info('');
     }
-    
+
     if (!ohosTypescriptExists) {
       logger.warn(`ohos-typescript 未初始化: ${config.ohosTypescriptPath}`);
       logger.info('需要初始化 ohos-typescript 子模块:');
@@ -481,36 +481,36 @@ async function main() {
       logger.info('  3. 或者使用标准 TypeScript（功能有限）');
       logger.info('');
     }
-    
+
     logger.warn('此 Demo 将只演示协议通信流程，不启动实际的语言服务器');
     logger.info('');
     await demonstrateProtocol();
     return;
   }
-  
+
   logger.success(`语言服务器路径: ${config.serverPath}`);
-  
+
   // 初始化工作区
   const workspaceRoot = initializeWorkspace();
-  
+
   // 启动语言服务器
   logger.section('🔌 启动语言服务器');
-  
+
   const serverProcess = spawn('node', [config.serverPath, '--stdio', '--server-mode'], {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env }
   });
-  
+
   const client = new JsonRpcClient(serverProcess);
-  
+
   // 等待服务器启动
   await new Promise(resolve => setTimeout(resolve, 1000));
   logger.success('语言服务器已启动');
-  
+
   try {
     // 1. 发送 initialize 请求
     logger.section('📡 发送 Initialize 请求');
-    
+
     const initResult = await client.sendRequest('initialize', {
       processId: process.pid,
       clientInfo: {
@@ -604,13 +604,13 @@ async function main() {
         }
       }
     });
-    
+
     logger.success('Initialize 请求成功');
     logger.data('服务器能力', initResult.capabilities);
-    
+
     // 2. 发送配置请求（ArkTS 特定）
     logger.section('⚙️  发送配置请求');
-    
+
     // 构建基本配置（如果没有 SDK 路径，使用最小配置）
     const etsConfig = {
       typescript: {
@@ -631,30 +631,30 @@ async function main() {
       },
       debug: true
     };
-    
+
     if (!config.sdkPath) {
       logger.warn('未配置 OpenHarmony SDK 路径，使用最小配置');
       logger.info('可通过设置环境变量 OHOS_SDK_PATH 来配置 SDK 路径');
     }
-    
+
     await client.sendRequest('ets/waitForEtsConfigurationChangedRequested', etsConfig);
     logger.success('配置请求已发送');
-    
+
     // 3. 发送 initialized 通知
     logger.section('✅ 发送 Initialized 通知');
-    
+
     client.sendNotification('initialized', {});
     logger.success('Initialized 通知已发送');
-    
+
     // 等待一下让服务器处理
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // 4. 打开文档
     logger.section('📄 打开文档');
-    
+
     const sampleFile = path.join(workspaceRoot, 'sample.ets');
     const fileContent = fs.readFileSync(sampleFile, 'utf8');
-    
+
     client.sendNotification('textDocument/didOpen', {
       textDocument: {
         uri: `file://${sampleFile}`,
@@ -663,15 +663,15 @@ async function main() {
         text: fileContent
       }
     });
-    
+
     logger.success(`已打开文档: sample.ets`);
-    
+
     // 等待一下让服务器分析文档
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // 5. 测试悬停信息
     logger.section('🔍 测试悬停信息');
-    
+
     try {
       const hoverResult = await client.sendRequest('textDocument/hover', {
         textDocument: {
@@ -682,7 +682,7 @@ async function main() {
           character: 10
         }
       });
-      
+
       if (hoverResult) {
         logger.success('成功获取悬停信息');
         logger.data('悬停内容', hoverResult);
@@ -692,10 +692,10 @@ async function main() {
     } catch (error) {
       logger.warn(`悬停请求失败: ${error.message}`);
     }
-    
+
     // 6. 测试代码补全
     logger.section('💡 测试代码补全');
-    
+
     try {
       const completionResult = await client.sendRequest('textDocument/completion', {
         textDocument: {
@@ -706,17 +706,17 @@ async function main() {
           character: 10
         }
       });
-      
+
       if (completionResult && (completionResult.items || completionResult.length > 0)) {
         const items = completionResult.items || completionResult;
         logger.success(`获取到 ${items.length} 个补全项`);
-        
+
         // 显示前 5 个补全项
         const previewItems = items.slice(0, 5);
         previewItems.forEach((item, index) => {
           logger.info(`  ${index + 1}. ${item.label} (${item.kind || 'unknown'})`);
         });
-        
+
         if (items.length > 5) {
           logger.info(`  ... 还有 ${items.length - 5} 个补全项`);
         }
@@ -726,34 +726,34 @@ async function main() {
     } catch (error) {
       logger.warn(`补全请求失败: ${error.message}`);
     }
-    
+
     // 7. 关闭文档
     logger.section('📤 关闭文档');
-    
+
     client.sendNotification('textDocument/didClose', {
       textDocument: {
         uri: `file://${sampleFile}`
       }
     });
-    
+
     logger.success('文档已关闭');
-    
+
     // 8. 关闭语言服务器
     logger.section('🛑 关闭语言服务器');
-    
+
     await client.sendRequest('shutdown', null);
     logger.success('Shutdown 请求已发送');
-    
+
     client.sendNotification('exit', null);
     logger.success('Exit 通知已发送');
-    
+
     // 等待服务器退出
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     logger.section('✨ Demo 执行完成！');
     logger.success('语言服务器通信测试成功');
     logger.info('\n如果你看到这条消息，说明语言服务器的基本功能正常工作。');
-    
+
   } catch (error) {
     logger.error(`执行过程中出错: ${error.message}`);
     console.error(error);
