@@ -50,7 +50,8 @@
   "scripts": {
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
-    "release": "pnpm publish"
+    "release": "pnpm publish",
+    "test": "node test-import.mjs && node test-require.cjs"
   },
   "devDependencies": {
     "@arkts/language-plugin": "workspace:*",
