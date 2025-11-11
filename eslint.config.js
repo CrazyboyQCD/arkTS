@@ -6,10 +6,10 @@ export default antfu({
   ignores: [
     'ohos-typescript/**/*',
     'sample/**/*',
-    'demo/**/*',
     'packages/declarations/ets/**/*',
     'packages/vscode/src/generated/**/*',
     'packages/vfs/src/**/*',
+    'packages/language-server/language-server-demo/*',
   ],
   rules: {
     'ts/no-namespace': 'off',
