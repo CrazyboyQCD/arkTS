@@ -8,9 +8,6 @@
     "ohos-typescript",
     "oh_modules",
     "samples",
-    "sample",
-    "packages/language-plugin/**/*",
-    "packages/language-server/**/*",
-    "packages/language-service/**/*"
+    "sample"
   ]
 }
