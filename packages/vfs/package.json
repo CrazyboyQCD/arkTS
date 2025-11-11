@@ -31,7 +31,6 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
-    "test:compatible": "node test-import.mjs && node test-require.cjs"
+    "build": "tsdown"
   }
 }

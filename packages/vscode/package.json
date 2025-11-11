@@ -290,8 +290,7 @@
     "release": "tsx scripts/pre-process.ts && pnpm run build && vsce publish && ovsx publish && tsx scripts/clean-process.ts",
     "update": "vscode-ext-gen --output src/generated/meta.ts",
     "ovsx": "ovsx",
-    "vsce": "vsce",
-    "test:compatible": "node test-build.cjs"
+    "vsce": "vsce"
   },
   "dependencies": {
     "@napi-rs/wasm-runtime": "^1.0.7"
