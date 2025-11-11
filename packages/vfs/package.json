@@ -32,6 +32,6 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "test": "node test-import.mjs && node test-require.cjs"
+    "test:compatible": "node test-import.mjs && node test-require.cjs"
   }
 }

@@ -50,7 +50,7 @@
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish",
-    "test": "node test-import.mjs && node test-require.cjs"
+    "test:compatible": "node test-import.mjs && node test-require.cjs"
   },
   "dependencies": {
     "@volar/language-core": "catalog:prod",
