@@ -46,56 +46,7 @@ Or simply search for `ArkTS Support` in VSCode.
 
 ## Usage Guide 📖
 
-### When DevEco Studio is already installed
-
-After installing this extension, configure the `OpenHarmony SDK` path and `HMS SDK` path (optional), then restart the IDE. These two `SDK paths` are usually found in a folder called `sdk` in the `DevEco Studio` installation directory.
-
-On macOS, right-click on `DevEco Studio` itself, select `Show Package Contents`, and you'll see a `sdk` folder inside the package containing `OpenHarmony SDK` and `HMS SDK`.
-
-Generally, `OpenHarmony SDK` has the following directory structure (referenced from version `DevEco Studio 6.0 Beta 2`):
-
-```
-ets/
-js/
-native/
-previewer/
-toolchains/
-```
-
-`HMS SDK` generally has the following directory structure (referenced from version `DevEco Studio 6.0 Beta 2`):
-
-```
-ets/
-native/
-previewer/
-toolchains/
-```
-
-### When DevEco Studio is not installed
-
-Currently, this extension still cannot completely replace HarmonyOS development. It's recommended that you install `DevEco Studio`. If you really don't want to install it, the extension also provides `download`, `extract and install`, and `seamless switching` features for `OpenHarmony SDK`. After installing this extension, you can search for `> ETS: Install OpenHarmony SDK` in the command palette and follow the prompts step by step.
-
-Additionally, the extension currently doesn't support `download`, `extract and install`, and `seamless switching` features for `HMS SDK`. Please download `DevEco Studio` or download HarmonyOS's `Command Line Tool` for installation.
-
-## About `ets.baseSdkPath` ⚠️
-
-This setting is used to configure the `base path` for `OpenHarmony SDK`. All versions of `OpenHarmony SDK` will be installed under this path.
-
-If the path is configured as `${os.homedir}/OpenHarmony`, the extension will automatically install `OpenHarmony SDK` in the `~/OpenHarmony/[API version, number]` folder and automatically detect the `API version` used by the current project, automatically switching to the corresponding `OpenHarmony SDK`. For example, if you want to install `OpenHarmony SDK` for `API20`, the extension will automatically install it in the `~/OpenHarmony/20` folder:
-
-```
-~/OpenHarmony
-├── 10
-├── 18
-└── 20
-    └── ets/
-    └── js/
-    └── native/
-    └── previewer/
-    └── toolchains/
-```
-
-This behavior is completely consistent with the `Settings -> OpenHarmony SDK` feature in `DevEco Studio`.
+Please refer to [Arkcode Organization Documentation](https://arkcode.dev/arkts/install).
 
 ## VSCode File Icon Pack 🖼️
 
