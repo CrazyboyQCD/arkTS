@@ -1,5 +1,19 @@
 # 开发或贡献本项目
 
+目前此仓库存放的不仅仅维护了 `ArkTS` 的 `VSCode` 扩展，还维护了 `ArkTS` 的 `volar` 语言服务器、插件、类型定义和虚拟文件系统等一系列底层工具链，他们都会被发布到 `npm` 的 `@arkts` 命名空间下。在提交 `Pull Request` 前，请确保您已经阅读并理解了以下内容。
+
+## 仓库结构
+
+- `packages/vscode`: 存储 `ArkTS` 的 `VSCode` 扩展代码
+- `packages/language-server`: 存储 `ArkTS` 的语言服务器启动代码，依赖 `packages/language-service` 和 `packages/shared` 包
+- `packages/language-service`: 存储 `ArkTS` 的语言服务代码，依赖 `packages/shared` 包
+- `packages/language-plugin`: 存储 `ArkTS` 的语言插件代码，依赖 `packages/shared` 包
+- `packages/shared`: 存储当前整个仓库的一些通用代码
+- `packages/types`: 存储 `build-profile.json5` 等文件的类型定义
+- `packages/vfs`: `ArkTS` 版虚拟文件系统，原 npm 包名为 `@typescript/vfs`
+
+## 开发环境准备
+
 必须有`node`、`pnpm`和`git`环境，并且建议装一个`vscode`或者类`vscode`的编辑器（如`cursor`/`trae`/`windsurf`等）。首先使用`git`克隆本仓库：
 
 ```bash
