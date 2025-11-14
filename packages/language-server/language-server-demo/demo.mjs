@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { spawn } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
@@ -8,10 +6,12 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+const jsType = process.argv[2] === 'esm' ? 'mjs' : 'js';
+
 // 配置
 const config = {
   // 语言服务器路径（相对于项目根目录）
-  serverPath: path.resolve(__dirname, '../bin/ets-language-server.js'),
+  serverPath: path.resolve(__dirname, `../bin/ets-language-server.${jsType}`),
   // 工作区路径
   workspaceRoot: path.join(__dirname, 'test-workspace'),
   // TypeScript SDK 路径（使用 node_modules 中的 TypeScript）
