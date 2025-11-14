@@ -180,7 +180,7 @@ async function demonstrateProtocol() {
   logger.section('📚 LSP 协议通信演示')
 
   // 初始化工作区
-  const workspaceRoot = initializeWorkspace()
+  const workspaceRoot = config.workspaceRoot
 
   logger.section('📋 1. Initialize 请求')
   logger.info('客户端发送 initialize 请求，包含客户端能力和工作区信息')
@@ -736,6 +736,7 @@ async function main() {
   catch (error) {
     logger.error(`执行过程中出错: ${error.message}`)
     console.error(error)
+    process.exit(1)
   }
   finally {
     // 确保进程被终止
