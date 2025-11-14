@@ -9,6 +9,5 @@ export default defineConfig({
   },
   clean: true,
   external: ['vscode'],
-  platform: 'node',
   shims: true,
 })

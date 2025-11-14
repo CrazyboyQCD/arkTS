@@ -20,7 +20,6 @@ export default defineConfig({
   sourcemap: isDev,
   external: ['vscode', '@aws-sdk/client-s3', '@arkts/project-detector'],
   tsconfig: './tsconfig.json',
-  platform: 'node',
   clean: false,
   onSuccess: 'vite build',
   minify: {
