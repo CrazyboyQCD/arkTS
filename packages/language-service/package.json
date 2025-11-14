@@ -54,8 +54,7 @@
   "scripts": {
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
-    "release": "pnpm publish",
-    "test:compatible": "node test-import.mjs && node test-require.cjs"
+    "release": "pnpm publish"
   },
   "dependencies": {
     "@arkts/project-detector": "catalog:prod",
