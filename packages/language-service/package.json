@@ -23,9 +23,14 @@
   ],
   "exports": {
     ".": {
-      "types": "./out/index.d.ts",
-      "import": "./out/index.mjs",
-      "default": "./out/index.js"
+      "import": {
+        "types": "./out/index.d.mts",
+        "default": "./out/index.mjs"
+      },
+      "require": {
+        "types": "./out/index.d.ts",
+        "default": "./out/index.js"
+      }
     },
     "./permission": {
       "types": "./out/permission.d.ts",

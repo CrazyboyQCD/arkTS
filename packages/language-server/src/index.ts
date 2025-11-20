@@ -1,3 +1,10 @@
+/* eslint-disable import/first */
+import { createRequire } from 'node:module'
+
+// Polyfill require for ESM compatibility with ohos-typescript
+const require = createRequire(import.meta.url)
+globalThis.require = require
+
 import process from 'node:process'
 import { ETSLanguagePlugin } from '@arkts/language-plugin'
 import { createArkTServices, ProjectDetectorManager } from '@arkts/language-service'

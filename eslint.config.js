@@ -9,6 +9,9 @@ export default antfu({
     'packages/declarations/ets/**/*',
     'packages/vscode/src/generated/**/*',
     'packages/vfs/src/**/*',
+    'packages/language-server/language-server-demo/*',
+    'test-*.mjs',
+    'test-*.cjs',
   ],
   rules: {
     'ts/no-namespace': 'off',

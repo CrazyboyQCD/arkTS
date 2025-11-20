@@ -47,9 +47,7 @@
   "scripts": {
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
-    "release": "pnpm publish",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "release": "pnpm publish"
   },
   "dependencies": {
     "consola": "^3.4.2",
