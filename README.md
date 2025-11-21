@@ -75,6 +75,8 @@
 }
 ```
 
+📖 **详细文档**：[ArkTS 文件图标主题完整指南](./ArkTS-File-Icons.md)
+
 ### Material Icon Theme（可选）
 
 也可以使用[Material Icon Theme](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme)，我已经给`Material Icon Theme`提交了PR，目前将`.ets`、`.d.ets`直接用上了`TypeScript官方的文件图标包`，升级到`v5.22.0`之后的版本都可用 👇

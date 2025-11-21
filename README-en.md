@@ -24,6 +24,7 @@ This is an ArkTS VSCode extension developed based on Volar. 🌹 It appears that
 ## Features
 
 - 🌹 Starting from version 1.x, complete `ArkTS` language support is available, fully supporting all `ArkTS` syntax.
+- 🎨 **Built-in File Icon Theme**: Provides the `ArkTS Icons` theme, supporting ArkTS file types (`.ets`, `.json5`, etc.) and common web project files (JavaScript, React, CSS, Markdown, etc.), perfect for Nx monorepos and mixed projects.
 - 🖊️ Comprehensive JSON Schema support. Supports the following JSON Schema files:
   - `build-profile.json5` Module-level/Project-level configuration
   - `oh-package.json5` Module-level/Project-level configuration
@@ -48,9 +49,37 @@ Or simply search for `ArkTS Support` in VSCode.
 
 Please refer to [Arkcode Organization Documentation](https://arkcode.dev/arkts/install).
 
-## VSCode File Icon Pack 🖼️
+## VSCode File Icon Theme 🖼️
 
-It's recommended to use [Material Icon Theme](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme). I've submitted a PR to `Material Icon Theme`, and currently `.ets` and `.d.ets` files directly use the `TypeScript official file icon pack`. This is available in versions after upgrading to `v5.22.0`, making it look much better 👇
+### Built-in ArkTS Icons Theme
+
+This extension includes the `ArkTS Icons` file icon theme, providing comprehensive support for ArkTS and web development files:
+
+**Supported File Types:**
+- **ArkTS Files**: `.ets`, `.hml`, `.json5` config files
+- **Web Development**: JavaScript (`.js`, `.jsx`), TypeScript (`.ts`, `.tsx`), React
+- **Styling**: CSS, SCSS, SASS, LESS, HTML
+- **Documentation**: Markdown (`.md`, `.mdx`), text files
+- **Config Files**: `.gitignore`, `.env`, `.eslintrc`, `package.json`, `next.config.js`, etc.
+- **Common Folders**: `node_modules`, `src`, `components`, `pages`, `app`, etc.
+
+**How to Enable:**
+1. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Type: "Preferences: File Icon Theme"
+3. Select "ArkTS Icons"
+
+Or set in `settings.json`:
+```json
+{
+  "workbench.iconTheme": "arkts-icons"
+}
+```
+
+📖 **Full Documentation**: [ArkTS File Icons Theme Guide](./ArkTS-File-Icons-en.md)
+
+### Material Icon Theme (Optional)
+
+You can also use [Material Icon Theme](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme). I've submitted a PR to `Material Icon Theme`, and currently `.ets` and `.d.ets` files directly use the `TypeScript official file icon pack`. This is available in versions after upgrading to `v5.22.0` 👇
 
 ![Material icon theme](./screenshots/icon-theme.png)
 
