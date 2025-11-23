@@ -23,6 +23,7 @@
 ## Features
 
 - 🌹 1.x版本开始具备完整的`ArkTS`语言支持，全量支持所有`ArkTS`语法。
+- 🎨 **内置文件图标主题**：提供`ArkTS Icons`主题，支持ArkTS文件类型（`.ets`、`.json5`等）和常见Web项目文件（JavaScript、React、CSS、Markdown等），适用于Nx monorepo等混合项目。
 - 🖊️ 完善的JSON Schema支持。支持以下文件的JSON Schema：
   - `build-profile.json5` 模块级别/项目级别配置
   - `oh-package.json5` 模块级别/项目级别配置
@@ -42,9 +43,35 @@
 
 详情请见 [Arkcode 组织文档](https://arkcode.dev/arkts/install)。
 
-## VSCode 文件图标包 🖼️
+## VSCode 文件图标主题 🖼️
 
-推荐使用[Material Icon Theme](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme)，我已经给`Material Icon Theme`提交了PR，目前将`.ets`、`.d.ets`直接用上了`TypeScript官方的文件图标包`，升级到`v5.22.0`之后的版本都可用，这样至少好看一些了 👇
+### 内置 ArkTS Icons 主题
+
+本扩展内置了`ArkTS Icons`文件图标主题，提供对ArkTS和Web开发文件的完整支持：
+
+**支持的文件类型：**
+- **ArkTS文件**：`.ets`、`.hml`、`.json5`配置文件
+- **Web开发**：JavaScript (`.js`、`.jsx`)、TypeScript (`.ts`、`.tsx`)、React
+- **样式文件**：CSS、SCSS、SASS、LESS、HTML
+- **文档**：Markdown (`.md`、`.mdx`)、文本文件
+- **配置文件**：`.gitignore`、`.env`、`.eslintrc`、`package.json`、`next.config.js`等
+- **常见文件夹**：`node_modules`、`src`、`components`、`pages`、`app`等
+
+**启用方式：**
+1. 打开命令面板 (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. 输入 "Preferences: File Icon Theme"
+3. 选择 "ArkTS Icons"
+
+或在 `settings.json` 中设置：
+```json
+{
+  "workbench.iconTheme": "arkts-icons"
+}
+```
+
+### Material Icon Theme（可选）
+
+也可以使用[Material Icon Theme](https://marketplace.visualstudio.com/items?itemName=PKief.material-icon-theme)，我已经给`Material Icon Theme`提交了PR，目前将`.ets`、`.d.ets`直接用上了`TypeScript官方的文件图标包`，升级到`v5.22.0`之后的版本都可用 👇
 
 ![Material icon theme](./screenshots/icon-theme.png)
 
