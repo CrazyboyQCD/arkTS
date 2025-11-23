@@ -2,7 +2,16 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    projects: ['packages/*'],
+    projects: [
+      'packages/*',
+      {
+        // Root project for e2e tests
+        test: {
+          include: ['e2e/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+          name: 'e2e',
+        },
+      },
+    ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

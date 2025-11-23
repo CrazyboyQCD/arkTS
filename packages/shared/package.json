@@ -26,7 +26,7 @@
         "require": "./out/index.d.ts"
       },
       "import": "./out/index.mjs",
-      "require": "./out/index.js"
+      "require": "./out/index.cjs"
     },
     "./vscode": {
       "types": {
@@ -34,30 +34,33 @@
         "require": "./out/vscode.d.ts"
       },
       "import": "./out/vscode.mjs",
-      "require": "./out/vscode.js"
+      "require": "./out/vscode.cjs"
     },
     "./out/*": "./out/*"
   },
   "publishConfig": {
     "access": "public"
   },
-  "main": "./out/index.js",
+  "main": "./out/index.cjs",
   "module": "./out/index.mjs",
   "types": "./out/index.d.ts",
+  "files": [
+    "out"
+  ],
   "scripts": {
     "build": "tsdown --tsconfig ./tsconfig.build.json",
     "prepublishOnly": "tsdown --tsconfig ./tsconfig.build.json",
     "release": "pnpm publish"
   },
   "dependencies": {
-    "consola": "^3.4.2",
-    "kleur": "^4.1.5",
+    "consola": "catalog:prod",
+    "kleur": "catalog:prod",
     "ohos-typescript": "workspace:*",
-    "vscode-languageserver-textdocument": "^1.0.12",
-    "vscode-uri": "^3.1.0"
+    "vscode-languageserver-textdocument": "catalog:prod",
+    "vscode-uri": "catalog:prod"
   },
   "devDependencies": {
-    "@types/node": "^20.19.17",
-    "@types/vscode": "^1.104.0"
+    "@types/node": "catalog:types",
+    "@types/vscode": "catalog:types"
   }
 }

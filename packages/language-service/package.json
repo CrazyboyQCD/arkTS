@@ -29,21 +29,20 @@
       },
       "require": {
         "types": "./out/index.d.ts",
-        "default": "./out/index.js"
+        "default": "./out/index.cjs"
       }
     },
     "./permission": {
       "types": "./out/permission.d.ts",
       "import": "./out/permission.mjs",
-      "default": "./out/permission.js"
+      "default": "./out/permission.cjs"
     },
     "./dist/*": "./dist/*"
   },
-  "main": "out/index.js",
+  "main": "out/index.cjs",
+  "module": "out/index.mjs",
   "files": [
-    "bin",
-    "out",
-    "src"
+    "out"
   ],
   "engines": {
     "node": ">=16.0.0"
@@ -60,11 +59,9 @@
     "@arkts/project-detector": "catalog:prod",
     "@arkts/shared": "workspace:*",
     "@arkts/types": "workspace:*",
-    "@types/vscode": "catalog:dev",
     "@volar/language-core": "catalog:prod",
     "@volar/language-server": "catalog:prod",
     "fast-glob": "catalog:dev",
-    "image-type": "^6.0.0",
     "json5": "catalog:prod",
     "mitt": "catalog:prod",
     "ohos-typescript": "workspace:*",
@@ -72,5 +69,8 @@
     "vscode-languageserver-textdocument": "catalog:prod",
     "vscode-languageserver-types": "catalog:prod",
     "vscode-uri": "catalog:prod"
+  },
+  "devDependencies": {
+    "@types/vscode": "catalog:types"
   }
 }
