@@ -6,9 +6,7 @@ catalog:
   fflate: ^0.8.2
 catalogs:
   build:
-    '@swc/core': ^1.13.5
     tsdown: 0.16.4
-    unplugin-swc: ^1.5.7
   dev:
     fast-glob: ^3.3.3
     reactive-vscode: ^0.3.2
