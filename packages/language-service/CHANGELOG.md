@@ -1,5 +1,14 @@
 # @arkts/language-service
 
+## 1.1.6
+
+### Patch Changes
+
+- 3c79c04: fix: 修复 element json file -> module.json5 reference 跳转问题 (#198)
+- 2874720: chore: update deps & move the compatible files into scripts folder, update icons using DevEco Studio Next icons (#197)
+- Updated dependencies [2874720]
+  - @arkts/shared@1.0.11
+
 ## 1.1.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @arkts/shared
 
+## 1.0.11
+
+### Patch Changes
+
+- 2874720: chore: update deps & move the compatible files into scripts folder, update icons using DevEco Studio Next icons (#197)
+
 ## 1.0.10
 
 ### Patch Changes
