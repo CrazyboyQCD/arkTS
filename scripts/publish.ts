@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -6,10 +7,10 @@ import { globalLogger as logger } from 'tsdown'
 
 const dirname = fileURLToPath(new URL('.', import.meta.url))
 
-function publishNpmPackages() {
+function publishNpmPackages(): boolean {
   try {
     logger.info(`Publishing @arkts/* packages...`)
-    const command = `pnpm -F "@arkts/*" publish --publish-branch=next`
+    const command = `pnpm changeset publish`
     logger.info(`Executing command: ${command}`)
     execSync(command, { cwd: path.resolve(dirname, '..'), stdio: 'inherit' })
     return true
@@ -21,7 +22,7 @@ function publishNpmPackages() {
   }
 }
 
-function publishToVsce() {
+function publishToVsce(): boolean {
   try {
     logger.info(`Publishing to VSCE...`)
     const command = `pnpm -F vscode-naily-ets vsce ${process.argv.slice(2).includes('--dry-run') ? 'package' : 'publish'} ${process.argv.slice(2).filter(v => v !== '--dry-run').join(' ')}`
@@ -36,7 +37,7 @@ function publishToVsce() {
   }
 }
 
-function publishToOvsce() {
+function publishToOvsce(): boolean {
   try {
     if (process.argv.includes('--dry-run')) {
       logger.warn(`Skipping OVSCE package in dry-run mode.`)
@@ -59,7 +60,12 @@ function publishToOvsce() {
   publishNpmPackages()
   execSync(`pnpm tsx scripts/pre-process.ts`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
   execSync(`pnpm run build`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
-  publishToVsce()
-  publishToOvsce()
+  const isPublishedToVsce = publishToVsce()
+  const isPublishedToOvsce = publishToOvsce()
+  // Changesets/action will be check the stdout to get the new versioning tag
+  if (isPublishedToVsce || isPublishedToOvsce) {
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(dirname, '..', 'packages', 'vscode', 'package.json'), 'utf-8'))
+    console.log(`New tag: ${packageJson.version}`)
+  }
   execSync(`pnpm tsx scripts/clean-process.ts`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
 })()
