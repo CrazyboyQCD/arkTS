@@ -29,17 +29,18 @@
       },
       "require": {
         "types": "./out/index.d.ts",
-        "default": "./out/index.js"
+        "default": "./out/index.cjs"
       }
     },
     "./permission": {
       "types": "./out/permission.d.ts",
       "import": "./out/permission.mjs",
-      "default": "./out/permission.js"
+      "default": "./out/permission.cjs"
     },
     "./dist/*": "./dist/*"
   },
-  "main": "out/index.js",
+  "main": "out/index.cjs",
+  "module": "out/index.mjs",
   "files": [
     "bin",
     "out",

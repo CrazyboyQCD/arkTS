@@ -9,7 +9,8 @@ const { existsSync, readFileSync } = require('node:fs')
 const path = require('node:path')
 const process = require('node:process')
 
-const __dirname = process.cwd()
+// eslint-disable-next-line no-global-assign
+__dirname = process.cwd()
 
 // Packages that support CJS require
 const packages = [

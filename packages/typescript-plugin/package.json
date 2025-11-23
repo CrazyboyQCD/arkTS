@@ -29,11 +29,11 @@
         "require": "./out/index.d.cts"
       },
       "import": "./out/index.mjs",
-      "require": "./out/index.js"
+      "require": "./out/index.cjs"
     },
     "./out/*": "./out/*"
   },
-  "main": "./out/index.js",
+  "main": "./out/index.cjs",
   "module": "./out/index.mjs",
   "types": "./out/index.d.ts",
   "files": [
