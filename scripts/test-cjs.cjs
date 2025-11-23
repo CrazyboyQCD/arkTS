@@ -1,20 +1,15 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 /**
- * Consolidated ESM import test for all packages
- * Tests that packages can be imported as ESM modules
+ * Consolidated CJS require test for all packages
+ * Tests that packages can be required as CommonJS modules
  */
 
-import { execSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+const { execSync } = require('node:child_process')
+const { existsSync, readFileSync } = require('node:fs')
+const { join } = require('node:path')
+const process = require('node:process')
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-// Packages that support ESM imports
+// Packages that support CJS require
 const packages = [
   'language-plugin',
   // language-server cannot be used as library. It should be used as binary.
@@ -39,7 +34,7 @@ async function testLanguageServer() {
     console.log('Running language server demo...')
 
     // Run demo.js with node and capture output
-    const result = execSync(`node "${demoPath}" esm`, {
+    const result = execSync(`node "${demoPath}"`, {
       cwd: __dirname,
       encoding: 'utf8',
       timeout: 30000, // 30 seconds timeout
@@ -80,49 +75,77 @@ async function testLanguageServer() {
   }
 }
 
+// VSCode package has a different test (build artifact check)
+async function testVscodePackage() {
+  try {
+    const vscodePackagePath = join(__dirname, 'packages', 'vscode')
+    const mainFile = join(vscodePackagePath, 'dist', 'client.js')
+
+    if (!existsSync(mainFile)) {
+      console.error('✗ vscode: Main file not found:', mainFile)
+      return false
+    }
+
+    const stats = require('node:fs').statSync(mainFile)
+    if (stats.size === 0) {
+      console.error('✗ vscode: Main file is empty')
+      return false
+    }
+
+    console.log(`✓ vscode: Build artifacts validated (${(stats.size / 1024).toFixed(2)} KB)`)
+    return true
+  }
+  catch (error) {
+    console.error(`✗ vscode: Test failed - ${error.message}`)
+    return false
+  }
+}
+
 async function testPackage(packageName) {
   try {
     const packagePath = join(__dirname, 'packages', packageName)
     const packageJsonPath = join(packagePath, 'package.json')
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 
-    // Determine the ESM entry point from package.json exports
-    let esmEntry = './out/index.mjs'
+    // Determine the CJS entry point from package.json exports
+    let cjsEntry = './out/index.js'
     const exportsField = packageJson.exports?.['.']
     if (typeof exportsField === 'string') {
-      esmEntry = exportsField
+      cjsEntry = exportsField
     }
-    else if (exportsField?.import) {
-      // Handle nested import field (could be string or object with default)
-      if (typeof exportsField.import === 'string') {
-        esmEntry = exportsField.import
+    else if (exportsField?.require) {
+      // Handle nested require field (could be string or object with default)
+      if (typeof exportsField.require === 'string') {
+        cjsEntry = exportsField.require
       }
-      else if (exportsField.import?.default) {
-        esmEntry = exportsField.import.default
+      else if (exportsField.require?.default) {
+        cjsEntry = exportsField.require.default
       }
     }
-    else if (packageJson.module) {
-      esmEntry = packageJson.module
+    else if (exportsField?.default) {
+      cjsEntry = exportsField.default
+    }
+    else if (packageJson.main) {
+      cjsEntry = packageJson.main
     }
 
-    const modulePath = join(packagePath, esmEntry)
-    const module = await import(modulePath)
+    const modulePath = join(packagePath, cjsEntry)
+    const module = require(modulePath)
 
-    // Check that the module has exports or is a function
-    const exportKeys = Object.keys(module)
-
-    // Check if it's a default function export
-    if (typeof module.default === 'function') {
-      console.log(`✓ ${packageName}: ESM import successful (default function export)`)
+    // Check if the module is a function (default export)
+    if (typeof module === 'function') {
+      console.log(`✓ ${packageName}: CJS require successful (default function export)`)
       return true
     }
 
+    // Check that the module has exports
+    const exportKeys = Object.keys(module)
     if (exportKeys.length === 0) {
-      console.error(`✗ ${packageName}: Expected module to have exports`)
+      console.error(`✗ ${packageName}: Expected module to have exports or be a function`)
       return false
     }
 
-    console.log(`✓ ${packageName}: ESM import successful (${exportKeys.length} exports)`)
+    console.log(`✓ ${packageName}: CJS require successful (${exportKeys.length} exports)`)
     return true
   }
   catch (error) {
@@ -131,17 +154,18 @@ async function testPackage(packageName) {
       console.log(`⚠ ${packageName}: Skipped - missing dependency (${error.message.split('\n')[0]})`)
       return true
     }
-    console.error(`✗ ${packageName}: Import failed - ${error.message}`)
+    console.error(`✗ ${packageName}: Require failed - ${error.message}`)
     return false
   }
 }
 
 async function testAll() {
-  console.log('Testing ESM packages and language server...\n')
+  console.log('Testing all packages and language server...\n')
 
   const results = await Promise.all([
     ...packages.map(testPackage),
     testLanguageServer(),
+    testVscodePackage(),
   ])
 
   const failed = results.filter(r => !r).length

@@ -56,7 +56,7 @@
   "devDependencies": {
     "@arkts/language-plugin": "workspace:*",
     "@arkts/shared": "workspace:*",
-    "@types/vscode": "catalog:dev",
+    "@types/vscode": "catalog:types",
     "@volar/language-core": "catalog:prod",
     "@volar/language-server": "catalog:prod",
     "@volar/typescript": "catalog:prod",
