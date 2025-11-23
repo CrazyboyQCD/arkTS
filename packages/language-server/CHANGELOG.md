@@ -1,5 +1,14 @@
 # @arkts/language-server
 
+## 1.2.3
+
+### Patch Changes
+
+- 2874720: chore: update deps & move the compatible files into scripts folder, update icons using DevEco Studio Next icons (#197)
+- Updated dependencies [3c79c04]
+- Updated dependencies [2874720]
+  - @arkts/language-service@1.1.6
+
 ## 1.2.2
 
 ### Patch Changes
