@@ -88,6 +88,13 @@
         "url": "./schemas/ets-tsconfig.schema.json"
       }
     ],
+    "iconThemes": [
+      {
+        "id": "arkts-icons",
+        "label": "ArkTS Icons",
+        "path": "./icons/arkts-icon-theme.json"
+      }
+    ],
     "languages": [
       {
         "id": "ets",
