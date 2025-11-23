@@ -82,7 +82,7 @@ async function testLanguageServer() {
 async function testVscodePackage() {
   try {
     const vscodePackagePath = path.join(__dirname, 'packages', 'vscode')
-    const mainFile = path.join(vscodePackagePath, 'dist', 'client.js')
+    const mainFile = path.join(vscodePackagePath, 'dist', 'client.cjs')
 
     if (!existsSync(mainFile)) {
       console.error('✗ vscode: Main file not found:', mainFile)
