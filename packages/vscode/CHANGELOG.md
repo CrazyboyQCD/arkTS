@@ -1,5 +1,14 @@
 # vscode-naily-ets
 
+## 1.2.5
+
+### Patch Changes
+
+- 97257a0: chore: update README.md & CONTRIBUTING.md
+- 97257a0: feat: Add custom VS Code icon theme with various file and folder icons (#195) Thanks @kristianmandrup !
+- 97257a0: fix: 修复 element json file -> module.json5 reference 跳转问题 (#198)
+- 97257a0: chore: update deps & move the compatible files into scripts folder, update icons using DevEco Studio Next icons (#197)
+
 ## 1.2.4
 
 ### Patch Changes
