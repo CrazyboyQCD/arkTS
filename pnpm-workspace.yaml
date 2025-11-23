@@ -121,7 +121,6 @@ lockfile: true
 nodeLinker: isolated
 recursiveInstall: true
 onlyBuiltDependencies:
-  - '@swc/core'
   - '@vscode/vsce-sign'
   - esbuild
   - keytar
