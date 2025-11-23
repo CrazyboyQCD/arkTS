@@ -37,9 +37,7 @@
   "module": "./out/index.mjs",
   "types": "./out/index.d.ts",
   "files": [
-    "bin",
-    "out",
-    "src"
+    "out"
   ],
   "engines": {
     "node": ">=16.0.0"

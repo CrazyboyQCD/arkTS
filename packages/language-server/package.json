@@ -35,8 +35,7 @@
   },
   "files": [
     "bin",
-    "out",
-    "src"
+    "out"
   ],
   "engines": {
     "node": ">=16.0.0"

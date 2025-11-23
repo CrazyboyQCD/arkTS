@@ -32,6 +32,6 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown --format cjs,esm"
   }
 }
