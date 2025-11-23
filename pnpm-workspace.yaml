@@ -1,9 +1,6 @@
 packages:
   - packages/*
   - ohos-typescript
-catalog:
-  '@napi-rs/wasm-runtime': ^1.0.7
-  fflate: ^0.8.2
 catalogs:
   build:
     tsdown: 0.16.4
@@ -72,6 +69,7 @@ catalogs:
     consola: ^3.4.2
     defu: ^6.1.4
     extract-zip: ^2.0.1
+    fflate: ^0.8.2
     handlebars: ^4.7.8
     json5: ^2.2.3
     kleur: ^4.1.5
