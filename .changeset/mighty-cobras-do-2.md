@@ -1,5 +1,4 @@
 ---
-"@arkts/language-service": patch
 "vscode-naily-ets": patch
 ---
 

@@ -1,7 +1,4 @@
 ---
-"@arkts/language-service": patch
-"@arkts/language-server": patch
-"@arkts/shared": patch
 "vscode-naily-ets": patch
 ---
 
