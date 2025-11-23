@@ -6,12 +6,10 @@
 
 import { execSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __dirname = process.cwd()
 
 // Packages that support ESM imports
 const packages = [
@@ -28,7 +26,7 @@ const packages = [
 // Language Server test - run demo.mjs and check result
 async function testLanguageServer() {
   try {
-    const demoPath = join(__dirname, 'packages', 'language-server', 'language-server-demo', 'demo.mjs')
+    const demoPath = path.join(__dirname, 'packages', 'language-server', 'language-server-demo', 'demo.mjs')
 
     if (!existsSync(demoPath)) {
       console.error('✗ language-server: Demo file not found:', demoPath)
@@ -81,8 +79,8 @@ async function testLanguageServer() {
 
 async function testPackage(packageName) {
   try {
-    const packagePath = join(__dirname, 'packages', packageName)
-    const packageJsonPath = join(packagePath, 'package.json')
+    const packagePath = path.join(__dirname, 'packages', packageName)
+    const packageJsonPath = path.join(packagePath, 'package.json')
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 
     // Determine the ESM entry point from package.json exports
@@ -104,7 +102,7 @@ async function testPackage(packageName) {
       esmEntry = packageJson.module
     }
 
-    const modulePath = join(packagePath, esmEntry)
+    const modulePath = path.join(packagePath, esmEntry)
     const module = await import(modulePath)
 
     // Check that the module has exports or is a function

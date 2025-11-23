@@ -6,8 +6,10 @@
 
 const { execSync } = require('node:child_process')
 const { existsSync, readFileSync } = require('node:fs')
-const { join } = require('node:path')
+const path = require('node:path')
 const process = require('node:process')
+
+const __dirname = process.cwd()
 
 // Packages that support CJS require
 const packages = [
@@ -24,7 +26,7 @@ const packages = [
 // Language Server test - run demo.mjs and check result
 async function testLanguageServer() {
   try {
-    const demoPath = join(__dirname, 'packages', 'language-server', 'language-server-demo', 'demo.mjs')
+    const demoPath = path.join(__dirname, 'packages', 'language-server', 'language-server-demo', 'demo.mjs')
 
     if (!existsSync(demoPath)) {
       console.error('✗ language-server: Demo file not found:', demoPath)
@@ -78,8 +80,8 @@ async function testLanguageServer() {
 // VSCode package has a different test (build artifact check)
 async function testVscodePackage() {
   try {
-    const vscodePackagePath = join(__dirname, 'packages', 'vscode')
-    const mainFile = join(vscodePackagePath, 'dist', 'client.js')
+    const vscodePackagePath = path.join(__dirname, 'packages', 'vscode')
+    const mainFile = path.join(vscodePackagePath, 'dist', 'client.js')
 
     if (!existsSync(mainFile)) {
       console.error('✗ vscode: Main file not found:', mainFile)
@@ -103,8 +105,8 @@ async function testVscodePackage() {
 
 async function testPackage(packageName) {
   try {
-    const packagePath = join(__dirname, 'packages', packageName)
-    const packageJsonPath = join(packagePath, 'package.json')
+    const packagePath = path.join(__dirname, 'packages', packageName)
+    const packageJsonPath = path.join(packagePath, 'package.json')
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 
     // Determine the CJS entry point from package.json exports
@@ -129,7 +131,7 @@ async function testPackage(packageName) {
       cjsEntry = packageJson.main
     }
 
-    const modulePath = join(packagePath, cjsEntry)
+    const modulePath = path.join(packagePath, cjsEntry)
     const module = require(modulePath)
 
     // Check if the module is a function (default export)
