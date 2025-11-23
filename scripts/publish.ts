@@ -62,10 +62,10 @@ function publishToOvsce(): boolean {
   execSync(`pnpm run build`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
   const isPublishedToVsce = publishToVsce()
   const isPublishedToOvsce = publishToOvsce()
-  // Changesets/action will be check the stdout to get the new versioning tag
+  // Changesets/action will check the stdout to get the new versioning tag
   if (isPublishedToVsce || isPublishedToOvsce) {
     const packageJson = JSON.parse(fs.readFileSync(path.resolve(dirname, '..', 'packages', 'vscode', 'package.json'), 'utf-8'))
-    console.log(`New tag: ${packageJson.version}`)
+    console.log(`🦋 New tag: ${packageJson.name}@${packageJson.version}`)
   }
   execSync(`pnpm tsx scripts/clean-process.ts`, { cwd: path.resolve(`packages`, `vscode`), stdio: `inherit` })
 })()
