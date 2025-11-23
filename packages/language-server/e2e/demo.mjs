@@ -1,12 +1,16 @@
 import { spawn } from 'node:child_process'
 import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
 import * as path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { globalLogger as logger } from 'tsdown'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
 
-const jsType = process.argv[2] === 'esm' ? 'mjs' : 'js';
+const jsType = process.argv[2] === 'esm' ? 'mjs' : 'js'
 
 // 配置
 const config = {
@@ -15,34 +19,12 @@ const config = {
   // 工作区路径
   workspaceRoot: path.join(__dirname, 'test-workspace'),
   // TypeScript SDK 路径（使用 node_modules 中的 TypeScript）
-  tsdk: path.resolve(__dirname, '../../../node_modules/ohos-typescript/lib'),
-  // ohos-typescript 路径
+  // tsdk 应该指向包含 typescript.js 的目录，而不是文件本身
+  tsdk: path.dirname(require.resolve('typescript')),
+  // ohos-typescript
   ohosTypescriptPath: path.resolve(__dirname, '../../../ohos-typescript'),
   // OpenHarmony SDK 路径（可选）
   sdkPath: process.env.OHOS_SDK_PATH || undefined,
-}
-
-// ANSI 颜色代码
-const colors = {
-  reset: '\x1B[0m',
-  bright: '\x1B[1m',
-  dim: '\x1B[2m',
-  red: '\x1B[31m',
-  green: '\x1B[32m',
-  yellow: '\x1B[33m',
-  blue: '\x1B[34m',
-  magenta: '\x1B[35m',
-  cyan: '\x1B[36m',
-}
-
-// 日志工具
-const logger = {
-  info: msg => console.log(`${colors.blue}ℹ${colors.reset} ${msg}`),
-  success: msg => console.log(`${colors.green}✓${colors.reset} ${msg}`),
-  error: msg => console.log(`${colors.red}✗${colors.reset} ${msg}`),
-  warn: msg => console.log(`${colors.yellow}⚠${colors.reset} ${msg}`),
-  section: msg => console.log(`\n${colors.bright}${colors.cyan}${msg}${colors.reset}\n`),
-  data: (label, data) => console.log(`${colors.dim}  ${label}:${colors.reset}`, JSON.stringify(data, null, 2)),
 }
 
 // JSON-RPC 消息处理器
@@ -103,13 +85,13 @@ class JsonRpcClient {
 
       if (message.error) {
         logger.error(`请求 ${method} 失败:`)
-        logger.data('错误', message.error)
+        logger.info('错误', message.error)
         reject(new Error(message.error.message))
       }
       else {
         logger.success(`收到 ${method} 响应`)
         if (message.result && Object.keys(message.result).length > 0) {
-          logger.data('结果', message.result)
+          logger.info('结果', message.result)
         }
         resolve(message.result)
       }
@@ -118,7 +100,7 @@ class JsonRpcClient {
       // 处理通知或请求
       logger.info(`收到通知/请求: ${message.method}`)
       if (message.params) {
-        logger.data('参数', message.params)
+        logger.info('参数', message.params)
       }
     }
   }
@@ -141,7 +123,7 @@ class JsonRpcClient {
       this.pendingRequests.set(id, { resolve, reject, method })
 
       logger.info(`发送请求: ${method}`)
-      logger.data('参数', params)
+      logger.info('参数', params)
 
       // 检查发送是否成功
       const success = this.process.send(message)
@@ -165,7 +147,7 @@ class JsonRpcClient {
     }
 
     logger.info(`发送通知: ${method}`)
-    logger.data('参数', params)
+    logger.info('参数', params)
 
     // 检查发送是否成功
     const success = this.process.send(message)
@@ -177,12 +159,12 @@ class JsonRpcClient {
 
 // 演示协议流程（不需要实际服务器）
 async function demonstrateProtocol() {
-  logger.section('📚 LSP 协议通信演示')
+  logger.success('📚 LSP 协议通信演示')
 
   // 初始化工作区
   const workspaceRoot = config.workspaceRoot
 
-  logger.section('📋 1. Initialize 请求')
+  logger.success('📋 1. Initialize 请求')
   logger.info('客户端发送 initialize 请求，包含客户端能力和工作区信息')
 
   const initializeRequest = {
@@ -215,7 +197,7 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('请求消息', initializeRequest)
+  logger.info('请求消息', JSON.stringify(initializeRequest, null, 2))
 
   logger.info('\n服务器响应包含服务器能力信息:')
   const initializeResponse = {
@@ -240,9 +222,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('响应消息', initializeResponse)
+  logger.info('响应消息', JSON.stringify(initializeResponse, null, 2))
 
-  logger.section('📋 2. ArkTS 配置请求')
+  logger.success('📋 2. ArkTS 配置请求')
   logger.info('发送 ets/waitForEtsConfigurationChangedRequested 请求')
   logger.info('这是 ArkTS Language Server 的特殊请求，用于配置 SDK 路径等信息')
 
@@ -262,9 +244,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('配置请求', configRequest)
+  logger.info('配置请求', JSON.stringify(configRequest, null, 2))
 
-  logger.section('📋 3. Initialized 通知')
+  logger.success('📋 3. Initialized 通知')
   logger.info('客户端通知服务器初始化完成')
 
   const initializedNotification = {
@@ -273,9 +255,9 @@ async function demonstrateProtocol() {
     params: {},
   }
 
-  logger.data('通知消息', initializedNotification)
+  logger.info('通知消息', JSON.stringify(initializedNotification, null, 2))
 
-  logger.section('📋 4. textDocument/didOpen 通知')
+  logger.success('📋 4. textDocument/didOpen 通知')
   logger.info('客户端通知服务器打开了一个文档')
 
   const sampleFile = path.join(workspaceRoot, 'sample.ets')
@@ -294,9 +276,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('通知消息', didOpenNotification)
+  logger.info('通知消息', JSON.stringify(didOpenNotification, null, 2))
 
-  logger.section('📋 5. textDocument/hover 请求')
+  logger.success('📋 5. textDocument/hover 请求')
   logger.info('客户端请求某个位置的悬停信息')
 
   const hoverRequest = {
@@ -309,7 +291,7 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('请求消息', hoverRequest)
+  logger.info('请求消息', JSON.stringify(hoverRequest, null, 2))
 
   logger.info('\n服务器响应包含类型信息和文档:')
   const hoverResponse = {
@@ -327,9 +309,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('响应消息', hoverResponse)
+  logger.info('响应消息', JSON.stringify(hoverResponse, null, 2))
 
-  logger.section('📋 6. textDocument/completion 请求')
+  logger.success('📋 6. textDocument/completion 请求')
   logger.info('客户端请求代码补全')
 
   const completionRequest = {
@@ -342,7 +324,7 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('请求消息', completionRequest)
+  logger.info('请求消息', JSON.stringify(completionRequest, null, 2))
 
   logger.info('\n服务器响应包含补全项列表:')
   const completionResponse = {
@@ -360,9 +342,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('响应消息', completionResponse)
+  logger.info('响应消息', JSON.stringify(completionResponse, null, 2))
 
-  logger.section('📋 7. textDocument/didClose 通知')
+  logger.success('📋 7. textDocument/didClose 通知')
   logger.info('客户端通知服务器关闭了文档')
 
   const didCloseNotification = {
@@ -373,9 +355,9 @@ async function demonstrateProtocol() {
     },
   }
 
-  logger.data('通知消息', didCloseNotification)
+  logger.info('通知消息', JSON.stringify(didCloseNotification, null, 2))
 
-  logger.section('📋 8. shutdown 请求')
+  logger.success('📋 8. shutdown 请求')
   logger.info('客户端请求关闭服务器')
 
   const shutdownRequest = {
@@ -385,7 +367,7 @@ async function demonstrateProtocol() {
     params: null,
   }
 
-  logger.data('请求消息', shutdownRequest)
+  logger.info('请求消息', JSON.stringify(shutdownRequest, null, 2))
 
   const shutdownResponse = {
     jsonrpc: '2.0',
@@ -393,9 +375,9 @@ async function demonstrateProtocol() {
     result: null,
   }
 
-  logger.data('响应消息', shutdownResponse)
+  logger.info('响应消息', JSON.stringify(shutdownResponse, null, 2))
 
-  logger.section('📋 9. exit 通知')
+  logger.success('📋 9. exit 通知')
   logger.info('客户端通知服务器退出')
 
   const exitNotification = {
@@ -404,9 +386,9 @@ async function demonstrateProtocol() {
     params: null,
   }
 
-  logger.data('通知消息', exitNotification)
+  logger.info('通知消息', JSON.stringify(exitNotification, null, 2))
 
-  logger.section('✨ 协议演示完成！')
+  logger.success('✨ 协议演示完成！')
   logger.success('以上演示了 LSP 协议的基本通信流程')
   logger.info('\n要测试真实的语言服务器，请:')
   logger.info('1. 初始化 ohos-typescript 子模块')
@@ -418,7 +400,7 @@ async function demonstrateProtocol() {
 
 // 主函数
 async function main() {
-  logger.section('🚀 ArkTS Language Server Demo')
+  logger.success('🚀 ArkTS Language Server Demo')
 
   // 检查语言服务器是否存在
   const serverExists = fs.existsSync(config.serverPath)
@@ -460,7 +442,7 @@ async function main() {
   const workspaceRoot = config.workspaceRoot
 
   // 启动语言服务器
-  logger.section('🔌 启动语言服务器')
+  logger.success('🔌 启动语言服务器')
 
   const serverProcess = spawn('node', [config.serverPath, '--node-ipc', '--server-mode'], {
     stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
@@ -484,7 +466,7 @@ async function main() {
 
   try {
     // 1. 发送 initialize 请求
-    logger.section('📡 发送 Initialize 请求')
+    logger.success('📡 发送 Initialize 请求')
 
     const initResult = await client.sendRequest('initialize', {
       processId: process.pid,
@@ -581,29 +563,31 @@ async function main() {
     })
 
     logger.success('Initialize 请求成功')
-    logger.data('服务器能力', initResult.capabilities)
+    logger.info('服务器能力', JSON.stringify(initResult.capabilities, null, 2))
 
     // 2. 发送配置请求（ArkTS 特定）
-    logger.section('⚙️  发送配置请求')
+    logger.success('⚙️  发送配置请求')
 
     // 构建基本配置（如果没有 SDK 路径，使用最小配置）
     const etsConfig = {
       typescript: {
         tsdk: config.tsdk,
       },
-      ohos: config.sdkPath ? {
-        sdkPath: config.sdkPath,
-        lib: [],
-        typeRoots: [],
-        baseUrl: workspaceRoot,
-        paths: {},
-      } : {
-        // 最小配置，不依赖 SDK
-        lib: [],
-        typeRoots: [],
-        baseUrl: workspaceRoot,
-        paths: {},
-      },
+      ohos: config.sdkPath
+        ? {
+            sdkPath: config.sdkPath,
+            lib: [],
+            typeRoots: [],
+            baseUrl: workspaceRoot,
+            paths: {},
+          }
+        : {
+            // 最小配置，不依赖 SDK
+            lib: [],
+            typeRoots: [],
+            baseUrl: workspaceRoot,
+            paths: {},
+          },
       debug: true,
     }
 
@@ -616,7 +600,7 @@ async function main() {
     logger.success('配置请求已发送')
 
     // 3. 发送 initialized 通知
-    logger.section('✅ 发送 Initialized 通知')
+    logger.success('✅ 发送 Initialized 通知')
 
     client.sendNotification('initialized', {})
     logger.success('Initialized 通知已发送')
@@ -625,7 +609,7 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 500))
 
     // 4. 打开文档
-    logger.section('📄 打开文档')
+    logger.success('📄 打开文档')
 
     const sampleFile = path.join(workspaceRoot, 'sample.ets')
     const fileContent = fs.readFileSync(sampleFile, 'utf8')
@@ -645,7 +629,7 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     // 5. 测试悬停信息
-    logger.section('🔍 测试悬停信息')
+    logger.success('🔍 测试悬停信息')
 
     try {
       const hoverResult = await client.sendRequest('textDocument/hover', {
@@ -660,7 +644,7 @@ async function main() {
 
       if (hoverResult) {
         logger.success('成功获取悬停信息')
-        logger.data('悬停内容', hoverResult)
+        logger.info('悬停内容', JSON.stringify(hoverResult, null, 2))
       }
       else {
         logger.info('该位置没有悬停信息')
@@ -671,7 +655,7 @@ async function main() {
     }
 
     // 6. 测试代码补全
-    logger.section('💡 测试代码补全')
+    logger.success('💡 测试代码补全')
 
     try {
       const completionResult = await client.sendRequest('textDocument/completion', {
@@ -707,7 +691,7 @@ async function main() {
     }
 
     // 7. 关闭文档
-    logger.section('📤 关闭文档')
+    logger.success('📤 关闭文档')
 
     client.sendNotification('textDocument/didClose', {
       textDocument: {
@@ -718,7 +702,7 @@ async function main() {
     logger.success('文档已关闭')
 
     // 8. 关闭语言服务器
-    logger.section('🛑 关闭语言服务器')
+    logger.success('🛑 关闭语言服务器')
 
     await client.sendRequest('shutdown', null)
     logger.success('Shutdown 请求已发送')
@@ -729,7 +713,7 @@ async function main() {
     // 等待服务器退出
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    logger.section('✨ Demo 执行完成！')
+    logger.success('✨ Demo 执行完成！')
     logger.success('语言服务器通信测试成功')
     logger.info('\n如果你看到这条消息，说明语言服务器的基本功能正常工作。')
   }

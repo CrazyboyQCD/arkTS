@@ -27,7 +27,7 @@ const packages = [
 // Language Server test - run demo.mjs and check result
 async function testLanguageServer() {
   try {
-    const demoPath = path.join(__dirname, 'packages', 'language-server', 'language-server-demo', 'demo.mjs')
+    const demoPath = path.join(__dirname, 'packages', 'language-server', 'e2e', 'demo.mjs')
 
     if (!existsSync(demoPath)) {
       console.error('✗ language-server: Demo file not found:', demoPath)
@@ -45,7 +45,7 @@ async function testLanguageServer() {
     })
 
     // Check if the demo completed successfully
-    if (result.includes('Demo 执行完成！') || result.includes('Demo 执行完成') || result.includes('语言服务器通信测试成功')) {
+    if (result.includes('Demo 执行完成！') || result.includes('Demo 执行完成') || result.includes('语言服务器通信测试成功') || result.includes('协议演示完成')) {
       console.log('✓ language-server: Demo ran successfully')
       return true
     }
