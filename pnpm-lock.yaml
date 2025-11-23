@@ -9,10 +9,6 @@ catalogs:
     tsdown:
       specifier: 0.16.4
       version: 0.16.4
-  default:
-    fflate:
-      specifier: ^0.8.2
-      version: 0.8.2
   dev:
     fast-glob:
       specifier: ^3.3.3
@@ -198,6 +194,9 @@ catalogs:
     extract-zip:
       specifier: ^2.0.1
       version: 2.0.1
+    fflate:
+      specifier: ^0.8.2
+      version: 0.8.2
     handlebars:
       specifier: ^4.7.8
       version: 4.7.8
@@ -520,7 +519,7 @@ importers:
         specifier: catalog:dev
         version: 3.3.3
       fflate:
-        specifier: 'catalog:'
+        specifier: catalog:prod
         version: 0.8.2
       handlebars:
         specifier: catalog:prod
