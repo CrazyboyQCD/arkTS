@@ -24,7 +24,7 @@
   "categories": [
     "Programming Languages"
   ],
-  "main": "./dist/client.js",
+  "main": "./dist/client.cjs",
   "icon": "assets/icon.png",
   "engines": {
     "vscode": "^1.22.0"
