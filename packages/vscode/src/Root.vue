@@ -5,6 +5,7 @@ import { provide } from 'vue'
 
 provide('vscode', window.vscode)
 provide('connection', window.connection)
+const locale = inject<any | undefined>('naiveui:locale')
 
 const themeOverrides: GlobalThemeOverrides = {
   common: {
@@ -20,6 +21,7 @@ const themeOverrides: GlobalThemeOverrides = {
     borderRadius: '2px',
     cardColor: 'var(--vscode-input-background)',
     tagColor: 'var(--vscode-background)',
+    inputColorDisabled: 'var(--vscode-disabledForeground)',
   },
   Card: {
     borderColor: 'none',
@@ -28,6 +30,8 @@ const themeOverrides: GlobalThemeOverrides = {
     tabColorSegment: 'var(--vscode-button-background)',
     colorSegment: 'var(--vscode-input-background)',
     colorSegmentActive: 'var(--vscode-button-hoverBackground)',
+    tabColor: 'var(--vscode-input-background)',
+    tabBorderColor: 'var(--vscode-button-background)',
   },
   Tag: {
     border: '1px solid var(--vscode-button-background)',
@@ -78,11 +82,20 @@ const themeOverrides: GlobalThemeOverrides = {
       },
     },
   },
+  Collapse: {
+    dividerColor: 'var(--vscode-button-background)',
+  },
+  Switch: {
+    railColorActive: 'var(--vscode-button-background)',
+  },
+  Radio: {
+    color: 'var(--vscode-input-background)',
+  },
 }
 </script>
 
 <template>
-  <NConfigProvider :theme-overrides inline-theme-disabled>
+  <NConfigProvider :theme-overrides inline-theme-disabled :locale>
     <RouterView />
   </NConfigProvider>
 </template>

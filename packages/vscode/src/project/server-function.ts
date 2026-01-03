@@ -1,7 +1,6 @@
 import * as fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ExtensionLogger } from '@arkts/shared/vscode'
 import { effect, signal } from 'alien-signals'
 import axios, { AxiosError } from 'axios'
 import { BirpcReturn } from 'birpc'
@@ -11,20 +10,21 @@ import { nanoid } from 'nanoid'
 import { Autowired, Service } from 'unioc'
 import { ExtensionContext } from 'unioc/vscode'
 import * as vscode from 'vscode'
+import { ProtocolContext } from '../context/protocol-context'
 import { Translator } from '../translate'
-import { ConnectionProtocol } from './interfaces/connection-protocol'
+import { ProjectConnectionProtocol } from './interfaces/connection-protocol'
 
 hbs.registerHelper('equal', (a: number | string, b: number | string) => Number(a) === Number(b) || String(a) === String(b))
 
 @Service
-export class ServerFunctionImpl extends ExtensionLogger implements ConnectionProtocol.ServerFunction {
+export class ServerFunctionImpl extends ProtocolContext implements ProjectConnectionProtocol.ServerFunction {
   @Autowired
-  private readonly translator: Translator
+  protected readonly translator: Translator
 
   @Autowired(ExtensionContext)
   private readonly extensionContext: vscode.ExtensionContext
 
-  async stat(path: string): Promise<false | ConnectionProtocol.File.Stat> {
+  async stat(path: string): Promise<false | ProjectConnectionProtocol.File.Stat> {
     const isExists = fs.existsSync(path)
     if (!isExists) return false
 
@@ -45,11 +45,7 @@ export class ServerFunctionImpl extends ExtensionLogger implements ConnectionPro
     return os.homedir()
   }
 
-  async findAllL10nByCurrentLanguage(): Promise<Record<string, string>> {
-    return this.translator.findAllByCurrentLanguage()
-  }
-
-  async requestTemplateMarketList(request: ConnectionProtocol.ServerFunction.RequestTemplateMarketList.Request): Promise<ConnectionProtocol.ServerFunction.RequestTemplateMarketList.Response> {
+  async requestTemplateMarketList(request: ProjectConnectionProtocol.ServerFunction.RequestTemplateMarketList.Request): Promise<ProjectConnectionProtocol.ServerFunction.RequestTemplateMarketList.Response> {
     const response = await axios.post('https://svc-drcn.developer.huawei.com/partnerVectorServlet/market/product/list', {
       lang: 'zh_CN',
       pageIndex: request?.pageIndex ?? 1,
@@ -59,7 +55,7 @@ export class ServerFunctionImpl extends ExtensionLogger implements ConnectionPro
       categoryNameL2: '模板',
       ...request,
     })
-    if (ConnectionProtocol.ServerFunction.RequestTemplateMarketList.Response.is(response.data)) {
+    if (ProjectConnectionProtocol.ServerFunction.RequestTemplateMarketList.Response.is(response.data)) {
       this.getConsola().info('[ServerFunction.RequestTemplateMarketList] response success:', JSON.stringify(response.data))
       return response.data
     }
@@ -67,12 +63,12 @@ export class ServerFunctionImpl extends ExtensionLogger implements ConnectionPro
     throw new AxiosError('[ServerFunction.RequestTemplateMarketList] Invalid response.', 'INVALID_RESPONSE', response.config, response.request, response)
   }
 
-  async requestTemplateMarketDetail(productId: string): Promise<ConnectionProtocol.ServerFunction.RequestTemplateMarketDetail.Response> {
+  async requestTemplateMarketDetail(productId: string): Promise<ProjectConnectionProtocol.ServerFunction.RequestTemplateMarketDetail.Response> {
     const response = await axios.post(`https://svc-drcn.developer.huawei.com/partnerVectorServlet/market/buyerQueryProductDetail`, {
       lang: 'zh_CN',
       productId,
     })
-    if (ConnectionProtocol.ServerFunction.RequestTemplateMarketDetail.Response.is(response.data)) {
+    if (ProjectConnectionProtocol.ServerFunction.RequestTemplateMarketDetail.Response.is(response.data)) {
       this.getConsola().info('[ServerFunction.RequestTemplateMarketDetail] response success:', JSON.stringify(response.data))
       return response.data
     }
@@ -82,7 +78,7 @@ export class ServerFunctionImpl extends ExtensionLogger implements ConnectionPro
 
   static readonly openDialog = signal<[string, Thenable<vscode.Uri[] | undefined>]>()
 
-  async createOpenDialog(options?: ConnectionProtocol.ServerFunction.CreateOpenDialog.Options): Promise<string> {
+  async createOpenDialog(options?: ProjectConnectionProtocol.ServerFunction.CreateOpenDialog.Options): Promise<string> {
     const dialogId = nanoid()
     ServerFunctionImpl.openDialog(
       [
@@ -93,7 +89,7 @@ export class ServerFunctionImpl extends ExtensionLogger implements ConnectionPro
     return dialogId
   }
 
-  onRpcInitialized(rpc: BirpcReturn<ConnectionProtocol.ClientFunction, ConnectionProtocol.ServerFunction>): void {
+  onRpcInitialized(rpc: BirpcReturn<ProjectConnectionProtocol.ClientFunction, ProjectConnectionProtocol.ServerFunction>): void {
     effect(() => {
       const [dialogId, openDialog] = ServerFunctionImpl.openDialog() ?? []
       if (!dialogId) return

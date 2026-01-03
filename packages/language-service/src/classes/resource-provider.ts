@@ -3,13 +3,16 @@ import type { CompletionContext, CompletionItem, CompletionList, Diagnostic, Doc
 import type * as ets from 'ohos-typescript'
 import type { Product, ProjectDetectorManager } from '../interfaces'
 import type { ContextUtil } from '../utils/context-util'
+import type { LocaleStorage } from '../utils/i18n'
 import type { GlobalCallExpressionFinder } from './global-call-finder'
 import path from 'node:path'
 import { CompletionItemKind, DiagnosticSeverity, FileType, MarkupKind, Position, Range } from '@volar/language-server'
 import { URI } from 'vscode-uri'
 import { permissions } from '../auth/permission'
+import { MediaReference } from '../interfaces/media-reference'
 import { Reference } from '../interfaces/reference'
 import { SysResource } from '../interfaces/sys-resource'
+import { simpleTranslate } from '../utils/i18n'
 import { LEADING_TRAILING_QUOTE_REGEX } from '../utils/regex'
 
 export interface ResourceProvider {
@@ -37,6 +40,29 @@ export namespace ResourceProvider {
     Position.create(0, 0),
     Position.create(0, 0),
   )
+
+  const imageHoverText = {
+    properties: {
+      default: 'Properties',
+      zh: '属性',
+    } satisfies LocaleStorage,
+    value: {
+      default: 'Value',
+      zh: '值',
+    } satisfies LocaleStorage,
+    qualifiers: {
+      default: 'Resource qualifiers',
+      zh: '资源组限定词',
+    } satisfies LocaleStorage,
+    fileName: {
+      default: 'File Name',
+      zh: '文件名',
+    } satisfies LocaleStorage,
+    fileSize: {
+      default: 'File Size',
+      zh: '文件大小',
+    } satisfies LocaleStorage,
+  } as const
 
   export function create(context: ContextUtil, globalCallExpressionFinder: GlobalCallExpressionFinder, projectDetectorManager: ProjectDetectorManager, config: LanguageServerConfigurator, ets: typeof import('ohos-typescript')): ResourceProvider {
     const definitionProvider = new DefinitionProviderImpl(context, globalCallExpressionFinder, projectDetectorManager, config, ets)
@@ -676,7 +702,7 @@ export namespace ResourceProvider {
   }
 
   class HoverProviderImpl extends ResourceProviderImpl implements HoverProvider {
-    provideHover(document: TextDocument, position: Position): NullableProviderResult<Hover> {
+    provideHoverForRequestPermissions(document: TextDocument, position: Position): NullableProviderResult<Hover> {
       const decodedUri = this.contextUtil.decodeTextDocumentUri(document)
       if (!decodedUri) return null
       const product = this.findProductByUri(decodedUri)
@@ -723,6 +749,59 @@ export namespace ResourceProvider {
       }
 
       return null
+    }
+
+    buildDollarResourceHoverText(reference: MediaReference): string {
+      const qualifiers = reference.getMediaDirectory()
+        .getResourceDirectory()
+        .getUnderlyingResourceDirectory()
+        .getQualifiers()
+
+      return `**🖼️ [${reference.getRawFileName()}](${reference.getUri().fsPath})**\n\n`
+        .concat(`| ${simpleTranslate(this.config.getLocale(), imageHoverText.properties)} | ${simpleTranslate(this.config.getLocale(), imageHoverText.value)} |\n`)
+        .concat(`|------|----|\n`)
+        .concat(`| ${simpleTranslate(this.config.getLocale(), imageHoverText.fileName)} | \`${reference.getFileName()}\` |\n`)
+        .concat(`| ${simpleTranslate(this.config.getLocale(), imageHoverText.fileSize)} | \`${reference.getFileSize()}\` |\n`)
+        .concat(`| ${simpleTranslate(this.config.getLocale(), imageHoverText.qualifiers)} | ${typeof qualifiers === 'string' ? `\`${qualifiers}\`` : qualifiers.map(q => `\`${Object.values(q).join(' ')}\``).join(' ')} |\n\n`)
+        .concat(reference.getMarkdownPreview())
+    }
+
+    provideHoverForDollarResource(document: TextDocument, position: Position): NullableProviderResult<Hover> {
+      const decodedSourceFile = this.contextUtil.decodeSourceFile(document)
+      if (!decodedSourceFile) return null
+      const resourceCallExpressions = this.globalCallExpressionFinder.findGlobalCallExpression(decodedSourceFile, '$r')
+      if (resourceCallExpressions.length === 0) return null
+      const currentCallExpression = this.globalCallExpressionFinder.isInCallExpression(resourceCallExpressions, decodedSourceFile, document, position)
+      if (!currentCallExpression) return null
+      const firstArgumentText = this.globalCallExpressionFinder.getFirstArgumentText(currentCallExpression, decodedSourceFile)
+      if (!firstArgumentText) return null
+      if (!firstArgumentText.startsWith('app.media.')) return null
+      const decodedUri = this.contextUtil.decodeTextDocumentUri(document)
+      if (!decodedUri) return null
+      const product = this.findProductByUri(decodedUri)
+      const references = product?.findReference()
+        .filter(reference => MediaReference.is(reference))
+        .filter(reference => reference.toEtsFormat() === firstArgumentText) ?? []
+      if (!references.length) return null
+      const value = references.map(reference => this.buildDollarResourceHoverText(reference)).join('---\n')
+      return {
+        contents: {
+          kind: MarkupKind.Markdown,
+          value,
+        },
+        range: Reference.toRange(currentCallExpression.arguments[0], decodedSourceFile, true),
+      }
+    }
+
+    provideHover(document: TextDocument, position: Position): NullableProviderResult<Hover> {
+      switch (document.languageId) {
+        case 'json':
+        case 'jsonc':
+        case 'json5':
+          return this.provideHoverForRequestPermissions(document, position)
+        default:
+          return this.provideHoverForDollarResource(document, position)
+      }
     }
   }
 }

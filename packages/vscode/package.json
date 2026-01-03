@@ -27,7 +27,7 @@
   "main": "./dist/client.js",
   "icon": "assets/icon.png",
   "engines": {
-    "vscode": "^1.22.0"
+    "vscode": "^1.61.0"
   },
   "galleryBanner": {
     "theme": "dark",
@@ -35,6 +35,56 @@
   },
   "activationEvents": [],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ets-resource-explorer",
+          "title": "Hvigor 资源管理器",
+          "icon": "$(file-media)"
+        }
+      ]
+    },
+    "breakpoints": [
+      {
+        "language": "ets"
+      }
+    ],
+    "views": {
+      "ets-resource-explorer": [
+        {
+          "id": "ets.resourceExplorer",
+          "name": "Hvigor 资源管理器",
+          "icon": "$(folder)",
+          "contextualTitle": "资源管理器"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "ets.resourceExplorer.refresh",
+          "group": "navigation",
+          "when": "view == ets.resourceExplorer"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ets.resourceExplorer.openFile",
+          "group": "inline",
+          "when": "view == ets.resourceExplorer && viewItem == ElementJsonFile"
+        },
+        {
+          "command": "ets.resourceExplorer.openFile",
+          "group": "inline",
+          "when": "view == ets.resourceExplorer && (viewItem == ElementJsonFile || viewItem == MediaFile)"
+        },
+        {
+          "command": "ets.resourceExplorer.openResourceQualifierEditor",
+          "group": "inline",
+          "when": "view == ets.resourceExplorer && viewItem == Resource"
+        }
+      ]
+    },
     "viewsWelcome": [
       {
         "view": "explorer",
@@ -161,6 +211,24 @@
       {
         "command": "ets.createProject",
         "title": "%command.createProject%",
+        "category": "ETS"
+      },
+      {
+        "command": "ets.resourceExplorer.refresh",
+        "title": "%command.resourceExplorer.refresh%",
+        "icon": "$(refresh)",
+        "category": "ETS"
+      },
+      {
+        "command": "ets.resourceExplorer.openFile",
+        "title": "%command.resourceExplorer.openFile%",
+        "icon": "$(link-external)",
+        "category": "ETS"
+      },
+      {
+        "command": "ets.resourceExplorer.openResourceQualifierEditor",
+        "title": "%command.resourceExplorer.openResourceQualifierEditor%",
+        "icon": "$(plus)",
         "category": "ETS"
       }
     ],
@@ -297,7 +365,7 @@
   "scripts": {
     "build": "tsdown",
     "watch": "cross-env NODE_ENV=development tsdown",
-    "pack": "tsx scripts/pre-process.ts && pnpm run build && vsce package && tsx scripts/clean-process.ts",
+    "pack": "tsx scripts/pre-process.ts && pnpm run build && vsce package --target darwin-x64 && tsx scripts/clean-process.ts",
     "release": "tsx scripts/pre-process.ts && pnpm run build && vsce publish && ovsx publish && tsx scripts/clean-process.ts",
     "update": "vscode-ext-gen --output src/generated/meta.ts",
     "ovsx": "ovsx",
